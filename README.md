@@ -5,11 +5,13 @@
 djfklsjlf
 `default branch`: main
 
-PR 브랜치 명칭: ${YYMMDD}-${changes} (e.g.: 210404-ui-bug-fix)
+작업할 브랜치 명칭: ${이름}-${작업 중인 feature} (e.g.: jin-login)
 
-You can use the README file to showcase and promote your mobile app. The template provided below is just a starting point. Feel free to craft your README as you see fit. 
+PR 명칭: ${이름}-${YYMMDD}-${changes} (e.g.: jin-230101-ui-bug-fix)
 
-Please note that the README doesn't affect your grade and is not included in documentation(Wiki).
+
+~~You can use the README file to showcase and promote your mobile app. The template provided below is just a starting point. Feel free to craft your README as you see fit.~~
+~~Please note that the README doesn't affect your grade and is not included in documentation(Wiki).~~
 
 # Our app : Food Record
 
