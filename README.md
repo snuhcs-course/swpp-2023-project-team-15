@@ -2,9 +2,9 @@
 
 **NEVER push directly to `main` or `develop`!**
 
-`default branch`: develop
+`PR할 branch`: develop
 
-PR 브랜치 명칭: ${YYMMDD}-${changes} (e.g.: 210404-ui-bug-fix)
+PR할 때 브랜치 명칭: ${YYMMDD}-${changes} (e.g.: 210404-ui-bug-fix)
 
 You can use the README file to showcase and promote your mobile app. The template provided below is just a starting point. Feel free to craft your README as you see fit. 
 
