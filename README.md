@@ -2,7 +2,6 @@
 
 **NEVER push directly to `main`!**
 
-djfklsjlf
 `default branch`: main
 
 작업할 브랜치 명칭: ${이름}-${작업 중인 feature} (e.g.: jin-login)
