@@ -5,6 +5,7 @@
 `default branch`: main
 
 작업할 브랜치 명칭: ${이름}-${작업 중인 feature} (e.g.: jin-login)
+
 PR 명칭: ${이름}-${YYMMDD}-${changes} (e.g.: jin-230101-ui-bug-fix)
 
 
