@@ -1,8 +1,8 @@
 # Branch conventions
 
-**NEVER push directly to `main` or `develop`!**
+**NEVER push directly to `main`!**
 
-`PR할 branch`: develop
+`PR할 branch`: main
 
 PR할 때 브랜치 명칭: ${YYMMDD}-${changes} (e.g.: 210404-ui-bug-fix)
 
