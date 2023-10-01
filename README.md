@@ -18,7 +18,7 @@ Merge: pair끼리 1차 검증 후 PR 보내면 각 iteration의 PM이 리뷰 후
 ~~You can use the README file to showcase and promote your mobile app. The template provided below is just a starting point. Feel free to craft your README as you see fit.~~
 ~~Please note that the README doesn't affect your grade and is not included in documentation(Wiki).~~
 
-# Our app : Food Record
+# Our app : Eat and Tell (EaT)
 
 Our app is a social network dedicated to food reviews, designed to enrich users' dining experiences by enabling them to share their reviews, connect with like-minded friends, and receive personalized user tags derived from review analysis.
 
