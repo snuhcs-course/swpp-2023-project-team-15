@@ -33,6 +33,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.sp
+import com.example.eatandtell.ui.home.HomeActivity
 
 
 class LoginActivity : ComponentActivity() {
@@ -102,8 +103,8 @@ fun LoginScreen(context: ComponentActivity) {
 
         LoginButton(onClick = {
             println("ID: ${id.text}, Password: ${password.text}")
-//            context.startActivity(Intent(context, HomeActivity::class.java))
-//            context.finish()
+            context.startActivity(Intent(context, HomeActivity::class.java))
+            context.finish()
         })
 
         Spacer(modifier = Modifier.height(18.dp))
