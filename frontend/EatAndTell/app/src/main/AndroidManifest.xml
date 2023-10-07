@@ -29,6 +29,13 @@
             android:label="SignupActivity"
             android:theme="@style/Theme.EatAndTell">
         </activity>
+
+        <activity
+            android:name=".ui.login.LoginActivity"
+            android:label="LoginActivity"
+            android:theme="@style/Theme.EatAndTell">
+        </activity>
+
     </application>
 
 </manifest>

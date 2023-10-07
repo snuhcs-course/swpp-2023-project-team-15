@@ -29,6 +29,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import com.example.eatandtell.Logo
 import com.example.eatandtell.R
+import com.example.eatandtell.ui.login.LoginActivity
 
 
 class SignupActivity : ComponentActivity() {
@@ -153,8 +154,8 @@ fun SignupScreen(context: ComponentActivity) {
 
         SignupButton(
             onClick = {
-//                context.startActivity(Intent(context, LoginActivity::class.java))
-//                context.finish()
+                context.startActivity(Intent(context, LoginActivity::class.java))
+                context.finish()
             },
             email = email.text,
             username = username.text,
@@ -187,10 +188,9 @@ fun SignupScreen(context: ComponentActivity) {
                     color = Color(0xFF23244F),
                 ),
                 modifier = Modifier.clickable {
-//                    context.startActivity(
-//                        Intent(context, LoginActivity::class.java)
-//                    )
-//                    context.finish()
+                    context.startActivity(
+                        Intent(context, LoginActivity::class.java)
+                    )
                 }
             )
 
