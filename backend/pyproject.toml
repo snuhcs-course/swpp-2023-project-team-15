@@ -11,6 +11,7 @@ django = "^4.2.6"
 djangorestframework = "^3.14.0"
 pymysql = "^1.1.0"
 python-decouple = "^3.8"
+gunicorn = "^21.2.0"
 
 
 [build-system]
