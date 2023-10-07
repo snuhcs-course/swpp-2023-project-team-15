@@ -17,10 +17,13 @@ DB_USER=xxxx
 DB_PASSWORD=xxxx
 ```
 
-
-
 # Migrate
 `poetry run python manage.py migrate`
 
 # Run
 `poetry run python manage.py runserver`
+
+# Admin Account
+
+- Check admin account from https://www.notion.so/Environment-Variable-22dcf6d95d294957a6e9b518005cc4ca?pvs=4
+- Login as admin in `/admin`
