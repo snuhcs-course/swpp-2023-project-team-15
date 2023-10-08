@@ -33,7 +33,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import com.example.eatandtell.ui.home.HomeActivity
+import com.example.eatandtell.ui.signup.SignupActivity
 
 
 class LoginActivity : ComponentActivity() {
@@ -131,6 +133,34 @@ fun LoginScreen(context: ComponentActivity) {
                     color = Color(0xFF23244F),
                 ),
                 modifier = Modifier.clickable { /* 여기에 클릭 시 수행될 동작 추가 */ }
+            )
+        }
+        Spacer(modifier = Modifier.width(7.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+            ,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "아직 계정이 없으신가요?",
+                style = TextStyle(
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight(400),
+                    color = Color(0xFF6D6D6D),
+                ),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "회원가입하기",
+                style = TextStyle(
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight(500),
+                    color = Color(0xFF23244F),
+                ),
+                modifier = Modifier.clickable {
+                    context.startActivity(Intent(context, SignupActivity::class.java))
+                    context.finish()}
             )
         }
 

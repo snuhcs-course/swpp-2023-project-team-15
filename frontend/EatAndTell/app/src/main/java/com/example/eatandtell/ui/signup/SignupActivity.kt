@@ -42,8 +42,6 @@ class SignupActivity : ComponentActivity() {
                 color = MaterialTheme.colorScheme.background
             ) {
                 SignupScreen(this@SignupActivity)
-
-
             }
         }
     }
@@ -191,6 +189,7 @@ fun SignupScreen(context: ComponentActivity) {
                     context.startActivity(
                         Intent(context, LoginActivity::class.java)
                     )
+                    context.finish()
                 }
             )
 
