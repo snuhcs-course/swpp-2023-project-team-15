@@ -141,10 +141,10 @@ fun Post(
             Spacer(modifier = Modifier.width(4.dp))
             Row(
                 horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.Start),
-                verticalAlignment = Alignment.Top,
+                verticalAlignment = Alignment.Bottom,
                 modifier = Modifier
                     .width(120.dp)
-                    .height(24.dp)
+                    .height(16.dp)
             ) {
                 StarRating(rating)
                 // 다른 child views 추가
@@ -156,7 +156,6 @@ fun Post(
 
         Row(
             modifier = Modifier
-
                 .height(160.dp)
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(20.dp)
@@ -251,8 +250,8 @@ fun StarFull() {
         painter = painterResource(R.drawable.ic_star_filled),
         modifier = Modifier
 
-            .width(24.dp)
-            .height(24.dp),
+            .width(16.dp)
+            .height(16.dp),
         contentDescription = "star_full",
         tint = Color(0xFFF23F18)
     )
@@ -263,8 +262,8 @@ fun StarEmpty() {
     Icon(
         painter = painterResource(R.drawable.ic_star_empty),
         modifier = Modifier
-            .width(24.dp)
-            .height(24.dp),
+            .width(16.dp)
+            .height(16.dp),
         contentDescription = "star_empty",
         tint = Color(0xFFF23F18)
     )
@@ -275,8 +274,8 @@ fun StarHalf() {
     Icon(
         painter = painterResource(R.drawable.ic_star_half),
         modifier = Modifier
-            .width(24.dp)
-            .height(24.dp),
+            .width(16.dp)
+            .height(16.dp),
         contentDescription = "star_half",
         tint = Color(0xFFF23F18)
     )
