@@ -253,5 +253,11 @@ fun LoginButton(onClick: () -> Unit) {
 @Composable
 fun LoginScreenPreview() {
     val dummyActivity = ComponentActivity()
-    LoginScreen(dummyActivity)
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        LoginScreen(dummyActivity)
+    }
+
 }

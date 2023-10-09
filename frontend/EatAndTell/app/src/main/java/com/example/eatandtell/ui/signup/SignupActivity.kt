@@ -32,6 +32,7 @@ import androidx.core.content.ContextCompat.startActivity
 import com.example.eatandtell.Logo
 import com.example.eatandtell.R
 import com.example.eatandtell.ui.login.LoginActivity
+import com.example.eatandtell.ui.login.LoginScreen
 
 
 class SignupActivity : ComponentActivity() {
@@ -296,5 +297,10 @@ fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
 @Composable
 fun SignupScreenPreview() {
     val dummyActivity = ComponentActivity()
-    SignupScreen(dummyActivity)
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        SignupScreen(dummyActivity)
+    }
 }

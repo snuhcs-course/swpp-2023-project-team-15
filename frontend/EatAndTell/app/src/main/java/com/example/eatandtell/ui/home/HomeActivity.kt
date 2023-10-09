@@ -403,5 +403,13 @@ fun LoginButton(onClick: () -> Unit) {
 @Preview
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen()
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp),
+        color = MaterialTheme.colorScheme.background
+    ) {
+
+        HomeScreen()
+    }
 }
