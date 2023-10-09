@@ -32,10 +32,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import com.example.eatandtell.ui.home.HomeActivity
 import com.example.eatandtell.ui.signup.SignupActivity
+import com.example.eatandtell.ui.signup.SignupScreen
 
 
 class LoginActivity : ComponentActivity() {
@@ -244,4 +246,12 @@ fun LoginButton(onClick: () -> Unit) {
     ) {
         Text("Log in", color = Color.White)
     }
+}
+
+
+@Preview
+@Composable
+fun LoginScreenPreview() {
+    val dummyActivity = ComponentActivity()
+    LoginScreen(dummyActivity)
 }
