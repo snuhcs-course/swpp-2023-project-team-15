@@ -1,6 +1,20 @@
 # Install Dependencies
 
-Install poetry:
+First, the project requires python version above 3.11. If not, install pyenv:
+
+`curl https://pyenv.run | bash`
+
+After installation, check the log message and follow the instruction to add pyenv to your shell. (Modify `~/.bashrc`)
+
+Then, install python 3.11.0:
+
+`pyenv install 3.11.0`
+
+Then set the global python version:
+
+`pyenv global 3.11.0`
+
+After python version above 3.11 is installed, install poetry:
 
 `curl -sSL https://install.python-poetry.org | python3 -`
 
