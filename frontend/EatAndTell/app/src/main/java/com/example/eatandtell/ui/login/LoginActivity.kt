@@ -1,7 +1,9 @@
-// SignupActivity.kt
+// RegisterActivity.kt
 package com.example.eatandtell.ui.login
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -36,11 +38,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import com.example.eatandtell.ui.home.HomeActivity
-import com.example.eatandtell.ui.signup.SignupActivity
+
 import com.example.eatandtell.ui.signup.SignupScreen
+
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.activity.viewModels
+import com.example.eatandtell.ui.login.LoginViewModel
+import com.example.eatandtell.ui.signup.RegisterActivity
+import com.example.eatandtell.ui.signup.RegisterViewModel
+
+
 
 
 class LoginActivity : ComponentActivity() {
+    private val loginViewModel: LoginViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -56,6 +67,7 @@ class LoginActivity : ComponentActivity() {
 
 @Composable
 fun LoginScreen(context: ComponentActivity) {
+
     var id by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
     }
@@ -78,7 +90,11 @@ fun LoginScreen(context: ComponentActivity) {
             onValueChange = { id = TextFieldValue(it) },
             placeholder = "아이디를 입력하세요",
             modifier = Modifier
-                .border(width = 0.5.dp, color = Color(0xFFC5C5C5), shape = RoundedCornerShape(size = 4.dp))
+                .border(
+                    width = 0.5.dp,
+                    color = Color(0xFFC5C5C5),
+                    shape = RoundedCornerShape(size = 4.dp)
+                )
                 .width(320.dp)
                 .height(48.dp),
         )
@@ -96,26 +112,42 @@ fun LoginScreen(context: ComponentActivity) {
             },
             placeholder = "비밀번호를 입력하세요",
             modifier = Modifier
-                .border(width = 0.5.dp, color = Color(0xFFC5C5C5), shape = RoundedCornerShape(size = 4.dp))
+                .border(
+                    width = 0.5.dp,
+                    color = Color(0xFFC5C5C5),
+                    shape = RoundedCornerShape(size = 4.dp)
+                )
                 .width(320.dp)
                 .height(48.dp),
 
 
-        )
+            )
         Spacer(modifier = Modifier.height(12.dp))
 
 
-        LoginButton(onClick = {
-            println("ID: ${id.text}, Password: ${password.text}")
-            context.startActivity(Intent(context, HomeActivity::class.java))
-            context.finish()
-        })
+        LoginButton(
+
+            onClick = {
+
+                println("ID: ${id.text}, Password: ${password.text}")
+
+                context.startActivity(Intent(context, HomeActivity::class.java))
+                context.finish()
+            },
+            id = id.text,
+            password = password.text,
+            context = context,
+            viewModel = viewModel()
+
+        )
+
+
+
 
         Spacer(modifier = Modifier.height(18.dp))
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-             ,
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
@@ -137,15 +169,16 @@ fun LoginScreen(context: ComponentActivity) {
                 modifier = Modifier.clickable { /* 여기에 클릭 시 수행될 동작 추가 */ }
             )
         }
-        Spacer(modifier = Modifier.width(7.dp))
+
+        Spacer(modifier = Modifier.height(18.dp))
+
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-            ,
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "아직 계정이 없으신가요?",
+                text = "계정이 없으십니까?",
                 style = TextStyle(
                     fontSize = 10.sp,
                     fontWeight = FontWeight(400),
@@ -154,18 +187,20 @@ fun LoginScreen(context: ComponentActivity) {
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = "회원가입하기",
+                text = "회원가입",
                 style = TextStyle(
                     fontSize = 10.sp,
                     fontWeight = FontWeight(500),
                     color = Color(0xFF23244F),
                 ),
                 modifier = Modifier.clickable {
-                    context.startActivity(Intent(context, SignupActivity::class.java))
-                    context.finish()}
+                    context.startActivity(
+                        Intent(context, RegisterActivity::class.java)
+                    )
+                }
             )
-        }
 
+        }
     }
 }
 
@@ -233,9 +268,18 @@ fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun LoginButton(onClick: () -> Unit) {
+fun LoginButton(viewModel: LoginViewModel, id:String, password:String, context:Context ,onClick: () -> Unit) {
+
     Button(
-        onClick = onClick,
+        onClick ={
+            viewModel.loginUser(id, password, object: LoginViewModel.LoginCallback{
+                override fun onLoginSuccess(token: String?) {
+                    onClick()
+                }
+
+                override fun onLoginError(errorMessage: String) {
+                    showToast(context, errorMessage)
+        } } )},
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFFF23F18),
             contentColor = Color.White),
@@ -243,10 +287,12 @@ fun LoginButton(onClick: () -> Unit) {
         modifier = Modifier
             .width(320.dp)
             .height(48.dp)
+
     ) {
         Text("Log in", color = Color.White)
     }
 }
+
 
 
 @Preview
@@ -259,5 +305,9 @@ fun LoginScreenPreview() {
     ) {
         LoginScreen(dummyActivity)
     }
+}
+
+private fun showToast(context: Context, message: String) {
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 
 }

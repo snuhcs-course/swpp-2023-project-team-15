@@ -1,12 +1,12 @@
-// SignupActivity.kt
+// RegisterActivity.kt
 package com.example.eatandtell.ui.signup
-
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,16 +27,14 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.eatandtell.Logo
 import com.example.eatandtell.R
 import com.example.eatandtell.ui.login.LoginActivity
 import com.example.eatandtell.ui.login.LoginScreen
 
-
-class SignupActivity : ComponentActivity() {
-
+class RegisterActivity : ComponentActivity() {
+    private val registerViewModel: RegisterViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -44,14 +42,18 @@ class SignupActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background
             ) {
-                SignupScreen(this@SignupActivity)
+
+                SignupScreen(this@RegisterActivity)
+
             }
         }
+
     }
 }
 
 @Composable
 fun SignupScreen(context: ComponentActivity) {
+
     var email by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
     }
@@ -140,6 +142,7 @@ fun SignupScreen(context: ComponentActivity) {
                 PasswordVisibilityToggle(passwordHidden) {
                     passwordHidden = !passwordHidden
                 }
+
             },
             placeholder = "비밀번호 확인",
             modifier = Modifier
@@ -154,15 +157,17 @@ fun SignupScreen(context: ComponentActivity) {
         Spacer(modifier = Modifier.height(12.dp))
 
         SignupButton(
-            onClick = {
+            onClick =  {
                 context.startActivity(Intent(context, LoginActivity::class.java))
                 context.finish()
             },
+
             email = email.text,
             username = username.text,
             password = password.text,
             confirmPassword = confirmPassword.text,
-            context = context
+            context = context,
+            viewModel=viewModel()
         )
 
         Spacer(modifier = Modifier.height(18.dp))
@@ -189,9 +194,6 @@ fun SignupScreen(context: ComponentActivity) {
                     color = Color(0xFF23244F),
                 ),
                 modifier = Modifier.clickable {
-                    context.startActivity(
-                        Intent(context, LoginActivity::class.java)
-                    )
                     context.finish()
                 }
             )
@@ -201,7 +203,9 @@ fun SignupScreen(context: ComponentActivity) {
 }
 
 @Composable
-fun SignupButton(
+fun SignupButton (
+
+    viewModel: RegisterViewModel,
     onClick: () -> Unit,
     email: String,
     username: String,
@@ -226,8 +230,20 @@ fun SignupButton(
                 password.length !in 4..20 -> showToast(context, "Invalid password")
                 confirmPassword.isBlank() -> showToast(context, "Please confirm your password")
                 password != confirmPassword -> showToast(context, "Passwords do not match")
-                else -> onClick()
+                else -> {
+                    viewModel.registerUser(username, password, email, object: RegisterViewModel.RegisterCallback{
+                        override fun onRegisterSuccess(token: String?) {
+                            onClick()
+                        }
+
+                        override fun onRegisterError(errorMessage: String) {
+                            showToast(context, errorMessage)
+                        }
+                    })
+                }
             }
+
+
 
         },
         colors = ButtonDefaults.buttonColors(
@@ -245,6 +261,7 @@ fun SignupButton(
 
 private fun showToast(context: Context, message: String) {
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    println(message)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

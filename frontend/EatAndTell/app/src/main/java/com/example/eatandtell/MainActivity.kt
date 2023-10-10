@@ -15,7 +15,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.eatandtell.ui.login.LoginActivity
-import com.example.eatandtell.ui.signup.SignupActivity
 import com.example.eatandtell.ui.theme.EatAndTellTheme
 import kotlinx.coroutines.delay
 
