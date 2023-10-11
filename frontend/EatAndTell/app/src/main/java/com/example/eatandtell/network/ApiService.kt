@@ -10,9 +10,9 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface ApiService {
-    @POST("login/") // The login endpoint
+    @POST("users/login/") // The login endpoint
     fun loginUser(@Body loginData: LoginRequest): Call<LoginResponse>
 
-    @POST("register/") // The registration endpoint
+    @POST("users/register/") // The registration endpoint
     fun registerUser(@Body registrationData: RegisterRequest): Call<RegisterResponse>
 }
