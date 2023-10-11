@@ -109,3 +109,18 @@ WantedBy=multi-user.target
 ```
 
 In case this is changed, please run: `sudo systemctl daemon-reload && sudo systemctl restart gunicorn`
+
+
+## Static files
+To serve static files required by e.g. admin sites, one has to first run `poetry run python manage.py collectstatic`.
+Then, the static files will be collected to `backend/staticfiles` as specified in `config/settings.py`.
+
+In case of `403 Forbidden` from nginx, one has to run something like below to ensure nginx can access the static files:
+```bash
+sudo chmod 711 /home/ec2-user/
+sudo chown -R ec2-user:nginx /home/ec2-user/swpp-2023-project-team-15/backend/staticfiles/
+sudo chmod 755 /home/ec2-user/swpp-2023-project-team-15/backend/
+sudo chmod -R 755 /home/ec2-user/swpp-2023-project-team-15/backend/staticfiles/
+
+sudo systemctl restart nginx
+```
