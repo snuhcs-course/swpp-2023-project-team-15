@@ -3,24 +3,17 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import retrofit2.Call
 import retrofit2.Callback
-import retrofit2.http.Body
-import retrofit2.http.POST
+import com.example.eatandtell.network.ApiClient
+import com.example.eatandtell.network.ApiService
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
+
 
 data class LoginRequest(val username: String, val password: String)
 data class LoginResponse(val token: String)
 
-interface ApiService {
-    @POST("login/") // The login endpoint (hypothetical)
-    fun loginUser(@Body loginData: LoginRequest): Call<LoginResponse>
-}
-
-
+//Stores LiveData via Sealed Class, accessed from view(activity) via callback
 class LoginViewModel : ViewModel() {
     //interface for callback
     interface LoginCallback {
@@ -31,12 +24,9 @@ class LoginViewModel : ViewModel() {
     private val _loginResult = MutableLiveData<LoginResult>()
     val loginResult: LiveData<LoginResult> = _loginResult
 
-    val retrofit = Retrofit.Builder()
-        .baseUrl("http://ec2-13-125-91-166.ap-northeast-2.compute.amazonaws.com/users/") // actual backend URL
-        .addConverterFactory(MoshiConverterFactory.create()) // Add coroutine adapter
-        .build()
 
-    private val apiService = retrofit.create(ApiService::class.java)
+
+    private val apiService = ApiClient.retrofit.create(ApiService::class.java)
     fun loginUser(username: String, password: String,  callback: LoginCallback) {
         val loginData = LoginRequest(username, password)
         val call = apiService.loginUser(loginData)

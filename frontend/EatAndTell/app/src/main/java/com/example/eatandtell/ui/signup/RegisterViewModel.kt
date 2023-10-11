@@ -5,21 +5,14 @@ import androidx.lifecycle.MutableLiveData
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import retrofit2.Call
 import retrofit2.Callback
-import retrofit2.http.Body
-import retrofit2.http.POST
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
+import com.example.eatandtell.network.ApiClient
+import com.example.eatandtell.network.ApiService
+
 
 
 data class RegisterRequest(val username: String, val password: String, val email:String)
 data class RegisterResponse(val token: String)
-
-interface ApiService {
-    @POST("register/") // The registration endpoint
-    fun registerUser(@Body registrationData: RegisterRequest): Call<RegisterResponse>
-
-}
 
 
 class RegisterViewModel : ViewModel() {
@@ -31,13 +24,9 @@ class RegisterViewModel : ViewModel() {
 
     private val _registerResult = MutableLiveData<RegistrationResult>()
     val registerResult: LiveData<RegistrationResult> = _registerResult
-    val BaseURL= "http://ec2-13-125-91-166.ap-northeast-2.compute.amazonaws.com/users/"
-    val retrofit = Retrofit.Builder()
-        .baseUrl(BaseURL) // actual backend URL
-        .addConverterFactory(MoshiConverterFactory.create())
-        .build()
 
-    private val apiService = retrofit.create(ApiService::class.java)
+
+    private val apiService = ApiClient.retrofit.create(ApiService::class.java)
 
     fun registerUser(username: String, password: String, email: String, callback: RegisterCallback) {
         val registrationData = RegisterRequest(username, password, email)
