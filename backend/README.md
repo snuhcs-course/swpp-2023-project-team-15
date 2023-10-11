@@ -60,3 +60,52 @@ Normal deployment can be done as following:
 Guricorn service setting is at `/etc/systemd/system/gunicorn.service`. In case this is changed:
 - `sudo systemctl daemon-reload`
 - `sudo systemctl restart gunicorn`
+
+## Nginx
+
+Nginx configuration file is at `/etc/nginx/conf.d/app.conf`. This is currently configured as following:
+
+```conf
+server {
+    listen 80;
+    server_name ec2-13-125-91-166.ap-northeast-2.compute.amazonaws.com;
+
+    location /static/ {
+        alias /home/ec2-user/swpp-2023-project-team-15/backend/staticfiles/;
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000";
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+
+```
+
+In case this is changed, please run: `sudo systemctl restart nginx`
+
+## Gunicorn
+
+Gunicorn service setting is at `/etc/systemd/system/gunicorn.service`. This is currently configured as following:
+
+```conf
+[Unit]
+Description=gunicorn daemon for the SWPP 2023 project
+After=network.target
+
+[Service]
+User=ec2-user
+Group=nginx
+WorkingDirectory=/home/ec2-user/swpp-2023-project-team-15/backend
+ExecStart=/home/ec2-user/.local/bin/poetry run gunicorn config.wsgi:application --bind 127.0.0.1:8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+In case this is changed, please run: `sudo systemctl daemon-reload && sudo systemctl restart gunicorn`
