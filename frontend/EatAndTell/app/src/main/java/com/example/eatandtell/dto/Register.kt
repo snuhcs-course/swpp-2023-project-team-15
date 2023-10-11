@@ -9,8 +9,3 @@ data class RegisterRequest(
 data class RegisterResponse(
     val token: String
 )
-
-sealed class RegistrationResult {
-    data class Success(val token: String?) : RegistrationResult()
-    data class Error(val errorMessage: String) : RegistrationResult()
-}

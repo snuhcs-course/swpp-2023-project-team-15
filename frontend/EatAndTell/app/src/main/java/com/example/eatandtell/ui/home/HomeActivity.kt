@@ -41,8 +41,15 @@ import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.example.eatandtell.ui.HeartEmpty
 import com.example.eatandtell.ui.HeartFull
+import com.example.eatandtell.ui.PostImage
+import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.StarRating
 import com.example.eatandtell.ui.login.LoginScreen
+import com.example.eatandtell.ui.ProfileImage
+import com.example.eatandtell.ui.ProfileText
+import com.example.eatandtell.ui.theme.Black
+import com.example.eatandtell.ui.theme.MainColor
+import com.example.eatandtell.ui.theme.White
 
 class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,71 +88,27 @@ fun Post(
     ) {
         // Profile Row
         Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Image(
-                painter = rememberImagePainter(
-                    data = profileUrl,
-                    builder = {
-                        transformations(CircleCropTransformation())
-                    }
-                ),
-                contentDescription = null,
-                modifier = Modifier
-                    .border(
-                        width = 2.dp,
-                        color = Color(0xFFF23F18),
-                        shape = RoundedCornerShape(size = 100.dp)
-                    )
-                    .padding(2.dp)
-                    .width(45.dp)
-                    .height(45.dp)
-                    .background(
-                        color = Color(0xFFFFFFFF),
-                        shape = RoundedCornerShape(size = 100.dp)
-                    )
-            )
+        Profile(profileUrl, username, userDescription);
 
-            Column {
-                Text(
-                    text = username,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        lineHeight = 18.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color(0xFF262626),
-                    )
-                )
-                Text(text = userDescription,
-                        style = TextStyle(
-                        fontSize = 12.sp,
-                    lineHeight = 18.sp,
-
-                    fontWeight = FontWeight(500),
-                    color =Color(0xFF848484)
-                )
-
-                )
-            }
-        }
         Spacer(modifier = Modifier.height(11.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
+            //식당 이름
             Text(text = restaurantName, style = TextStyle(
                 fontSize = 14.sp,
                 lineHeight = 21.sp,
                 fontWeight = FontWeight(700),
-                color = Color(0xFF000000),
+                color = Black,
             ), modifier = Modifier
                 .width(236.dp)
                 .height(20.dp),
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.width(4.dp))
+
+            //ratings
             Row(
                 horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.Start),
                 verticalAlignment = Alignment.Bottom,
@@ -159,32 +122,17 @@ fun Post(
         }
 
         Spacer(modifier = Modifier.height(7.dp))
-        // Images Row
 
+        // Images Row
         Row(
             modifier = Modifier
                 .height(160.dp)
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-
             for (imageUrl in imageUrls) {
-                Image(
-                    painter = rememberImagePainter(
-                        data = imageUrl,
-
-                    ),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .width(150.dp)
-                        .height(150.dp)
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(8.dp))
-                )
+                PostImage(imageUrl)
             }
-
-
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -202,7 +150,7 @@ fun Post(
 
         Row(
             horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.Bottom,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
@@ -212,11 +160,10 @@ fun Post(
                     fontSize = 11.sp,
                     lineHeight = 16.5.sp,
                     fontWeight = FontWeight(500),
-                    color = Color(0xFFF23F18),
+                    color = MainColor,
                 ),
                 modifier = Modifier
                     .width(16.dp)
-
             )
             if(isLiked) HeartFull() else HeartEmpty()
         }
@@ -225,7 +172,6 @@ fun Post(
 
 @Composable
 fun HomeScreen() {
-
     Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState()),) {

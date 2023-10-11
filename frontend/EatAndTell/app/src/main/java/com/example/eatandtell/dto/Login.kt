@@ -10,8 +10,3 @@ data class LoginRequest(
 data class LoginResponse(
     val token: String,
 )
-
-sealed class LoginResult {
-    data class Success(val token: String?) : LoginResult()
-    data class Error(val errorMessage: String) : LoginResult()
-}

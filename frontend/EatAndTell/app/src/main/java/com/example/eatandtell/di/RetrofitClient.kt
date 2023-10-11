@@ -8,10 +8,10 @@ object RetrofitClient {
 
     private val moshi = Moshi.Builder().build()
 
-    val retrofit = {
+    val retro =
         Retrofit.Builder()
             .baseUrl(BaseURL) // actual backend URL
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
-    }
+
 }
