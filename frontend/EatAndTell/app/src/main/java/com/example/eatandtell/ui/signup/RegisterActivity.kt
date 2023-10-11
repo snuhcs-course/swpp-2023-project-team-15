@@ -30,8 +30,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.eatandtell.Logo
 import com.example.eatandtell.R
+import com.example.eatandtell.ui.login.CustomTextField
 import com.example.eatandtell.ui.login.LoginActivity
 import com.example.eatandtell.ui.login.LoginScreen
+import com.example.eatandtell.ui.login.PasswordVisibilityToggle
 
 class RegisterActivity : ComponentActivity() {
     private val registerViewModel: RegisterViewModel by viewModels()
@@ -262,52 +264,6 @@ fun SignupButton (
 private fun showToast(context: Context, message: String) {
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     println(message)
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CustomTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    supportingText: String = "",
-    visualTransformation: VisualTransformation = VisualTransformation.None,
-    trailingIcon: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier
-) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        visualTransformation = visualTransformation,
-        trailingIcon = trailingIcon,
-        modifier = modifier,
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color(0xFFEEEEEE),
-            cursorColor = Color.Black,
-            focusedIndicatorColor = Color(0xFFA0A0A0),
-            unfocusedIndicatorColor = Color.Transparent,
-
-            ),
-        placeholder = { Text(placeholder, style = TextStyle(
-            fontSize = 12.sp,
-            fontWeight = FontWeight(400),
-            color = Color(0xFF000000)
-        )) },
-        maxLines = 1
-    )
-}
-
-@Composable
-fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
-    IconButton(onClick = onClick) {
-        val visibilityIcon = if (passwordHidden) {
-            painterResource(R.drawable.ic_visibility)
-        } else {
-            painterResource(R.drawable.ic_visibility_off)
-        }
-
-        Icon(painter = visibilityIcon, contentDescription = "visibility")
-    }
 }
 
 @Preview

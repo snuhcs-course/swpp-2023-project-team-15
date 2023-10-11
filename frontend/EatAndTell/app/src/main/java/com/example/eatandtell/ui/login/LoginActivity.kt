@@ -258,9 +258,9 @@ fun CustomTextField(
 fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
     IconButton(onClick = onClick) {
         val visibilityIcon = if (passwordHidden) {
-            painterResource(R.drawable.ic_visibility)
-        } else {
             painterResource(R.drawable.ic_visibility_off)
+        } else {
+            painterResource(R.drawable.ic_visibility)
         }
 
         Icon(painter = visibilityIcon, contentDescription = "visibility")
