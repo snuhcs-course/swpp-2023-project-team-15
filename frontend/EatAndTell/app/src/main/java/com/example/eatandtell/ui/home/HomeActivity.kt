@@ -39,6 +39,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
+import com.example.eatandtell.ui.HeartEmpty
+import com.example.eatandtell.ui.HeartFull
+import com.example.eatandtell.ui.StarRating
 import com.example.eatandtell.ui.login.LoginScreen
 
 class HomeActivity : ComponentActivity() {
@@ -57,6 +60,8 @@ class HomeActivity : ComponentActivity() {
         }
     }
 }
+
+//TODO: parameter PostDTO로 바꾸기
 
 @Composable
 fun Post(
@@ -244,161 +249,6 @@ fun HomeScreen() {
     }
 }
 
-
-
-@Composable
-fun StarFull() {
-    Icon(
-        painter = painterResource(R.drawable.ic_star_filled),
-        modifier = Modifier
-
-            .width(16.dp)
-            .height(16.dp),
-        contentDescription = "star_full",
-        tint = Color(0xFFF23F18)
-    )
-}
-
-@Composable
-fun StarEmpty() {
-    Icon(
-        painter = painterResource(R.drawable.ic_star_empty),
-        modifier = Modifier
-            .width(16.dp)
-            .height(16.dp),
-        contentDescription = "star_empty",
-        tint = Color(0xFFF23F18)
-    )
-}
-
-@Composable
-fun StarHalf() {
-    Icon(
-        painter = painterResource(R.drawable.ic_star_half),
-        modifier = Modifier
-            .width(16.dp)
-            .height(16.dp),
-        contentDescription = "star_half",
-        tint = Color(0xFFF23F18)
-    )
-}
-
-@Composable
-fun StarRating(rating: Float) {
-    val fullStars = rating.toInt()
-    val hasHalfStar = rating - fullStars >= 0.5
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(0.dp), // 조절 가능한 간격
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Full stars
-        repeat(fullStars) {
-            StarFull()
-        }
-
-        // Half star
-        if (hasHalfStar) {
-            StarHalf()
-        }
-
-        // Empty stars
-        repeat(5 - fullStars - if (hasHalfStar) 1 else 0) {
-            StarEmpty()
-        }
-    }
-}
-
-@Composable
-fun HeartFull() {
-    Icon(
-        painter = painterResource(R.drawable.ic_heart_full),
-        modifier = Modifier
-            .width(24.dp)
-            .height(24.dp),
-        contentDescription = "heart_full",
-        tint = Color(0xFFF23F18)
-    )
-}
-
-@Composable
-fun HeartEmpty() {
-    Icon(
-        painter = painterResource(R.drawable.ic_heart_empty),
-        modifier = Modifier
-            .width(24.dp)
-            .height(24.dp),
-        contentDescription = "heart_empty",
-        tint = Color(0xFFF23F18)
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CustomTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    supportingText: String = "",
-    visualTransformation: VisualTransformation = VisualTransformation.None,
-    trailingIcon: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier
-) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        visualTransformation = visualTransformation,
-        trailingIcon = trailingIcon,
-        modifier = modifier,
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color(0xFFEEEEEE),
-            cursorColor = Color.Black,
-            focusedIndicatorColor = Color(0xFFA0A0A0),
-            unfocusedIndicatorColor = Color.Transparent,
-
-            ),
-        placeholder = { Text(placeholder, style = TextStyle(
-            fontSize = 12.sp,
-            fontWeight = FontWeight(400),
-            color = Color(0xFF000000)
-        )) },
-        supportingText = { Text(supportingText, style = TextStyle(
-            fontSize = 12.sp,
-            fontWeight = FontWeight(400),
-            color = Color(0xFF000000)
-        )) },
-        maxLines = 1
-    )
-}
-
-@Composable
-fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
-    IconButton(onClick = onClick) {
-        val visibilityIcon = if (passwordHidden) {
-            painterResource(R.drawable.ic_visibility)
-        } else {
-            painterResource(R.drawable.ic_visibility_off)
-        }
-
-        Icon(painter = visibilityIcon, contentDescription = "visibility")
-    }
-}
-
-@Composable
-fun LoginButton(onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFFF23F18),
-            contentColor = Color.White),
-        shape = RoundedCornerShape(size = 4.dp),
-        modifier = Modifier
-            .width(320.dp)
-            .height(48.dp)
-    ) {
-        Text("Log in", color = Color.White)
-    }
-}
 
 @Preview
 @Composable

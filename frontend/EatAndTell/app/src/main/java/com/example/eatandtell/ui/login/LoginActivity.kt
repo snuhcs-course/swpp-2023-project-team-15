@@ -43,7 +43,10 @@ import com.example.eatandtell.ui.signup.SignupScreen
 
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.activity.viewModels
+import com.example.eatandtell.ui.CustomTextField
+import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.login.LoginViewModel
+import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.signup.RegisterActivity
 import com.example.eatandtell.ui.signup.RegisterViewModel
 
@@ -204,56 +207,10 @@ fun LoginScreen(context: ComponentActivity) {
     }
 }
 
-@Composable
-fun Logo() {
-    Image(
-        painter = painterResource(R.drawable.logo),
-        contentDescription = "Logo Image",
-        modifier = Modifier
-            .width(210.dp)
-            .height(30.dp)
 
-    )
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CustomTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    supportingText: String = "",
-    visualTransformation: VisualTransformation = VisualTransformation.None,
-    trailingIcon: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier
-) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        visualTransformation = visualTransformation,
-        trailingIcon = trailingIcon,
-        modifier = modifier,
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color(0xFFEEEEEE),
-            cursorColor = Color.Black,
-            focusedIndicatorColor = Color(0xFFA0A0A0),
-            unfocusedIndicatorColor = Color.Transparent,
 
-            ),
-        placeholder = { Text(placeholder, style = TextStyle(
-            fontSize = 12.sp,
-            fontWeight = FontWeight(400),
-            color = Color(0xFF000000)
-        )) },
-        supportingText = { Text(supportingText, style = TextStyle(
-            fontSize = 12.sp,
-            fontWeight = FontWeight(400),
-            color = Color(0xFF000000)
-        )) },
-        maxLines = 1
-    )
-}
-
+//TODO: ViewModel로 옮기기
 @Composable
 fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
     IconButton(onClick = onClick) {
@@ -294,7 +251,6 @@ fun LoginButton(viewModel: LoginViewModel, id:String, password:String, context:C
 }
 
 
-
 @Preview
 @Composable
 fun LoginScreenPreview() {
@@ -305,9 +261,4 @@ fun LoginScreenPreview() {
     ) {
         LoginScreen(dummyActivity)
     }
-}
-
-private fun showToast(context: Context, message: String) {
-    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-
 }
