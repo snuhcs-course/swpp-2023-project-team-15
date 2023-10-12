@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Post, Restaurant, PostPhoto
+
+from .models import Post, PostPhoto, Restaurant
+
 
 class RestaurantSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,6 +22,7 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = '__all__'
+        read_only_fields = ('user',)
 
     def create(self, validated_data):
         restaurant_data = validated_data.pop('restaurant')
@@ -33,5 +36,4 @@ class PostSerializer(serializers.ModelSerializer):
             PostPhoto.objects.create(post=post, **photo_data)
 
         return post
-
     
