@@ -14,6 +14,7 @@ python-decouple = "^3.8"
 gunicorn = "^21.2.0"
 boto3 = "^1.28.62"
 drf-yasg = "^1.21.7"
+pillow = "^10.0.1"
 
 
 [build-system]
