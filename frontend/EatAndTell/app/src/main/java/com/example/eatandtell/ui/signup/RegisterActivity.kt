@@ -29,7 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.eatandtell.R
+import com.example.eatandtell.ui.BlackSmallText
 import com.example.eatandtell.ui.CustomTextField
+import com.example.eatandtell.ui.GraySmallText
 import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.login.LoginActivity
@@ -149,14 +151,12 @@ fun SignupScreen(context: ComponentActivity, viewModel: RegisterViewModel) {
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(
+            GraySmallText(
                 text = "이미 계정이 있으십니까?",
-                style = MaterialTheme.typography.labelSmall
             )
             Spacer(modifier = Modifier.width(4.dp))
-            Text(
+            BlackSmallText(
                 text = "로그인",
-                style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.clickable {
                     context.finish()
                 }

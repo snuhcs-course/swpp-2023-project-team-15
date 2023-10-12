@@ -205,7 +205,6 @@ fun HomeScreenPreview() {
             .padding(horizontal = 20.dp),
         color = MaterialTheme.colorScheme.background
     ) {
-
         HomeScreen()
     }
 }

@@ -44,13 +44,16 @@ import com.example.eatandtell.ui.signup.SignupScreen
 
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.activity.viewModels
+import com.example.eatandtell.ui.BlackSmallText
 import com.example.eatandtell.ui.CustomTextField
+import com.example.eatandtell.ui.GraySmallText
 import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.login.LoginViewModel
 import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.signup.RegisterActivity
 import com.example.eatandtell.ui.signup.RegisterViewModel
+import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.Gray
 
 
@@ -130,14 +133,12 @@ fun LoginScreen(context: ComponentActivity, viewModel: LoginViewModel) {
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "계정 정보를 잊어버리셨나요?",
-                style = MaterialTheme.typography.labelSmall
+            GraySmallText(
+                text = "계정 정보를 잊어버리셨나요?"
             )
             Spacer(modifier = Modifier.width(4.dp))
-            Text(
+            BlackSmallText(
                 text = "아이디/패스워드 찾기",
-                style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.clickable { /* 여기에 클릭 시 수행될 동작 추가 */ }
             )
         }
@@ -149,14 +150,12 @@ fun LoginScreen(context: ComponentActivity, viewModel: LoginViewModel) {
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(
+            GraySmallText(
                 text = "계정이 없으십니까?",
-                style = MaterialTheme.typography.labelSmall
             )
             Spacer(modifier = Modifier.width(4.dp))
-            Text(
+            BlackSmallText(
                 text = "회원가입",
-                style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.clickable {
                     context.startActivity(
                         Intent(context, RegisterActivity::class.java)

@@ -64,7 +64,7 @@ fun EatAndTellTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = MyTypography,
+        typography = Typography,
         content = content
     )
 }

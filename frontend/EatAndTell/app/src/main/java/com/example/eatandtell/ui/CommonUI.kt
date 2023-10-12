@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,6 +34,7 @@ import com.example.eatandtell.ui.login.LoginActivity
 import com.example.eatandtell.ui.signup.RegisterViewModel
 import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.EatAndTellTheme
+import com.example.eatandtell.ui.theme.Gray
 import com.example.eatandtell.ui.theme.MainColor
 import com.example.eatandtell.ui.theme.White
 import kotlinx.coroutines.delay
@@ -115,7 +117,35 @@ fun CustomTextField(
         ) },
         supportingText = { Text(supportingText, style = MaterialTheme.typography.bodySmall
         ) },
+        textStyle = MaterialTheme.typography.bodySmall,
         maxLines = 1
+    )
+}
+
+@Composable
+fun GraySmallText(text: String) {
+    Text(
+        text = text,
+        style = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontSize = 10.sp,
+            fontWeight = FontWeight(400),
+            color = Gray,
+        ),
+    )
+}
+
+@Composable
+fun BlackSmallText(text: String, modifier: Modifier?) {
+    Text(
+        text = text,
+        style = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontSize = 10.sp,
+            fontWeight = FontWeight(500),
+            color = Black,
+        ),
+        modifier = modifier ?: Modifier
     )
 }
 
