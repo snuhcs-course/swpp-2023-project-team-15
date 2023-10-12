@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.login.LoginActivity
 import com.example.eatandtell.ui.theme.EatAndTellTheme
 import kotlinx.coroutines.delay
@@ -50,16 +51,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-@Composable
-fun Logo() {
-    Image(
-        painter = painterResource(R.drawable.logo),
-        contentDescription = "Logo Image",
-        modifier = Modifier
-            .width(210.dp)
-            .height(30.dp)
-
-    )
 }

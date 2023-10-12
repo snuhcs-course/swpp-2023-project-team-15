@@ -39,7 +39,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
+import com.example.eatandtell.ui.HeartEmpty
+import com.example.eatandtell.ui.HeartFull
+import com.example.eatandtell.ui.PostImage
+import com.example.eatandtell.ui.Profile
+import com.example.eatandtell.ui.StarRating
 import com.example.eatandtell.ui.login.LoginScreen
+import com.example.eatandtell.ui.ProfileImage
+import com.example.eatandtell.ui.ProfileText
+import com.example.eatandtell.ui.theme.Black
+import com.example.eatandtell.ui.theme.MainColor
+import com.example.eatandtell.ui.theme.White
 
 class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +67,8 @@ class HomeActivity : ComponentActivity() {
         }
     }
 }
+
+//TODO: parameter PostDTO로 바꾸기
 
 @Composable
 fun Post(
@@ -76,71 +88,27 @@ fun Post(
     ) {
         // Profile Row
         Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Image(
-                painter = rememberImagePainter(
-                    data = profileUrl,
-                    builder = {
-                        transformations(CircleCropTransformation())
-                    }
-                ),
-                contentDescription = null,
-                modifier = Modifier
-                    .border(
-                        width = 2.dp,
-                        color = Color(0xFFF23F18),
-                        shape = RoundedCornerShape(size = 100.dp)
-                    )
-                    .padding(2.dp)
-                    .width(45.dp)
-                    .height(45.dp)
-                    .background(
-                        color = Color(0xFFFFFFFF),
-                        shape = RoundedCornerShape(size = 100.dp)
-                    )
-            )
+        Profile(profileUrl, username, userDescription);
 
-            Column {
-                Text(
-                    text = username,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        lineHeight = 18.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color(0xFF262626),
-                    )
-                )
-                Text(text = userDescription,
-                        style = TextStyle(
-                        fontSize = 12.sp,
-                    lineHeight = 18.sp,
-
-                    fontWeight = FontWeight(500),
-                    color =Color(0xFF848484)
-                )
-
-                )
-            }
-        }
         Spacer(modifier = Modifier.height(11.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
+            //식당 이름
             Text(text = restaurantName, style = TextStyle(
                 fontSize = 14.sp,
                 lineHeight = 21.sp,
                 fontWeight = FontWeight(700),
-                color = Color(0xFF000000),
+                color = Black,
             ), modifier = Modifier
                 .width(236.dp)
                 .height(20.dp),
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.width(4.dp))
+
+            //ratings
             Row(
                 horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.Start),
                 verticalAlignment = Alignment.Bottom,
@@ -154,32 +122,17 @@ fun Post(
         }
 
         Spacer(modifier = Modifier.height(7.dp))
-        // Images Row
 
+        // Images Row
         Row(
             modifier = Modifier
                 .height(160.dp)
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-
             for (imageUrl in imageUrls) {
-                Image(
-                    painter = rememberImagePainter(
-                        data = imageUrl,
-
-                    ),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .width(150.dp)
-                        .height(150.dp)
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(8.dp))
-                )
+                PostImage(imageUrl)
             }
-
-
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -197,7 +150,7 @@ fun Post(
 
         Row(
             horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.Bottom,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
@@ -207,11 +160,10 @@ fun Post(
                     fontSize = 11.sp,
                     lineHeight = 16.5.sp,
                     fontWeight = FontWeight(500),
-                    color = Color(0xFFF23F18),
+                    color = MainColor,
                 ),
                 modifier = Modifier
                     .width(16.dp)
-
             )
             if(isLiked) HeartFull() else HeartEmpty()
         }
@@ -220,7 +172,6 @@ fun Post(
 
 @Composable
 fun HomeScreen() {
-
     Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState()),) {
@@ -245,161 +196,6 @@ fun HomeScreen() {
 }
 
 
-
-@Composable
-fun StarFull() {
-    Icon(
-        painter = painterResource(R.drawable.ic_star_filled),
-        modifier = Modifier
-
-            .width(16.dp)
-            .height(16.dp),
-        contentDescription = "star_full",
-        tint = Color(0xFFF23F18)
-    )
-}
-
-@Composable
-fun StarEmpty() {
-    Icon(
-        painter = painterResource(R.drawable.ic_star_empty),
-        modifier = Modifier
-            .width(16.dp)
-            .height(16.dp),
-        contentDescription = "star_empty",
-        tint = Color(0xFFF23F18)
-    )
-}
-
-@Composable
-fun StarHalf() {
-    Icon(
-        painter = painterResource(R.drawable.ic_star_half),
-        modifier = Modifier
-            .width(16.dp)
-            .height(16.dp),
-        contentDescription = "star_half",
-        tint = Color(0xFFF23F18)
-    )
-}
-
-@Composable
-fun StarRating(rating: Float) {
-    val fullStars = rating.toInt()
-    val hasHalfStar = rating - fullStars >= 0.5
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(0.dp), // 조절 가능한 간격
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Full stars
-        repeat(fullStars) {
-            StarFull()
-        }
-
-        // Half star
-        if (hasHalfStar) {
-            StarHalf()
-        }
-
-        // Empty stars
-        repeat(5 - fullStars - if (hasHalfStar) 1 else 0) {
-            StarEmpty()
-        }
-    }
-}
-
-@Composable
-fun HeartFull() {
-    Icon(
-        painter = painterResource(R.drawable.ic_heart_full),
-        modifier = Modifier
-            .width(24.dp)
-            .height(24.dp),
-        contentDescription = "heart_full",
-        tint = Color(0xFFF23F18)
-    )
-}
-
-@Composable
-fun HeartEmpty() {
-    Icon(
-        painter = painterResource(R.drawable.ic_heart_empty),
-        modifier = Modifier
-            .width(24.dp)
-            .height(24.dp),
-        contentDescription = "heart_empty",
-        tint = Color(0xFFF23F18)
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CustomTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    supportingText: String = "",
-    visualTransformation: VisualTransformation = VisualTransformation.None,
-    trailingIcon: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier
-) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        visualTransformation = visualTransformation,
-        trailingIcon = trailingIcon,
-        modifier = modifier,
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color(0xFFEEEEEE),
-            cursorColor = Color.Black,
-            focusedIndicatorColor = Color(0xFFA0A0A0),
-            unfocusedIndicatorColor = Color.Transparent,
-
-            ),
-        placeholder = { Text(placeholder, style = TextStyle(
-            fontSize = 12.sp,
-            fontWeight = FontWeight(400),
-            color = Color(0xFF000000)
-        )) },
-        supportingText = { Text(supportingText, style = TextStyle(
-            fontSize = 12.sp,
-            fontWeight = FontWeight(400),
-            color = Color(0xFF000000)
-        )) },
-        maxLines = 1
-    )
-}
-
-@Composable
-fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
-    IconButton(onClick = onClick) {
-        val visibilityIcon = if (passwordHidden) {
-            painterResource(R.drawable.ic_visibility)
-        } else {
-            painterResource(R.drawable.ic_visibility_off)
-        }
-
-        Icon(painter = visibilityIcon, contentDescription = "visibility")
-    }
-}
-
-@Composable
-fun LoginButton(onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFFF23F18),
-            contentColor = Color.White),
-        shape = RoundedCornerShape(size = 4.dp),
-        modifier = Modifier
-            .width(320.dp)
-            .height(48.dp)
-    ) {
-        Text("Log in", color = Color.White)
-    }
-}
-
 @Preview
 @Composable
 fun HomeScreenPreview() {
@@ -409,7 +205,6 @@ fun HomeScreenPreview() {
             .padding(horizontal = 20.dp),
         color = MaterialTheme.colorScheme.background
     ) {
-
         HomeScreen()
     }
 }

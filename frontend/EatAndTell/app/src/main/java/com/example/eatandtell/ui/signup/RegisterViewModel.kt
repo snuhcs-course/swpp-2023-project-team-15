@@ -1,26 +1,18 @@
 package com.example.eatandtell.ui.signup
+import RetrofitClient
+import android.util.Log
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.example.eatandtell.R
+import com.example.eatandtell.di.ApiService
+import com.example.eatandtell.dto.RegisterRequest
+import com.example.eatandtell.dto.RegisterResponse
 import retrofit2.Call
 import retrofit2.Callback
-import retrofit2.http.Body
-import retrofit2.http.POST
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
-
-
-data class RegisterRequest(val username: String, val password: String, val email:String)
-data class RegisterResponse(val token: String)
-
-interface ApiService {
-    @POST("register/") // The registration endpoint
-    fun registerUser(@Body registrationData: RegisterRequest): Call<RegisterResponse>
-
-}
-
 
 class RegisterViewModel : ViewModel() {
     //interface for callback
@@ -29,15 +21,21 @@ class RegisterViewModel : ViewModel() {
         fun onRegisterError(errorMessage: String)
     }
 
-    private val _registerResult = MutableLiveData<RegistrationResult>()
-    val registerResult: LiveData<RegistrationResult> = _registerResult
-    val BaseURL= "http://ec2-13-125-91-166.ap-northeast-2.compute.amazonaws.com/users/"
-    val retrofit = Retrofit.Builder()
-        .baseUrl(BaseURL) // actual backend URL
-        .addConverterFactory(MoshiConverterFactory.create())
-        .build()
+    private val apiService = RetrofitClient.retro.create(ApiService::class.java)
 
-    private val apiService = retrofit.create(ApiService::class.java)
+    //TODO: ViewModel로 옮기기
+    @Composable
+    fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
+        IconButton(onClick = onClick) {
+            val visibilityIcon = if (passwordHidden) {
+                painterResource(R.drawable.ic_visibility)
+            } else {
+                painterResource(R.drawable.ic_visibility_off)
+            }
+
+            Icon(painter = visibilityIcon, contentDescription = "visibility")
+        }
+    }
 
     fun registerUser(username: String, password: String, email: String, callback: RegisterCallback) {
         val registrationData = RegisterRequest(username, password, email)
@@ -48,12 +46,10 @@ class RegisterViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     val registrationResponse = response.body()
                     val token = registrationResponse?.token
-                    _registerResult.value = RegistrationResult.Success(token)
                     callback.onRegisterSuccess(token)
                 } else {
-                    println(""+response.code())
                     val errorMessage = response.message()
-                    _registerResult.value = RegistrationResult.Error("Registration failed: $errorMessage")
+                    Log.d("register error", ""+response.code()+errorMessage)
                     callback.onRegisterError("Registration failed: $errorMessage")
                 }
             }
@@ -63,12 +59,6 @@ class RegisterViewModel : ViewModel() {
                 callback.onRegisterError(errorMessage)
             }
         })
-    }
-
-    //Sealed Class (closer to mvvm)
-    sealed class RegistrationResult {
-        data class Success(val token: String?) : RegistrationResult()
-        data class Error(val errorMessage: String) : RegistrationResult()
     }
 
 }

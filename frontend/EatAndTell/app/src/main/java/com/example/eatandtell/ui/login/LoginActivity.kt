@@ -3,6 +3,7 @@ package com.example.eatandtell.ui.login
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -43,11 +44,17 @@ import com.example.eatandtell.ui.signup.SignupScreen
 
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.activity.viewModels
+import com.example.eatandtell.ui.BlackSmallText
+import com.example.eatandtell.ui.CustomTextField
+import com.example.eatandtell.ui.GraySmallText
+import com.example.eatandtell.ui.Logo
+import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.login.LoginViewModel
+import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.signup.RegisterActivity
 import com.example.eatandtell.ui.signup.RegisterViewModel
-
-
+import com.example.eatandtell.ui.theme.Black
+import com.example.eatandtell.ui.theme.Gray
 
 
 class LoginActivity : ComponentActivity() {
@@ -55,18 +62,20 @@ class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background
-            ) {
-                LoginScreen(this@LoginActivity)
+            MaterialTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    LoginScreen(this@LoginActivity, loginViewModel)
+                }
             }
         }
     }
 }
 
 @Composable
-fun LoginScreen(context: ComponentActivity) {
+fun LoginScreen(context: ComponentActivity, viewModel: LoginViewModel) {
 
     var id by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -89,14 +98,6 @@ fun LoginScreen(context: ComponentActivity) {
             value = id.text,
             onValueChange = { id = TextFieldValue(it) },
             placeholder = "아이디를 입력하세요",
-            modifier = Modifier
-                .border(
-                    width = 0.5.dp,
-                    color = Color(0xFFC5C5C5),
-                    shape = RoundedCornerShape(size = 4.dp)
-                )
-                .width(320.dp)
-                .height(48.dp),
         )
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -106,43 +107,25 @@ fun LoginScreen(context: ComponentActivity) {
             visualTransformation =
             if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
             trailingIcon = {
-                PasswordVisibilityToggle(passwordHidden) {
+                viewModel.PasswordVisibilityToggle(passwordHidden) {
                     passwordHidden = !passwordHidden
                 }
             },
             placeholder = "비밀번호를 입력하세요",
-            modifier = Modifier
-                .border(
-                    width = 0.5.dp,
-                    color = Color(0xFFC5C5C5),
-                    shape = RoundedCornerShape(size = 4.dp)
-                )
-                .width(320.dp)
-                .height(48.dp),
-
-
             )
         Spacer(modifier = Modifier.height(12.dp))
 
-
         LoginButton(
-
             onClick = {
-
-                println("ID: ${id.text}, Password: ${password.text}")
-
+                Log.d("login activity", "ID: ${id.text}, Password: ${password.text}")
                 context.startActivity(Intent(context, HomeActivity::class.java))
                 context.finish()
             },
             id = id.text,
             password = password.text,
             context = context,
-            viewModel = viewModel()
-
+            viewModel = viewModel
         )
-
-
-
 
         Spacer(modifier = Modifier.height(18.dp))
         Row(
@@ -150,22 +133,12 @@ fun LoginScreen(context: ComponentActivity) {
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "계정 정보를 잊어버리셨나요?",
-                style = TextStyle(
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight(400),
-                    color = Color(0xFF6D6D6D),
-                ),
+            GraySmallText(
+                text = "계정 정보를 잊어버리셨나요?"
             )
             Spacer(modifier = Modifier.width(4.dp))
-            Text(
+            BlackSmallText(
                 text = "아이디/패스워드 찾기",
-                style = TextStyle(
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFF23244F),
-                ),
                 modifier = Modifier.clickable { /* 여기에 클릭 시 수행될 동작 추가 */ }
             )
         }
@@ -177,22 +150,12 @@ fun LoginScreen(context: ComponentActivity) {
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(
+            GraySmallText(
                 text = "계정이 없으십니까?",
-                style = TextStyle(
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight(400),
-                    color = Color(0xFF6D6D6D),
-                ),
             )
             Spacer(modifier = Modifier.width(4.dp))
-            Text(
+            BlackSmallText(
                 text = "회원가입",
-                style = TextStyle(
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFF23244F),
-                ),
                 modifier = Modifier.clickable {
                     context.startActivity(
                         Intent(context, RegisterActivity::class.java)
@@ -205,109 +168,36 @@ fun LoginScreen(context: ComponentActivity) {
 }
 
 @Composable
-fun Logo() {
-    Image(
-        painter = painterResource(R.drawable.logo),
-        contentDescription = "Logo Image",
-        modifier = Modifier
-            .width(210.dp)
-            .height(30.dp)
-
-    )
+fun LoginButton(viewModel: LoginViewModel, id: String, password: String, context: Context, onClick: () -> Unit) {
+    val onClickReal = {
+        viewModel.loginUser(id, password, object: LoginViewModel.LoginCallback{
+            override fun onLoginSuccess(token: String?) {
+                onClick()
+            }
+            override fun onLoginError(errorMessage: String) {
+                showToast(context, errorMessage)
+            } } )}
+    MainButton(onClickReal, "Log in")
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+@Preview (showBackground = true, heightDp = 100)
 @Composable
-fun CustomTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    supportingText: String = "",
-    visualTransformation: VisualTransformation = VisualTransformation.None,
-    trailingIcon: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier
-) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        visualTransformation = visualTransformation,
-        trailingIcon = trailingIcon,
-        modifier = modifier,
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color(0xFFEEEEEE),
-            cursorColor = Color.Black,
-            focusedIndicatorColor = Color(0xFFA0A0A0),
-            unfocusedIndicatorColor = Color.Transparent,
+fun MyComposablePreview() {
+    MaterialTheme { Column {
+        Text(
+            text = "회원가입",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.clickable {
 
-            ),
-        placeholder = { Text(placeholder, style = TextStyle(
-            fontSize = 12.sp,
-            fontWeight = FontWeight(400),
-            color = Color(0xFF000000)
-        )) },
-        supportingText = { Text(supportingText, style = TextStyle(
-            fontSize = 12.sp,
-            fontWeight = FontWeight(400),
-            color = Color(0xFF000000)
-        )) },
-        maxLines = 1
-    )
-}
-
-@Composable
-fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
-    IconButton(onClick = onClick) {
-        val visibilityIcon = if (passwordHidden) {
-            painterResource(R.drawable.ic_visibility)
-        } else {
-            painterResource(R.drawable.ic_visibility_off)
-        }
-
-        Icon(painter = visibilityIcon, contentDescription = "visibility")
+            }
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text("작음", style = MaterialTheme.typography.labelSmall)
+        Text(
+            text = "계정이 없으십니까?",
+            style = MaterialTheme.typography.bodySmall
+        )
     }
-}
-
-@Composable
-fun LoginButton(viewModel: LoginViewModel, id:String, password:String, context:Context ,onClick: () -> Unit) {
-
-    Button(
-        onClick ={
-            viewModel.loginUser(id, password, object: LoginViewModel.LoginCallback{
-                override fun onLoginSuccess(token: String?) {
-                    onClick()
-                }
-
-                override fun onLoginError(errorMessage: String) {
-                    showToast(context, errorMessage)
-        } } )},
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFFF23F18),
-            contentColor = Color.White),
-        shape = RoundedCornerShape(size = 4.dp),
-        modifier = Modifier
-            .width(320.dp)
-            .height(48.dp)
-
-    ) {
-        Text("Log in", color = Color.White)
     }
-}
-
-
-
-@Preview
-@Composable
-fun LoginScreenPreview() {
-    val dummyActivity = ComponentActivity()
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        LoginScreen(dummyActivity)
-    }
-}
-
-private fun showToast(context: Context, message: String) {
-    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-
 }
