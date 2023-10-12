@@ -57,7 +57,9 @@ Normal deployment can be done as following:
 - In case of new dependency added, `poetry install`
 - `sudo systemctl restart gunicorn`
 
-Guricorn service setting is at `/etc/systemd/system/gunicorn.service`. In case this is changed:
+
+## Gunicorn
+Gunicorn service setting is at `/etc/systemd/system/gunicorn.service`. In case this is changed:
 - `sudo systemctl daemon-reload`
 - `sudo systemctl restart gunicorn`
 
