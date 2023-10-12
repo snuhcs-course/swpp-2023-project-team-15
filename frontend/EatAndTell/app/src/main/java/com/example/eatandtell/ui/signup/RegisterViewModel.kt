@@ -23,19 +23,7 @@ class RegisterViewModel : ViewModel() {
 
     private val apiService = RetrofitClient.retro.create(ApiService::class.java)
 
-    //TODO: ViewModel로 옮기기
-    @Composable
-    fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
-        IconButton(onClick = onClick) {
-            val visibilityIcon = if (passwordHidden) {
-                painterResource(R.drawable.ic_visibility)
-            } else {
-                painterResource(R.drawable.ic_visibility_off)
-            }
 
-            Icon(painter = visibilityIcon, contentDescription = "visibility")
-        }
-    }
 
     fun registerUser(username: String, password: String, email: String, callback: RegisterCallback) {
         val registrationData = RegisterRequest(username, password, email)

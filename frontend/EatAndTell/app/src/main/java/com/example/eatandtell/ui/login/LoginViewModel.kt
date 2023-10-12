@@ -21,19 +21,6 @@ class LoginViewModel : ViewModel() {
         fun onLoginError(errorMessage: String)
     }
 
-    @Composable
-    fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
-        IconButton(onClick = onClick) {
-            val visibilityIcon = if (passwordHidden) {
-                painterResource(R.drawable.ic_visibility)
-            } else {
-                painterResource(R.drawable.ic_visibility_off)
-            }
-
-            Icon(painter = visibilityIcon, contentDescription = "visibility")
-        }
-    }
-
     private val apiService = RetrofitClient.retro.create(ApiService::class.java)
     fun loginUser(username: String, password: String,  callback: LoginCallback) {
         val loginData = LoginRequest(username, password)

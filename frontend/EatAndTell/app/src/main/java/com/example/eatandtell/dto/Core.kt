@@ -12,21 +12,33 @@ data class UserDTO(
     // val greeting : String,
 )
 
-data class RestuarantDTO(
-    // val id: Int,
+data class RestaurantDTO(
+    val id: Int?,
     val name: String,
 )
 
 data class PhotoDTO(
-    val photo_url : String,
+    val id : Int?,
+    val photoUrl : String,
+    val post : Int?
+)
+
+data class RestReqDTO(
+    val name: String,
+)
+
+data class PhotoReqDTO(
+    val photoUrl : String,
 )
 
 data class PostDTO(
+    val id: Int,
     val user: Int,
-    val restaurant : RestuarantDTO,
+    val restaurant : RestaurantDTO,
     val title: String,
     val menu: String,
-    val rating: Float,
+    val rating: String, //TODO
     val description: String,
-    val photos: List<PhotoDTO>
+    val photos: List<PhotoDTO>,
+    val createdAt : String?, //TODO
 )

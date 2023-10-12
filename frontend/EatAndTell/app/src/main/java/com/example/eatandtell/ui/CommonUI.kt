@@ -41,7 +41,6 @@ import kotlinx.coroutines.delay
 
 public fun showToast(context: Context, message: String) {
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-    println(message)
 }
 
 @Composable

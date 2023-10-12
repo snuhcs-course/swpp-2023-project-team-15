@@ -1,16 +1,14 @@
 package com.example.eatandtell.dto
 
 data class CreatePostRequest(
-    val user: Int,
-    val restaurant : RestuarantDTO,
+    val restaurant : RestReqDTO,
+    val photos: List<PhotoReqDTO>,
     val title: String,
     val menu: String,
-    val rating: Float,
+    val rating: String,
     val description: String,
-    val photos: List<PhotoDTO>
 )
 
 data class GetAllPostsResponse(
-    val results: List<PostDTO> //TODO
+    var results : List<PostDTO> //TODO
 )
-
