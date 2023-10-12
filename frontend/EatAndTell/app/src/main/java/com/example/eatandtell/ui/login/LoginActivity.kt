@@ -75,6 +75,18 @@ class LoginActivity : ComponentActivity() {
 }
 
 @Composable
+fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        val visibilityIcon = if (passwordHidden) {
+            painterResource(R.drawable.ic_visibility_off)
+        } else {
+            painterResource(R.drawable.ic_visibility)
+        }
+        Icon(painter = visibilityIcon, contentDescription = "visibility")
+    }
+}
+
+@Composable
 fun LoginScreen(context: ComponentActivity, viewModel: LoginViewModel) {
 
     var id by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -107,7 +119,7 @@ fun LoginScreen(context: ComponentActivity, viewModel: LoginViewModel) {
             visualTransformation =
             if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
             trailingIcon = {
-                viewModel.PasswordVisibilityToggle(passwordHidden) {
+                PasswordVisibilityToggle(passwordHidden) {
                     passwordHidden = !passwordHidden
                 }
             },
@@ -177,27 +189,26 @@ fun LoginButton(viewModel: LoginViewModel, id: String, password: String, context
             override fun onLoginError(errorMessage: String) {
                 showToast(context, errorMessage)
             } } )}
-    MainButton(onClickReal, "Log in")
+    MainButton(onClickReal, "로그인")
 }
 
 
-@Preview (showBackground = true, heightDp = 100)
-@Composable
-fun MyComposablePreview() {
-    MaterialTheme { Column {
-        Text(
-            text = "회원가입",
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.clickable {
-
-            }
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text("작음", style = MaterialTheme.typography.labelSmall)
-        Text(
-            text = "계정이 없으십니까?",
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
-    }
-}
+//@Preview (showBackground = true, heightDp = 100)
+//@Composable
+//fun MyComposablePreview() {
+//    MaterialTheme { Column {
+//        Text(
+//            text = "회원가입",
+//            style = MaterialTheme.typography.bodyLarge,
+//            modifier = Modifier.clickable {
+//            }
+//        )
+//        Spacer(modifier = Modifier.height(4.dp))
+//        Text("작음", style = MaterialTheme.typography.labelSmall)
+//        Text(
+//            text = "계정이 없으십니까?",
+//            style = MaterialTheme.typography.bodySmall
+//        )
+//    }
+//    }
+//}

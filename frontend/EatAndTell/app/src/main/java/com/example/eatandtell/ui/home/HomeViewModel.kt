@@ -1,1 +1,1 @@
-package com.example.compose_study.ui.home
+package com.example.eatandtell.ui.home

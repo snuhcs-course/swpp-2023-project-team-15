@@ -58,6 +58,19 @@ class RegisterActivity : ComponentActivity() {
 }
 
 @Composable
+fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        val visibilityIcon = if (passwordHidden) {
+            painterResource(R.drawable.ic_visibility_off)
+        } else {
+            painterResource(R.drawable.ic_visibility)
+        }
+
+        Icon(painter = visibilityIcon, contentDescription = "visibility")
+    }
+}
+
+@Composable
 fun SignupScreen(context: ComponentActivity, viewModel: RegisterViewModel) {
 
     var email by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -108,7 +121,7 @@ fun SignupScreen(context: ComponentActivity, viewModel: RegisterViewModel) {
             if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
 
             trailingIcon = {
-                viewModel.PasswordVisibilityToggle(passwordHidden) {
+                PasswordVisibilityToggle(passwordHidden) {
                     passwordHidden = !passwordHidden
                 }
             },
@@ -122,7 +135,7 @@ fun SignupScreen(context: ComponentActivity, viewModel: RegisterViewModel) {
             visualTransformation =
             if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
             trailingIcon = {
-                viewModel.PasswordVisibilityToggle(passwordHidden) {
+                PasswordVisibilityToggle(passwordHidden) {
                     passwordHidden = !passwordHidden
                 }
 
@@ -164,6 +177,8 @@ fun SignupScreen(context: ComponentActivity, viewModel: RegisterViewModel) {
         }
     }
 }
+
+
 
 @Composable
 fun SignupButton (
@@ -207,5 +222,5 @@ fun SignupButton (
 
     }
 
-    MainButton(onClick = onClickReal, text = "Sign Up")
+    MainButton(onClick = onClickReal, text = "회원가입")
 }
