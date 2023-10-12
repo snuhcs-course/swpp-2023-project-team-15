@@ -23,8 +23,6 @@ class RegisterViewModel : ViewModel() {
 
     private val apiService = RetrofitClient.retro.create(ApiService::class.java)
 
-
-
     fun registerUser(username: String, password: String, email: String, callback: RegisterCallback) {
         val registrationData = RegisterRequest(username, password, email)
         val call = apiService.registerUser(registrationData)

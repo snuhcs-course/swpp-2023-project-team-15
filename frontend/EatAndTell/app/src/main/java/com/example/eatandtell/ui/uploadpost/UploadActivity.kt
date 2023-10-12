@@ -1,214 +1,199 @@
 // RegisterActivity.kt
-package com.example.eatandtell.ui.login
+package com.example.eatandtell.ui.uploadpost
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.TextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.example.eatandtell.R
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import com.example.eatandtell.ui.home.HomeActivity
 
-import com.example.eatandtell.ui.signup.SignupScreen
-
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.activity.viewModels
-import com.example.eatandtell.ui.BlackSmallText
-import com.example.eatandtell.ui.CustomTextField
-import com.example.eatandtell.ui.GraySmallText
-import com.example.eatandtell.ui.Logo
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.eatandtell.dto.PhotoReqDTO
+import com.example.eatandtell.dto.RestReqDTO
+import com.example.eatandtell.dto.UploadPostRequest
+import com.example.eatandtell.ui.BackBar
 import com.example.eatandtell.ui.MainButton
-import com.example.eatandtell.ui.login.LoginViewModel
+import com.example.eatandtell.ui.MediumWhiteButton
+import com.example.eatandtell.ui.PostImage
+import com.example.eatandtell.ui.Profile
+import com.example.eatandtell.ui.StarRating
+import com.example.eatandtell.ui.WhiteTextField
+import com.example.eatandtell.ui.login.LoginScreen
 import com.example.eatandtell.ui.showToast
-import com.example.eatandtell.ui.signup.RegisterActivity
-import com.example.eatandtell.ui.signup.RegisterViewModel
-import com.example.eatandtell.ui.theme.Black
-import com.example.eatandtell.ui.theme.Gray
 
-
-class LoginActivity : ComponentActivity() {
-    private val loginViewModel: LoginViewModel by viewModels()
+class UploadActivity : ComponentActivity() {
+    private val uploadViewModel: UploadViewModel by viewModels()
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    LoginScreen(this@LoginActivity, loginViewModel)
-                }
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp),
+                    color = MaterialTheme.colorScheme.background,
+                    ) {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        //TODO: Top Bar
+                        BackBar(name = "리뷰 작성")
+                        UploadScreen(this@UploadActivity, uploadViewModel)
+
+                    }
+//                        BackBar(name = "리뷰 작성")
+                    }
             }
         }
     }
 }
 
 @Composable
-fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
-    IconButton(onClick = onClick) {
-        val visibilityIcon = if (passwordHidden) {
-            painterResource(R.drawable.ic_visibility_off)
-        } else {
-            painterResource(R.drawable.ic_visibility)
-        }
-        Icon(painter = visibilityIcon, contentDescription = "visibility")
-    }
-}
+fun UploadScreen(context: UploadActivity, viewModel: UploadViewModel) {
 
-@Composable
-fun LoginScreen(context: ComponentActivity, viewModel: LoginViewModel) {
-
-    var id by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+    var restaurantName by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
     }
 
-    var password by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+    var reviewDescription by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
     }
 
-    var passwordHidden by rememberSaveable { mutableStateOf(true) }
+
+    val profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8"
+    val photoUrls = listOf(
+        "https://api.nudge-community.com/attachments/339560",
+        "https://img.siksinhot.com/place/1650516612762055.jpg?w=560&h=448&c=Y",
+        "https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FdKS0uX%2FbtrScbvc9HH%2F5I2m53vgz0LWvszHQ9PQNk%2Fimg.jpg"
+    )
+    val username = "Joshua-i"
+    val userDescription = "고독한 미식가"
 
     // Main content of LoginActivity
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier
+            .fillMaxSize()
     ) {
-        Logo()
-        Spacer(modifier = Modifier.height(18.dp))
-        CustomTextField(
-            value = id.text,
-            onValueChange = { id = TextFieldValue(it) },
-            placeholder = "아이디를 입력하세요",
-        )
-        Spacer(modifier = Modifier.height(12.dp))
 
-        CustomTextField(
-            value = password.text,
-            onValueChange = { password = TextFieldValue(it) },
-            visualTransformation =
-            if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
-            trailingIcon = {
-                PasswordVisibilityToggle(passwordHidden) {
-                    passwordHidden = !passwordHidden
-                }
-            },
-            placeholder = "비밀번호를 입력하세요",
+        // Profile Row
+//        Spacer(modifier = Modifier.height(10.dp))
+        Profile(profileUrl, username, userDescription);
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Images Row
+        Row(
+            modifier = Modifier
+                .height(150.dp)
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            for (photoUrl in photoUrls) {
+                PostImage(photoUrl)
+            }
+        }
+
+        // Medium White Button
+        Spacer(modifier = Modifier.height(16.dp))
+        MediumWhiteButton(onClick = { /*TODO*/ }, text = "사진 추가하기")
+
+        // Restaurant Name Text Field and Rating
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row (
+            horizontalArrangement = Arrangement.SpaceBetween, //너비에 상관없이 양쪽 끝에 배치
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            WhiteTextField(
+                value = restaurantName.text,
+                onValueChange = { restaurantName = TextFieldValue(it) },
+                placeholder = "맛집명",
+                modifier = Modifier
+                    .border(
+                        width = 0.5.dp,
+                        color = Color(0xFFC5C5C5),
+                        shape = RoundedCornerShape(size = 4.dp)
+                    )
+                    .height(IntrinsicSize.Min)
+                    .width(160.dp)
             )
-        Spacer(modifier = Modifier.height(12.dp))
+            StarRating(rating = "0", size = 24.dp)
+        }
 
-        LoginButton(
+        // Review Text Field
+        Spacer(modifier = Modifier.height(12.dp))
+        WhiteTextField(value = reviewDescription.text,
+            onValueChange = { reviewDescription = TextFieldValue(it)},
+            placeholder = "리뷰를 작성해 주세요",
+            modifier = Modifier
+                .border(
+                    width = 0.5.dp,
+                    color = Color(0xFFC5C5C5),
+                    shape = RoundedCornerShape(size = 4.dp)
+                )
+                .fillMaxWidth()
+                .weight(1f) // 남은 세로 길이 모두 리뷰 공간으로 할당
+        )
+
+        // Upload Button
+        Spacer(modifier = Modifier.height(16.dp))
+        UploadButton(
+            viewModel = viewModel,
+            restaurant = RestReqDTO(name = restaurantName.text),
+            photos = photoUrls.map { PhotoReqDTO(it) } ,
+            rating = "4",
+            description = reviewDescription.text,
+            context = context,
             onClick = {
-                Log.d("login activity", "ID: ${id.text}, Password: ${password.text}")
                 context.startActivity(Intent(context, HomeActivity::class.java))
                 context.finish()
-            },
-            id = id.text,
-            password = password.text,
-            context = context,
-            viewModel = viewModel
+            }
         )
 
-        Spacer(modifier = Modifier.height(18.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            GraySmallText(
-                text = "계정 정보를 잊어버리셨나요?"
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            BlackSmallText(
-                text = "아이디/패스워드 찾기",
-                modifier = Modifier.clickable { /* 여기에 클릭 시 수행될 동작 추가 */ }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(18.dp))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            GraySmallText(
-                text = "계정이 없으십니까?",
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            BlackSmallText(
-                text = "회원가입",
-                modifier = Modifier.clickable {
-                    context.startActivity(
-                        Intent(context, RegisterActivity::class.java)
-                    )
-                }
-            )
-
-        }
+        Spacer(modifier = Modifier.height(20.dp))
     }
+
 }
+
+//@Preview(showBackground = true)
+//@Composable
+//fun UploadScreenPreview() {
+//    UploadScreen(UploadActivity())
+//}
 
 @Composable
-fun LoginButton(viewModel: LoginViewModel, id: String, password: String, context: Context, onClick: () -> Unit) {
+fun UploadButton(viewModel: UploadViewModel,
+                 restaurant : RestReqDTO,
+                 photos: List<PhotoReqDTO>,
+                 rating: String,
+                 description: String,
+                 context: Context,
+                 onClick: () -> Unit) {
+    val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
     val onClickReal = {
-        viewModel.loginUser(id, password, object: LoginViewModel.LoginCallback{
-            override fun onLoginSuccess(token: String?) {
+        viewModel.uploadPost(postData, object: UploadViewModel.UploadCallback{
+            override fun onUploadSuccess() {
                 onClick()
             }
-            override fun onLoginError(errorMessage: String) {
+            override fun onUploadError(errorMessage: String) {
                 showToast(context, errorMessage)
             } } )}
-    MainButton(onClickReal, "로그인")
+    MainButton(onClick, "리뷰 작성") //TODO: 이후 onClickReal로 변경해야 백엔드와 연결됨
 }
-
-
-//@Preview (showBackground = true, heightDp = 100)
-//@Composable
-//fun MyComposablePreview() {
-//    MaterialTheme { Column {
-//        Text(
-//            text = "회원가입",
-//            style = MaterialTheme.typography.bodyLarge,
-//            modifier = Modifier.clickable {
-//            }
-//        )
-//        Spacer(modifier = Modifier.height(4.dp))
-//        Text("작음", style = MaterialTheme.typography.labelSmall)
-//        Text(
-//            text = "계정이 없으십니까?",
-//            style = MaterialTheme.typography.bodySmall
-//        )
-//    }
-//    }
-//}

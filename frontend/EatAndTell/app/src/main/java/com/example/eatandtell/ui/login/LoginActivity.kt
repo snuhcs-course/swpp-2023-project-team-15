@@ -55,6 +55,7 @@ import com.example.eatandtell.ui.signup.RegisterActivity
 import com.example.eatandtell.ui.signup.RegisterViewModel
 import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.Gray
+import com.example.eatandtell.ui.uploadpost.UploadActivity
 
 
 class LoginActivity : ComponentActivity() {
@@ -64,8 +65,9 @@ class LoginActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 20.dp),
+                    color = MaterialTheme.colorScheme.background,
+
                 ) {
                     LoginScreen(this@LoginActivity, loginViewModel)
                 }
@@ -155,7 +157,7 @@ fun LoginScreen(context: ComponentActivity, viewModel: LoginViewModel) {
             )
         }
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             modifier = Modifier
@@ -192,23 +194,3 @@ fun LoginButton(viewModel: LoginViewModel, id: String, password: String, context
     MainButton(onClickReal, "로그인")
 }
 
-
-//@Preview (showBackground = true, heightDp = 100)
-//@Composable
-//fun MyComposablePreview() {
-//    MaterialTheme { Column {
-//        Text(
-//            text = "회원가입",
-//            style = MaterialTheme.typography.bodyLarge,
-//            modifier = Modifier.clickable {
-//            }
-//        )
-//        Spacer(modifier = Modifier.height(4.dp))
-//        Text("작음", style = MaterialTheme.typography.labelSmall)
-//        Text(
-//            text = "계정이 없으십니까?",
-//            style = MaterialTheme.typography.bodySmall
-//        )
-//    }
-//    }
-//}

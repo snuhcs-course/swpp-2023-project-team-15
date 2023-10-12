@@ -45,7 +45,7 @@ class RegisterActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Surface(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 20.dp),
                 color = MaterialTheme.colorScheme.background
             ) {
 
@@ -53,7 +53,6 @@ class RegisterActivity : ComponentActivity() {
 
             }
         }
-
     }
 }
 
@@ -109,7 +108,7 @@ fun SignupScreen(context: ComponentActivity, viewModel: RegisterViewModel) {
         CustomTextField(
             value = username.text,
             onValueChange = { username = TextFieldValue(it) },
-            placeholder = "아이디를 입력하세요 (4자 이상, 20자 이하)",
+            placeholder = "아이디를 입력하세요 (4~20자)",
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -125,7 +124,7 @@ fun SignupScreen(context: ComponentActivity, viewModel: RegisterViewModel) {
                     passwordHidden = !passwordHidden
                 }
             },
-            placeholder = "비밀번호를 입력하세요 (4자 이상, 20자 이하)",
+            placeholder = "비밀번호를 입력하세요 (4~20자)",
         )
         Spacer(modifier = Modifier.height(12.dp))
 

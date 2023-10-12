@@ -31,12 +31,11 @@ data class PhotoReqDTO(
     val photoUrl : String,
 )
 
+// upload post시 response이자, get posts시 response list의 요소
 data class PostDTO(
     val id: Int,
     val user: Int,
     val restaurant : RestaurantDTO,
-    val title: String,
-    val menu: String,
     val rating: String, //TODO
     val description: String,
     val photos: List<PhotoDTO>,

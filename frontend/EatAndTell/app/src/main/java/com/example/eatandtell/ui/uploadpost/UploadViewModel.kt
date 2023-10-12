@@ -1,47 +1,41 @@
-package com.example.eatandtell.ui.login
+package com.example.eatandtell.ui.uploadpost
 import RetrofitClient
 import android.util.Log
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.ViewModel
-import com.example.eatandtell.R
 import com.example.eatandtell.di.ApiService
 import com.example.eatandtell.dto.LoginRequest
 import com.example.eatandtell.dto.LoginResponse
+import com.example.eatandtell.dto.PostDTO
+import com.example.eatandtell.dto.UploadPostRequest
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class LoginViewModel : ViewModel() {
+class UploadViewModel : ViewModel() {
     //interface for callback
-    interface LoginCallback {
-        fun onLoginSuccess(token: String?)
-        fun onLoginError(errorMessage: String)
+    interface UploadCallback {
+        fun onUploadSuccess()
+        fun onUploadError(errorMessage: String)
     }
 
     private val apiService = RetrofitClient.retro.create(ApiService::class.java)
-    fun loginUser(username: String, password: String,  callback: LoginCallback) {
-        val loginData = LoginRequest(username, password)
-        val call = apiService.loginUser(loginData)
+    fun uploadPost(postData: UploadPostRequest,  callback: UploadCallback) {
+        val call = apiService.uploadPost(postData)
 
-        call.enqueue(object : Callback<LoginResponse> {
-            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+        call.enqueue(object : Callback<PostDTO> {
+            override fun onResponse(call: Call<PostDTO>, response: Response<PostDTO>) {
                 if (response.isSuccessful) {
-                    val loginResponse = response.body()
-                    val token = loginResponse?.token
-                    callback.onLoginSuccess(token)
+                    callback.onUploadSuccess()
                 } else {
                     val errorMessage = response.message()
-                    Log.d("login error", ""+response.code()+errorMessage)
-                    callback.onLoginError("Log in failed: $errorMessage")
+                    Log.d("upload post error", ""+response.code()+errorMessage)
+                    callback.onUploadError("Upload post failed: $errorMessage")
                 }
             }
 
-            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+            override fun onFailure(call: Call<PostDTO>, t: Throwable) {
                 val errorMessage = t.message ?: "Network error"
-                callback.onLoginError(errorMessage)
+                callback.onUploadError(errorMessage)
             }
         })
     }

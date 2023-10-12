@@ -15,8 +15,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.eatandtell.ui.Logo
+import com.example.eatandtell.ui.home.HomeActivity
 import com.example.eatandtell.ui.login.LoginActivity
 import com.example.eatandtell.ui.theme.EatAndTellTheme
+import com.example.eatandtell.ui.uploadpost.UploadActivity
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
@@ -42,8 +44,8 @@ class MainActivity : ComponentActivity() {
                             // 기다릴 시간(1초)
                             delay(1000)
 
-                            // 1초 후에 SignupActivity로 이동
-                            startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                            // 1초 후에 LoginActivity로 이동
+                            startActivity(Intent(this@MainActivity, UploadActivity::class.java))
                             finish()
                         }
                     }

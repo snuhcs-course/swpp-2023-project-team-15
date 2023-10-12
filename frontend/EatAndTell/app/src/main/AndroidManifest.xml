@@ -43,6 +43,12 @@
             android:theme="@style/Theme.EatAndTell">
         </activity>
 
+        <activity
+            android:name=".ui.uploadpost.UploadActivity"
+            android:label="UploadActivity"
+            android:theme="@style/Theme.EatAndTell">
+        </activity>
+
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

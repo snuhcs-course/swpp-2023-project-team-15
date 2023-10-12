@@ -1,17 +1,17 @@
 // MainActivity.kt
 package com.example.eatandtell.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,23 +21,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.example.eatandtell.R
-import com.example.eatandtell.ui.login.LoginActivity
-import com.example.eatandtell.ui.signup.RegisterViewModel
 import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.EatAndTellTheme
 import com.example.eatandtell.ui.theme.Gray
+import com.example.eatandtell.ui.theme.Inter
 import com.example.eatandtell.ui.theme.MainColor
 import com.example.eatandtell.ui.theme.White
-import kotlinx.coroutines.delay
+import com.example.eatandtell.ui.uploadpost.UploadScreen
 
 public fun showToast(context: Context, message: String) {
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -112,22 +112,63 @@ fun CustomTextField(
             unfocusedIndicatorColor = Color.Transparent,
 
             ),
-        placeholder = { Text(placeholder, style = MaterialTheme.typography.bodySmall
+        placeholder = { Text(placeholder, style = MaterialTheme.typography.bodyMedium
         ) },
-        supportingText = { Text(supportingText, style = MaterialTheme.typography.bodySmall
+        supportingText = { Text(supportingText, style = MaterialTheme.typography.bodyMedium
         ) },
-        textStyle = MaterialTheme.typography.bodySmall,
+        textStyle = MaterialTheme.typography.bodyMedium,
         maxLines = 1
     )
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WhiteTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    maxLines : Int = 1,
+    modifier : Modifier,
+    width : Dp? = null,
+    height : Dp? = null,
+) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        visualTransformation = VisualTransformation.None,
+        modifier = modifier,
+        colors = TextFieldDefaults.textFieldColors(
+            containerColor = White,
+            cursorColor = Black,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+        ),
+        placeholder = { Text(placeholder, style = TextStyle(
+            fontFamily = Inter,
+            fontSize = 14.sp,
+            fontWeight = FontWeight(400),
+            color = Gray,
+        ),
+        ) },
+        textStyle = TextStyle(
+            fontFamily = Inter,
+            fontSize = 14.sp,
+            fontWeight = FontWeight(400),
+            color = Black,
+        ),
+        maxLines = maxLines
+
+    )
+}
+
 
 @Composable
 fun GraySmallText(text: String) {
     Text(
         text = text,
         style = TextStyle(
-            fontFamily = FontFamily.Default,
-            fontSize = 10.sp,
+            fontFamily = Inter,
+            fontSize = 12.sp,
             fontWeight = FontWeight(400),
             color = Gray,
         ),
@@ -139,8 +180,8 @@ fun BlackSmallText(text: String, modifier: Modifier?) {
     Text(
         text = text,
         style = TextStyle(
-            fontFamily = FontFamily.Default,
-            fontSize = 10.sp,
+            fontFamily = Inter,
+            fontSize = 12.sp,
             fontWeight = FontWeight(500),
             color = Black,
         ),
@@ -158,55 +199,96 @@ fun MainButton(onClick: () -> Unit, text: String) {
             contentColor = White
         ),
         shape = RoundedCornerShape(size = 4.dp),
-        modifier = Modifier.width(320.dp).height(48.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp),
     ) {
-        Text(text, color = White)
+        Text(text, color = White,
+        )
     }
 }
+
+@Composable
+fun MediumWhiteButton(onClick: () -> Unit, text: String) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = White,
+            contentColor = MainColor
+        ),
+        shape = RoundedCornerShape(size = 10.dp),
+        modifier = Modifier
+            .width(120.dp)
+            .height(36.dp),
+        border = BorderStroke(1.dp, MainColor),
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        Text(text, color = MainColor,
+            style = TextStyle(
+                fontFamily = Inter,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Black,
+                textAlign = TextAlign.Center,
+            ), modifier = Modifier
+                .padding(0.dp)
+                .align(Alignment.CenterVertically) // Center the text vertically
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewMediumWhiteButton() {
+    EatAndTellTheme {
+        MediumWhiteButton(onClick = { /*TODO*/ }, text = "사진 추가하기")
+    }
+}
+
 
 
 // stars, ratings
 
 @Composable
-fun StarFull() {
+fun StarFull(size : Dp) {
     Icon(
         painter = painterResource(R.drawable.ic_star_filled),
         modifier = Modifier
-            .width(16.dp)
-            .height(16.dp),
+            .width(size)
+            .height(size),
         contentDescription = "star_full",
         tint = MainColor
     )
 }
 
 @Composable
-fun StarEmpty() {
+fun StarEmpty(size : Dp) {
     Icon(
         painter = painterResource(R.drawable.ic_star_empty),
         modifier = Modifier
-            .width(16.dp)
-            .height(16.dp),
+            .width(size)
+            .height(size),
         contentDescription = "star_empty",
         tint = MainColor
     )
 }
 
 @Composable
-fun StarHalf() {
+fun StarHalf(size : Dp) {
     Icon(
         painter = painterResource(R.drawable.ic_star_half),
         modifier = Modifier
-            .width(16.dp)
-            .height(16.dp),
+            .width(size)
+            .height(size),
         contentDescription = "star_half",
         tint = MainColor
     )
 }
 
 @Composable
-fun StarRating(rating: Float) {
-    val fullStars = rating.toInt()
-    val hasHalfStar = rating - fullStars >= 0.5
+fun StarRating(rating: String, size: Dp = 16.dp) {
+    val rate = rating.toFloat()
+    val fullStars = rate.toInt()
+    val hasHalfStar = rate - fullStars >= 0.5
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(0.dp), // 조절 가능한 간격
@@ -214,17 +296,17 @@ fun StarRating(rating: Float) {
     ) {
         // Full stars
         repeat(fullStars) {
-            StarFull()
+            StarFull(size)
         }
 
         // Half star
         if (hasHalfStar) {
-            StarHalf()
+            StarHalf(size)
         }
 
         // Empty stars
         repeat(5 - fullStars - if (hasHalfStar) 1 else 0) {
-            StarEmpty()
+            StarEmpty(size)
         }
     }
 }
@@ -262,7 +344,7 @@ fun ProfileText(username: String, userDescription: String) {
         Text(
             text = username,
             style = TextStyle(
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 lineHeight = 18.sp,
                 fontWeight = FontWeight(500),
                 color = Color(0xFF262626),
@@ -270,11 +352,10 @@ fun ProfileText(username: String, userDescription: String) {
         )
         Text(text = userDescription,
             style = TextStyle(
-                fontSize = 12.sp,
+                fontSize = 13.sp,
                 lineHeight = 18.sp,
-
                 fontWeight = FontWeight(500),
-                color =Color(0xFF848484)
+                color = Color(0xFF848484)
             )
 
         )
@@ -285,7 +366,8 @@ fun ProfileText(username: String, userDescription: String) {
 fun Profile(profileUrl: String, username: String, userDescription: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.padding(4.dp)
     ) {
         ProfileImage(profileUrl = profileUrl)
         ProfileText(username = username, userDescription = userDescription)
@@ -308,4 +390,39 @@ fun PostImage(imageUrl: String) {
             .aspectRatio(1f)
             .clip(RoundedCornerShape(8.dp))
     )
+}
+
+// Top Bar
+@Composable
+fun BackBar(name: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp)
+    ) {
+        IconButton(onClick = { /*TODO*/ }) {
+            Icon(
+                imageVector = Icons.Filled.KeyboardArrowLeft,
+                contentDescription = "Back Button"
+            )
+        }
+        Text(
+            text = name,
+            style = TextStyle(
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Black,
+            ),
+        )
+
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BackBarPreview() {
+     EatAndTellTheme {
+        BackBar(name = "리뷰 작성")
+    }
 }

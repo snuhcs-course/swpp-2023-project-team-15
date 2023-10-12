@@ -58,7 +58,7 @@ class HomeActivity : ComponentActivity() {
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = 20.dp, vertical = 20.dp),
                 color = MaterialTheme.colorScheme.background
             ) {
 
@@ -76,7 +76,7 @@ fun Post(
     username: String,
     userDescription: String,
     restaurantName: String,
-    rating: Float,
+    rating: String,
     imageUrls: List<String>,
     restaurantDescription: String,
     isLiked : Boolean,
@@ -102,7 +102,7 @@ fun Post(
                 fontWeight = FontWeight(700),
                 color = Black,
             ), modifier = Modifier
-                .width(236.dp)
+                .weight(1f)
                 .height(20.dp),
                 overflow = TextOverflow.Ellipsis
             )
@@ -113,7 +113,7 @@ fun Post(
                 horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.Start),
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier
-                    .width(120.dp)
+                    .width(80.dp)
                     .height(16.dp)
             ) {
                 StarRating(rating)
@@ -139,12 +139,12 @@ fun Post(
 
         // Restaurant Description
         Text(text = restaurantDescription, style = TextStyle(
-            fontSize = 12.sp,
+            fontSize = 14.sp,
             lineHeight = 18.sp,
             fontWeight = FontWeight(500),
             color = Color(0xFF262626),
         ), modifier = Modifier
-            .width(320.dp)
+            .fillMaxWidth()
             .height(54.dp),
             overflow = TextOverflow.Ellipsis)
 
@@ -157,7 +157,7 @@ fun Post(
             Text(
                 text = likes.toString(),
                 style = TextStyle(
-                    fontSize = 11.sp,
+                    fontSize = 14.sp,
                     lineHeight = 16.5.sp,
                     fontWeight = FontWeight(500),
                     color = MainColor,
@@ -165,9 +165,30 @@ fun Post(
                 modifier = Modifier
                     .width(16.dp)
             )
+            Spacer(modifier = Modifier.width(4.dp))
             if(isLiked) HeartFull() else HeartEmpty()
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PostPreview() {
+    Post(
+        profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
+        username = "Joshua-i",
+        userDescription = "고독한 미식가",
+        restaurantName = "포케앤 샐러드",
+        rating = "3.5",
+        imageUrls = listOf(
+            "https://api.nudge-community.com/attachments/339560",
+            "https://img.siksinhot.com/place/1650516612762055.jpg?w=560&h=448&c=Y",
+            "https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FdKS0uX%2FbtrScbvc9HH%2F5I2m53vgz0LWvszHQ9PQNk%2Fimg.jpg"
+        ),
+        restaurantDescription = "정직한 가격에 맛도 있고, 대만족합니다. 매장이 큰편은 아니지만 서빙하시는 분도 친절하시고 양도 배부르네요... 어쩌구저쩌구",
+        isLiked = false,
+        likes = 36,
+    )
 }
 
 @Composable
@@ -181,7 +202,7 @@ fun HomeScreen() {
                 username = "Joshua-i",
                 userDescription = "고독한 미식가",
                 restaurantName = "포케앤 샐러드",
-                rating = 3.5f,
+                rating = "3.5",
                 imageUrls = listOf(
                     "https://api.nudge-community.com/attachments/339560",
                     "https://img.siksinhot.com/place/1650516612762055.jpg?w=560&h=448&c=Y",
