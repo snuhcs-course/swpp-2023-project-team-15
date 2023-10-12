@@ -30,7 +30,7 @@ class ImageUploadView(APIView):
 
         # Get the validated image from the serializer
         image = serializer.validated_data['image']
-
+        
         # Upload to S3
         s3 = boto3.client('s3', 
                           aws_access_key_id=config('AWS_ACCESS_KEY_ID'),
