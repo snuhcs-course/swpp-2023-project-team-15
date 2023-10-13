@@ -4,12 +4,14 @@ package com.example.eatandtell.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -38,6 +40,7 @@ import com.example.eatandtell.ui.theme.Gray
 import com.example.eatandtell.ui.theme.MainColor
 import com.example.eatandtell.ui.theme.White
 import kotlinx.coroutines.delay
+
 
 public fun showToast(context: Context, message: String) {
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -231,7 +234,7 @@ fun StarRating(rating: Float) {
 
 //profile image
 @Composable
-fun ProfileImage(profileUrl: String) {
+fun ProfileImage(profileUrl: String, modifier: Modifier = Modifier) {
     Image(
         painter = rememberImagePainter(
             data = profileUrl,
@@ -252,8 +255,7 @@ fun ProfileImage(profileUrl: String) {
             .background(
                 color = White,
                 shape = RoundedCornerShape(size = 100.dp)
-            )
-    )
+            ))
 }
 
 @Composable
@@ -308,4 +310,60 @@ fun PostImage(imageUrl: String) {
             .aspectRatio(1f)
             .clip(RoundedCornerShape(8.dp))
     )
+}
+
+@Composable
+fun Home(onClick: () -> Unit) {
+    Icon(
+        painter = painterResource(R.drawable.ic_home),
+        modifier = Modifier
+            .padding(1.dp)
+            .width(24.dp)
+            .height(24.dp)
+            .clickable(onClick = onClick),
+
+        contentDescription = "home",
+        tint = Black
+    )
+}
+
+@Composable
+fun PlusCircle(onClick: () -> Unit) {
+    Icon(
+        painter = painterResource(R.drawable.ic_plus_circle),
+        modifier = Modifier
+            .padding(1.dp)
+            .width(24.dp)
+            .height(24.dp)
+            .clickable(onClick = onClick),
+    contentDescription = "plus_circle",
+        tint = Black
+    )
+}
+@Composable
+fun SearchRefraction(onClick: () -> Unit) {
+    Icon(
+        painter = painterResource(R.drawable.ic_search_refraction),
+        modifier = Modifier
+            .padding(1.dp)
+            .width(24.dp)
+            .height(24.dp)
+            .clickable(onClick = onClick),
+        contentDescription = "search_refraction",
+        tint = Black
+    )
+}
+
+@Composable
+fun ClickableProfileImage(profileUrl: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier
+            .width(24.dp)
+            .height(24.dp)
+            .clickable(onClick = onClick), // Making the Surface clickable
+    ){
+        ProfileImage(
+            profileUrl = profileUrl
+        )
+    }
 }
