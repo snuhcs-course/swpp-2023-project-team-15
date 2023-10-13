@@ -1,5 +1,6 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
+
 
 class Restaurant(models.Model):
     name = models.CharField(max_length=255)
@@ -10,8 +11,6 @@ class Restaurant(models.Model):
 class Post(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, db_column='restaurant_id', related_name='posts')
-    title = models.CharField(max_length=200)
-    menu = models.CharField(max_length=500)
     rating = models.DecimalField(max_digits=5, decimal_places=1)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
