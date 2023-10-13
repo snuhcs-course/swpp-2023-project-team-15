@@ -13,6 +13,7 @@ import androidx.activity.viewModels
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.eatandtell.ui.theme.White
 
 
 class StartActivity : ComponentActivity() {
@@ -23,7 +24,7 @@ class StartActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 20.dp),
-                    color = MaterialTheme.colorScheme.background,
+                    color = White,
                 ) {
                     val navController = rememberNavController()
                     NavHost(navController = navController, startDestination = "login") {

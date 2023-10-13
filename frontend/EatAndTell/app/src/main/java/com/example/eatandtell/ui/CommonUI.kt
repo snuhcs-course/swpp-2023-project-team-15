@@ -395,40 +395,7 @@ fun PostImage(imageUrl: String) {
     )
 }
 
-// Top Bar
-@Composable
-fun BackBar(name: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(60.dp)
-    ) {
-        IconButton(onClick = { /*TODO*/ }) {
-            Icon(
-                imageVector = Icons.Filled.KeyboardArrowLeft,
-                contentDescription = "Back Button"
-            )
-        }
-        Text(
-            text = name,
-            style = TextStyle(
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Black,
-            ),
-        )
 
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun BackBarPreview() {
-     EatAndTellTheme {
-        BackBar(name = "리뷰 작성")
-    }
-}
 
 @Composable
 fun Home(onClick: () -> Unit) {

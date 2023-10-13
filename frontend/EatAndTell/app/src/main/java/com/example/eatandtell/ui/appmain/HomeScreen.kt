@@ -160,7 +160,9 @@ fun PostPreview() {
 @Composable
 fun HomeScreen() {
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 20.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)
             .verticalScroll(rememberScrollState()),) {
         repeat(5) {
             Post(
@@ -179,6 +181,9 @@ fun HomeScreen() {
                 likes = 36,
             )
         }
+
+        // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
+        Spacer(modifier = Modifier.height(70.dp))
     }
 }
 

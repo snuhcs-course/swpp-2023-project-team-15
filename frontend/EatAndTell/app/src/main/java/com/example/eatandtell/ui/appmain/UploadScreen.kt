@@ -20,7 +20,6 @@ import androidx.navigation.NavController
 import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.UploadPostRequest
-import com.example.eatandtell.ui.BackBar
 import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.MediumWhiteButton
 import com.example.eatandtell.ui.PostImage
@@ -53,10 +52,10 @@ fun UploadScreen(navController: NavController, context: ComponentActivity, viewM
     // Main content of LoginActivity
     Column(
         modifier = Modifier
-            .fillMaxSize().padding(horizontal = 20.dp, vertical = 20.dp)
+            .fillMaxSize().padding(horizontal = 20.dp)
     ) {
 
-        BackBar(name = "리뷰 작성")
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Profile Row
 //        Spacer(modifier = Modifier.height(10.dp))
@@ -129,8 +128,7 @@ fun UploadScreen(navController: NavController, context: ComponentActivity, viewM
             description = reviewDescription.text,
             context = context,
             onClick = {
-                context.startActivity(Intent(context, AppMainActivity::class.java))
-                context.finish()
+                navController.navigate("home")
             }
         )
 

@@ -1,15 +1,22 @@
 
 package com.example.eatandtell.ui.appmain
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Scaffold
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.eatandtell.ui.start.StartViewModel
 
@@ -25,24 +32,48 @@ class AppMainActivity : ComponentActivity() {
                     .fillMaxSize(),
                 color = MaterialTheme.colorScheme.background
             ) {
-                HomeScreen()
-
                 val navController = rememberNavController()
 
-                Scaffold(
-                    bottomBar = {
-                        BottomNavBar(
-                            onHomeClick = { navController.navigate("home") },
-                            onSearchClick = { navController.navigate("search") },
-                            onPlusClick = { navController.navigate("upload") },
-                            onProfileClick = { navController.navigate("profile") },
-                            profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8"
-                        )
-                    }
-                ) { innerPadding ->
-                   BottomNav(navController = navController, modifier = Modifier.padding(innerPadding), this@AppMainActivity, appMainViewModel)
-                }
+                AppMain(appMainViewModel, navController, context = this@AppMainActivity)
             }
         }
     }
+}
+
+@Composable
+fun AppMain(
+    viewModel: AppMainViewModel,
+    navController: NavHostController,
+    context: ComponentActivity
+) {
+    // Get current back stack entry
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    // Get the name of the current screen
+    val currentScreenName = backStackEntry?.destination?.route ?: "home"
+
+    Scaffold(
+        topBar = {
+            BackBar(
+                currentScreenName = currentScreenName,
+                navigateUp = {
+                    Log.d("Navigation", "Calling navigateUp")
+                    navController.navigateUp()
+                }
+            )
+         },
+        bottomBar = {
+            if(currentScreenName != "upload")
+                BottomNavBar(
+                    onHomeClick = { navController.navigate("home") },
+                    onSearchClick = { navController.navigate("search") },
+                    onPlusClick = { navController.navigate("upload") },
+                    onProfileClick = { navController.navigate("profile") },
+                    profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8"
+                )
+        }
+    ) { innerPadding ->
+        BottomNav(navController = navController, modifier = Modifier.padding(innerPadding), context, viewModel)
+    }
+
+
 }
