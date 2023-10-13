@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from .models import Post, PostPhoto, Restaurant
@@ -14,10 +15,16 @@ class PostPhotoSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('post',)
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', 'id')
+        read_only_fields = ('username', 'id')
 
 class PostSerializer(serializers.ModelSerializer):
     restaurant = RestaurantSerializer()
     photos = PostPhotoSerializer(many=True, required=False)
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = Post
