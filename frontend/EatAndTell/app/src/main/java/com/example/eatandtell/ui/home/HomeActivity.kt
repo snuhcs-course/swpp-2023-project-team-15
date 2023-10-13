@@ -3,17 +3,12 @@ package com.example.eatandtell.ui.home
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.Scaffold
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TextField
@@ -37,10 +32,12 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberImagePainter
-import coil.transform.CircleCropTransformation
+import androidx.navigation.compose.rememberNavController
+//import com.example.eatandtell.ui.AppNavigation
+import com.example.eatandtell.ui.navigationBar.Navigation
 import com.example.eatandtell.ui.HeartEmpty
 import com.example.eatandtell.ui.HeartFull
+import com.example.eatandtell.ui.navigationBar.NavigationBar
 import com.example.eatandtell.ui.PostImage
 import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.StarRating
@@ -61,8 +58,22 @@ class HomeActivity : ComponentActivity() {
                     .padding(horizontal = 20.dp, vertical = 20.dp),
                 color = MaterialTheme.colorScheme.background
             ) {
-
                 HomeScreen()
+
+                val navController = rememberNavController()
+                Scaffold(
+                    bottomBar = {
+                        NavigationBar(
+                            onHomeClick = { navController.navigate("home") },
+                            onSearchClick = { navController.navigate("search") },
+                            onPlusClick = { navController.navigate("upload") },
+                            onProfileClick = { navController.navigate("profile") },
+                            profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8"
+                        )
+                    }
+                ) { innerPadding ->
+                   Navigation(navController = navController, Modifier.padding(innerPadding))
+                }
             }
         }
     }
@@ -121,7 +132,7 @@ fun Post(
             }
         }
 
-        Spacer(modifier = Modifier.height(7.dp))
+            Spacer(modifier = Modifier.height(7.dp))
 
         // Images Row
         Row(
@@ -216,16 +227,15 @@ fun HomeScreen() {
     }
 }
 
-
-@Preview
-@Composable
-fun HomeScreenPreview() {
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        HomeScreen()
+    @Preview
+    @Composable
+    fun HomeScreenPreview() {
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            HomeScreen()
+        }
     }
-}

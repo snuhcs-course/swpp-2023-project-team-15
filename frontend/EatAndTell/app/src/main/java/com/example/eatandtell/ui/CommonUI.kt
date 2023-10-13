@@ -3,11 +3,15 @@ package com.example.eatandtell.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -167,8 +172,8 @@ fun GraySmallText(text: String) {
     Text(
         text = text,
         style = TextStyle(
-            fontFamily = Inter,
-            fontSize = 12.sp,
+            fontFamily = FontFamily.Default,
+            fontSize = 10.sp,
             fontWeight = FontWeight(400),
             color = Gray,
         ),
@@ -180,8 +185,8 @@ fun BlackSmallText(text: String, modifier: Modifier?) {
     Text(
         text = text,
         style = TextStyle(
-            fontFamily = Inter,
-            fontSize = 12.sp,
+            fontFamily = FontFamily.Default,
+            fontSize = 10.sp,
             fontWeight = FontWeight(500),
             color = Black,
         ),
@@ -313,7 +318,7 @@ fun StarRating(rating: String, size: Dp = 16.dp) {
 
 //profile image
 @Composable
-fun ProfileImage(profileUrl: String) {
+fun ProfileImage(profileUrl: String, modifier: Modifier = Modifier) {
     Image(
         painter = rememberImagePainter(
             data = profileUrl,
@@ -334,8 +339,7 @@ fun ProfileImage(profileUrl: String) {
             .background(
                 color = White,
                 shape = RoundedCornerShape(size = 100.dp)
-            )
-    )
+            ))
 }
 
 @Composable
@@ -424,5 +428,61 @@ fun BackBar(name: String) {
 fun BackBarPreview() {
      EatAndTellTheme {
         BackBar(name = "리뷰 작성")
+    }
+}
+
+@Composable
+fun Home(onClick: () -> Unit) {
+    Icon(
+        painter = painterResource(R.drawable.ic_home),
+        modifier = Modifier
+            .padding(1.dp)
+            .width(24.dp)
+            .height(24.dp)
+            .clickable(onClick = onClick),
+
+        contentDescription = "home",
+        tint = Black
+    )
+}
+
+@Composable
+fun PlusCircle(onClick: () -> Unit) {
+    Icon(
+        painter = painterResource(R.drawable.ic_plus_circle),
+        modifier = Modifier
+            .padding(1.dp)
+            .width(24.dp)
+            .height(24.dp)
+            .clickable(onClick = onClick),
+    contentDescription = "plus_circle",
+        tint = Black
+    )
+}
+@Composable
+fun SearchRefraction(onClick: () -> Unit) {
+    Icon(
+        painter = painterResource(R.drawable.ic_search_refraction),
+        modifier = Modifier
+            .padding(1.dp)
+            .width(24.dp)
+            .height(24.dp)
+            .clickable(onClick = onClick),
+        contentDescription = "search_refraction",
+        tint = Black
+    )
+}
+
+@Composable
+fun ClickableProfileImage(profileUrl: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier
+            .width(24.dp)
+            .height(24.dp)
+            .clickable(onClick = onClick), // Making the Surface clickable
+    ){
+        ProfileImage(
+            profileUrl = profileUrl
+        )
     }
 }
