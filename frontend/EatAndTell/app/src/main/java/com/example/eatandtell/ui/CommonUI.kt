@@ -358,6 +358,8 @@ fun SearchRefraction(onClick: () -> Unit) {
 fun ClickableProfileImage(profileUrl: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier
+            .width(24.dp)
+            .height(24.dp)
             .clickable(onClick = onClick), // Making the Surface clickable
     ){
         ProfileImage(
