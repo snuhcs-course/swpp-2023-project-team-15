@@ -42,7 +42,6 @@ import com.example.eatandtell.ui.theme.Gray
 import com.example.eatandtell.ui.theme.Inter
 import com.example.eatandtell.ui.theme.MainColor
 import com.example.eatandtell.ui.theme.White
-import com.example.eatandtell.ui.uploadpost.UploadScreen
 
 public fun showToast(context: Context, message: String) {
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()

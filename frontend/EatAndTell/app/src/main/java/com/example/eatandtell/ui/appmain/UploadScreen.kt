@@ -1,30 +1,22 @@
-// RegisterActivity.kt
-package com.example.eatandtell.ui.uploadpost
+// SignUpScreen.kt
+package com.example.eatandtell.ui.appmain
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.example.eatandtell.ui.home.HomeActivity
 
-import androidx.activity.viewModels
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.UploadPostRequest
@@ -35,37 +27,10 @@ import com.example.eatandtell.ui.PostImage
 import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.StarRating
 import com.example.eatandtell.ui.WhiteTextField
-import com.example.eatandtell.ui.login.LoginScreen
 import com.example.eatandtell.ui.showToast
 
-class UploadActivity : ComponentActivity() {
-    private val uploadViewModel: UploadViewModel by viewModels()
-    @OptIn(ExperimentalMaterial3Api::class)
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            MaterialTheme {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 20.dp),
-                    color = MaterialTheme.colorScheme.background,
-                    ) {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        //TODO: Top Bar
-                        BackBar(name = "리뷰 작성")
-                        UploadScreen(this@UploadActivity, uploadViewModel)
-
-                    }
-//                        BackBar(name = "리뷰 작성")
-                    }
-            }
-        }
-    }
-}
-
 @Composable
-fun UploadScreen(context: UploadActivity, viewModel: UploadViewModel) {
+fun UploadScreen(navController: NavController, context: ComponentActivity, viewModel: AppMainViewModel) {
 
     var restaurantName by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -88,8 +53,10 @@ fun UploadScreen(context: UploadActivity, viewModel: UploadViewModel) {
     // Main content of LoginActivity
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxSize().padding(horizontal = 20.dp, vertical = 20.dp)
     ) {
+
+        BackBar(name = "리뷰 작성")
 
         // Profile Row
 //        Spacer(modifier = Modifier.height(10.dp))
@@ -162,7 +129,7 @@ fun UploadScreen(context: UploadActivity, viewModel: UploadViewModel) {
             description = reviewDescription.text,
             context = context,
             onClick = {
-                context.startActivity(Intent(context, HomeActivity::class.java))
+                context.startActivity(Intent(context, AppMainActivity::class.java))
                 context.finish()
             }
         )
@@ -179,7 +146,7 @@ fun UploadScreen(context: UploadActivity, viewModel: UploadViewModel) {
 //}
 
 @Composable
-fun UploadButton(viewModel: UploadViewModel,
+fun UploadButton(viewModel: AppMainViewModel,
                  restaurant : RestReqDTO,
                  photos: List<PhotoReqDTO>,
                  rating: String,
@@ -188,7 +155,7 @@ fun UploadButton(viewModel: UploadViewModel,
                  onClick: () -> Unit) {
     val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
     val onClickReal = {
-        viewModel.uploadPost(postData, object: UploadViewModel.UploadCallback{
+        viewModel.uploadPost(postData, object: AppMainViewModel.UploadCallback{
             override fun onUploadSuccess() {
                 onClick()
             }

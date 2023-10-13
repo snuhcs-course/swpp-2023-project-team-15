@@ -1,11 +1,10 @@
-package com.example.eatandtell.ui.navigationBar
+package com.example.eatandtell.ui.appmain
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,10 +19,10 @@ import com.example.eatandtell.ui.ClickableProfileImage
 import com.example.eatandtell.ui.Home
 import com.example.eatandtell.ui.PlusCircle
 import com.example.eatandtell.ui.SearchRefraction
-import com.example.eatandtell.ui.home.HomeScreen
 
+//TODO: 스크린이 전체가 다 안 참
 @Composable
-fun NavigationBar(
+fun BottomNavBar(
     onHomeClick: () -> Unit,
     onSearchClick: () -> Unit,
     onPlusClick: () -> Unit,
@@ -36,7 +35,7 @@ fun NavigationBar(
                 .fillMaxWidth()
                 .height(50.dp),
             horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             // Home
             Home(onClick = onHomeClick)
@@ -53,7 +52,7 @@ fun NavigationBar(
 
 
 @Composable
-fun Navigation(navController: NavHostController, modifier: Modifier) {
+fun BottomNav(navController: NavHostController, modifier: Modifier, context: ComponentActivity, viewModel: AppMainViewModel) {
     NavHost(
         navController = navController,
         startDestination = "home"
@@ -65,7 +64,7 @@ fun Navigation(navController: NavHostController, modifier: Modifier) {
             SearchScreen(navController)
         }
         composable(route = "upload") {
-            UploadScreen(navController)
+            UploadScreen(navController, context, viewModel)
 
         }
         composable(route = "profile") {
@@ -79,9 +78,7 @@ fun Navigation(navController: NavHostController, modifier: Modifier) {
 fun SearchScreen(navController: NavHostController) {
      Text(text = "Search Screen")
 }
-@Composable
-fun UploadScreen(navController: NavHostController) {      Text(text = "Upload Screen")
-}
+
 @Composable
 fun ProfileScreen(navController: NavHostController) {      Text(text = "Profile Screen")
 }
@@ -90,7 +87,7 @@ fun ProfileScreen(navController: NavHostController) {      Text(text = "Profile 
 @Composable
 fun PreviewNavigationBar() {
     Surface {
-        NavigationBar(
+        BottomNavBar(
             profileUrl = "https://avatars.githubusercontent.com/u/44080404?v=4",
             onHomeClick = { /*TODO: Home Clicked*/ },
             onSearchClick = { /*TODO: Search Clicked*/ },

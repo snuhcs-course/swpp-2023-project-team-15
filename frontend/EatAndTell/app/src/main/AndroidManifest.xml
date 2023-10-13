@@ -25,29 +25,19 @@
             </intent-filter>
         </activity>
 
+
         <activity
-            android:name=".ui.signup.RegisterActivity"
-            android:label="SignupActivity"
+            android:name=".ui.start.StartActivity"
+            android:label="StartActivity"
             android:theme="@style/Theme.EatAndTell">
         </activity>
 
         <activity
-            android:name=".ui.login.LoginActivity"
-            android:label="LoginActivity"
+            android:name=".ui.appmain.AppMainActivity"
+            android:label="AppMainActivity"
             android:theme="@style/Theme.EatAndTell">
         </activity>
 
-        <activity
-            android:name=".ui.home.HomeActivity"
-            android:label="HomeActivity"
-            android:theme="@style/Theme.EatAndTell">
-        </activity>
-
-        <activity
-            android:name=".ui.uploadpost.UploadActivity"
-            android:label="UploadActivity"
-            android:theme="@style/Theme.EatAndTell">
-        </activity>
 
     </application>
 

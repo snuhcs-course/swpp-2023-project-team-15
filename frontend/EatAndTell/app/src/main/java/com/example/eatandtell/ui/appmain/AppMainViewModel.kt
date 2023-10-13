@@ -1,17 +1,15 @@
-package com.example.eatandtell.ui.uploadpost
+package com.example.eatandtell.ui.appmain
 import RetrofitClient
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.eatandtell.di.ApiService
-import com.example.eatandtell.dto.LoginRequest
-import com.example.eatandtell.dto.LoginResponse
 import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.UploadPostRequest
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class UploadViewModel : ViewModel() {
+class AppMainViewModel : ViewModel() {
     //interface for callback
     interface UploadCallback {
         fun onUploadSuccess()
