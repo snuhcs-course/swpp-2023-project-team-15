@@ -3,7 +3,7 @@ from rest_framework import permissions, viewsets
 from rest_framework.response import Response
 
 from .models import Post
-from .serializers import PostListSerializer, PostSerializer
+from .serializers import PostSerializer, data_list
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -16,7 +16,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_description="List all posts",
-        responses={200: PostListSerializer}
+        responses={200: data_list(PostSerializer)}
     )
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -27,4 +27,4 @@ class PostViewSet(viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        return Response(PostListSerializer(serializer.data))
+        return Response({"data": serializer.data})

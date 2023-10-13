@@ -43,7 +43,9 @@ class PostSerializer(serializers.ModelSerializer):
             PostPhoto.objects.create(post=post, **photo_data)
 
         return post
-    
 
-class PostListSerializer(serializers.Serializer):
-    data = PostSerializer(many=True)
+def data_list(serializer):
+    class DataListSerializer(serializers.Serializer):
+        data = serializer(many=True)
+    
+    return DataListSerializer
