@@ -37,3 +37,6 @@ class PostSerializer(serializers.ModelSerializer):
 
         return post
     
+
+class PostListSerializer(serializers.Serializer):
+    data = PostSerializer(many=True)
