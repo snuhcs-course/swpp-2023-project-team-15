@@ -54,7 +54,7 @@ Normal deployment can be done as following:
 - `cd` into `~/swpp-2023-project-team-15`
 - `git pull`
 - `git checkout <branch-name>` where branch name is the branch to be deployed
-- In case of new dependency added, `poetry install`
+- In case of new dependency added, `cd backend && poetry install`
 - `sudo systemctl restart gunicorn`
 
 
