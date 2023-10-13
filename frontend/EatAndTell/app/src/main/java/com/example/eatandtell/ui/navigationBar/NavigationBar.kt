@@ -1,6 +1,5 @@
 package com.example.eatandtell.ui.navigationBar
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -40,13 +38,10 @@ fun NavigationBar(
         ) {
             // Home
             Home(onClick = onHomeClick)
-
             // Search
             SearchRefraction(onClick = onSearchClick)
-
             // Plus (Upload)
             PlusCircle(onClick = onPlusClick)
-
             // Profile
             ClickableProfileImage(profileUrl, onClick = onProfileClick)
 
@@ -56,7 +51,7 @@ fun NavigationBar(
 
 
 @Composable
-fun Navigation(navController: NavHostController, padding: Modifier) {
+fun Navigation(navController: NavHostController, modifier: Modifier) {
     NavHost(
         navController = navController,
         startDestination = "home"
@@ -77,7 +72,7 @@ fun Navigation(navController: NavHostController, padding: Modifier) {
     }
 }
 
-//Delete on Merge
+//Delete when done Implementing Each Screens
 @Composable
 fun SearchScreen(navController: NavHostController) {
      Text(text = "Search Screen")
@@ -89,20 +84,19 @@ fun UploadScreen(navController: NavHostController) {      Text(text = "Upload Sc
 fun ProfileScreen(navController: NavHostController) {      Text(text = "Profile Screen")
 }
 
-//@Preview
-//@Composable
-//fun PreviewNavigationBar() {
-//    Surface {
-//        NavigationBar(
-//            profileUrl = "https://avatars.githubusercontent.com/u/44080404?v=4",
-//            onHomeClick = { /*TODO: Home Clicked*/ },
-//            onSearchClick = { /*TODO: Search Clicked*/ },
-//            onPlusClick = { /*TODO: Plus Clicked*/ },
-//            onProfileClick = { /*TODO: Profile Clicked*/ },
-//            navController = NavController()
-//        )
-//    }
-//}
+@Preview
+@Composable
+fun PreviewNavigationBar() {
+    Surface {
+        NavigationBar(
+            profileUrl = "https://avatars.githubusercontent.com/u/44080404?v=4",
+            onHomeClick = { /*TODO: Home Clicked*/ },
+            onSearchClick = { /*TODO: Search Clicked*/ },
+            onPlusClick = { /*TODO: Plus Clicked*/ },
+            onProfileClick = { /*TODO: Profile Clicked*/ },
+        )
+    }
+}
 
 
 

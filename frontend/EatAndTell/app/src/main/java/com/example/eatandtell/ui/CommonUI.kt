@@ -326,18 +326,7 @@ fun Home(onClick: () -> Unit) {
         tint = Black
     )
 }
-@Composable
-fun Menu(onClick: () -> Unit) {
-    Icon(
-        painter = painterResource(R.drawable.ic_menu),
-        modifier = Modifier
-            .width(24.dp)
-            .height(24.dp)
-            .clickable(onClick = onClick),
-        contentDescription = "menu",
-        tint = Black
-    )
-}
+
 @Composable
 fun PlusCircle(onClick: () -> Unit) {
     Icon(
@@ -365,46 +354,14 @@ fun SearchRefraction(onClick: () -> Unit) {
     )
 }
 
-//@Composable
-//fun ClickableProfileImage(profileUrl: String, onClick: () -> Unit) {
-//    ProfileImage(
-//        profileUrl = profileUrl,
-//        modifier = Modifier.clickable {
-//            onClick()
-//        }
-//    )
-//}
-
 @Composable
-fun ClickableProfileImage(
-    profileUrl: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun ClickableProfileImage(profileUrl: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier
             .clickable(onClick = onClick), // Making the Surface clickable
-    ) {
-        Image(
-            painter = rememberImagePainter(
-                data = profileUrl,
-                builder = {
-                    transformations(CircleCropTransformation())
-                }
-            ),
-            contentDescription = null,
-            modifier = Modifier
-                .border(
-                    width = 2.dp,
-                    color = Color(0xFFF23F18),
-                    shape = RoundedCornerShape(size = 100.dp)
-                )
-                .padding(2.dp)
-                .width(45.dp)
-                .height(45.dp)
-                .background(
-                    color = White,
-                    shape = RoundedCornerShape(size = 100.dp)
-                ))
+    ){
+        ProfileImage(
+            profileUrl = profileUrl
+        )
     }
 }

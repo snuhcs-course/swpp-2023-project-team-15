@@ -48,20 +48,16 @@ class HomeActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 Scaffold(
                     bottomBar = {
-                        // Your NavigationBar component is defined here
                         NavigationBar(
-//                            navController = navController,
                             onHomeClick = { navController.navigate("home") },
                             onSearchClick = { navController.navigate("search") },
                             onPlusClick = { navController.navigate("upload") },
                             onProfileClick = { navController.navigate("profile") },
                             profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8"
                         )
-                    } // Here's your bottom bar
+                    }
                 ) { innerPadding ->
-                    // Provide the padding to your NavHost, this allows your content to be displayed above the BottomBar
                    Navigation(navController = navController, Modifier.padding(innerPadding))
-//                    AppNavigation(navController,Modifier.padding(innerPadding))
                 }
             }
         }
