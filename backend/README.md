@@ -47,48 +47,33 @@ DB_PASSWORD=xxxx
 - Check admin account from https://www.notion.so/Environment-Variable-22dcf6d95d294957a6e9b518005cc4ca?pvs=4
 - Login as admin in `/admin`
 
-# Deployment
+# EC2 Deployment
 
-Normal deployment can be done as following:
-- `ssh` into EC2. pem key is at https://www.notion.so/Environment-Variable-22dcf6d95d294957a6e9b518005cc4ca?pvs=4
-- `cd` into `~/swpp-2023-project-team-15`
-- `git pull`
-- `git checkout <branch-name>` where branch name is the branch to be deployed
-- In case of new dependency added, `poetry install`
-- `sudo systemctl restart gunicorn`
+Deployment can be done as following:
+- First, check you can `ssh` into EC2. pem key is at https://www.notion.so/Environment-Variable-22dcf6d95d294957a6e9b518005cc4ca?pvs=4
+- Push your code to any branch on origin.
+- Run `./deploy.sh`. Then, the current branch on local is deployed on server. You might need to change the KEY variable in the script.
 
 
-## Gunicorn
-Gunicorn service setting is at `/etc/systemd/system/gunicorn.service`. In case this is changed:
-- `sudo systemctl daemon-reload`
-- `sudo systemctl restart gunicorn`
+## Caddy
 
-## Nginx
+For auto-https, we use Caddy instead of Nginx as reverse proxy. For installing Caddy on Amazon Linux 2, see https://stackoverflow.com/a/74436450
 
-Nginx configuration file is at `/etc/nginx/conf.d/app.conf`. This is currently configured as following:
-
-```conf
-server {
-    listen 80;
-    server_name ec2-13-125-91-166.ap-northeast-2.compute.amazonaws.com;
-
-    location /static/ {
-        alias /home/ec2-user/swpp-2023-project-team-15/backend/staticfiles/;
-        expires 30d;
-        add_header Cache-Control "public, max-age=2592000";
+Caddy service setting is at `/etc/caddy/Caddyfile`. The file is currently configured as following:
+```
+http://ec2-13-125-91-166.ap-northeast-2.compute.amazonaws.com, swpp.dlwocks31.me {
+    handle_path /static/* {
+        root * /home/ec2-user/swpp-2023-project-team-15/backend/staticfiles/
+        file_server
     }
 
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    handle_path /* {
+        reverse_proxy :8000
     }
 }
-
 ```
 
-In case this is changed, please run: `sudo systemctl restart nginx`
+In case this is changed, please run: `sudo systemctl daemon-reload && sudo systemctl restart caddy`
 
 ## Gunicorn
 
