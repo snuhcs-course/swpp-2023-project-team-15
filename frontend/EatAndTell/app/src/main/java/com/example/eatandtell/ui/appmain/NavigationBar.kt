@@ -3,11 +3,18 @@ package com.example.eatandtell.ui.appmain
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -66,19 +73,19 @@ fun BottomNavBar(
 fun BottomNav(navController: NavHostController, modifier: Modifier, context: ComponentActivity, viewModel: AppMainViewModel) {
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = "Home"
     ) {
-        composable(route = "home") {
+        composable(route = "Home") {
             HomeScreen()
         }
-        composable(route = "search") {
+        composable(route = "Search") {
             SearchScreen(navController)
         }
-        composable(route = "upload") {
+        composable(route = "Upload") {
             UploadScreen(navController, context, viewModel)
 
         }
-        composable(route = "profile") {
+        composable(route = "Profile") {
             ProfileScreen(navController)
         }
     }
@@ -96,6 +103,7 @@ fun navigateToDestination(navController: NavHostController, destination: String)
         restoreState = true
     }
 }
+
 
 //Delete when done Implementing Each Screens
 @Composable
@@ -123,40 +131,38 @@ fun PreviewNavigationBar() {
 
 
 // Top Bar
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BackBar(currentScreenName: String, navigateUp: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp)
-    ) {
-            IconButton(onClick = {
-                Log.d("BackBar", "Back Button Clicked")
-                navigateUp()
-            }) {
-                Icon(
-                    imageVector = Icons.Filled.KeyboardArrowLeft,
-                    contentDescription = "Back Button"
-                )
-            }
-        Text(
+fun TopBar(currentScreenName: String, navigateToHome: () -> Unit) {
+    CenterAlignedTopAppBar(
+        title = { Text(
             text = currentScreenName,
-            style = TextStyle(
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Black,
-            ),
-        )
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Black,
+                    ),
+        ) },
+        navigationIcon = { if (currentScreenName != "Home")
+            {
+                IconButton(onClick = { navigateToHome() }) {
+                    Icon(
+                        imageVector = Icons.Filled.KeyboardArrowLeft,
+                        contentDescription = "go back to home",
+                        tint = Black
+                    )
+                }
+            }
+        }
+    )
 
-    }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun BackBarPreview() {
+fun TopBarPreview() {
     EatAndTellTheme {
-        BackBar(currentScreenName = "리뷰 작성", navigateUp = {})
+        TopBar(currentScreenName = "리뷰 작성", navigateToHome = {})
     }
 }
 

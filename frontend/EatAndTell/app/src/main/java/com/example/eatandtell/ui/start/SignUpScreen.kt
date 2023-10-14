@@ -47,7 +47,7 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)
     ) {
         Logo()
         Spacer(modifier = Modifier.height(17.dp))

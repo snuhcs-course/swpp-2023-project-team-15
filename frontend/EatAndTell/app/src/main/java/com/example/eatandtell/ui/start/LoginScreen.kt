@@ -57,7 +57,7 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)
     ) {
         Logo()
         Spacer(modifier = Modifier.height(18.dp))

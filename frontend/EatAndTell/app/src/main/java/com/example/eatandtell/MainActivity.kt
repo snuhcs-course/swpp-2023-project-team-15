@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
                             // 기다릴 시간(1초)
                             delay(1000)
 
-                            // 1초 후에 LoginActivity로 이동
+                            // 1초 후에 login으로 이동
                             startActivity(Intent(this@MainActivity, StartActivity::class.java))
                             finish()
                         }

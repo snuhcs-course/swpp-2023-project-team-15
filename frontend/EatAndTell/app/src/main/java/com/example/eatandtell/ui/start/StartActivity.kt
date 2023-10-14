@@ -23,7 +23,7 @@ class StartActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 20.dp),
+                    modifier = Modifier.fillMaxSize(),
                     color = White,
                 ) {
                     val navController = rememberNavController()

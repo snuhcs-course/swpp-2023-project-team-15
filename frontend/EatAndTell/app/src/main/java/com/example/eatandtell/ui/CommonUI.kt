@@ -108,17 +108,14 @@ fun CustomTextField(
                 shape = RoundedCornerShape(size = 4.dp)
             )
             .width(320.dp)
-            .height(48.dp),
+            .height(IntrinsicSize.Min),
         colors = TextFieldDefaults.textFieldColors(
             containerColor = Color(0xFFEEEEEE),
             cursorColor = Color.Black,
             focusedIndicatorColor = Color(0xFFA0A0A0),
             unfocusedIndicatorColor = Color.Transparent,
-
             ),
         placeholder = { Text(placeholder, style = MaterialTheme.typography.bodyMedium
-        ) },
-        supportingText = { Text(supportingText, style = MaterialTheme.typography.bodyMedium
         ) },
         textStyle = MaterialTheme.typography.bodyMedium,
         maxLines = 1
@@ -407,7 +404,7 @@ fun Home(onClick: () -> Unit) {
             .height(24.dp)
             .clickable(onClick = onClick),
 
-        contentDescription = "home",
+        contentDescription = "Home",
         tint = Black
     )
 }

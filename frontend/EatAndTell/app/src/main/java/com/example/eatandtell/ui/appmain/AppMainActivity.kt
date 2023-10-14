@@ -49,25 +49,24 @@ fun AppMain(
     // Get current back stack entry
     val backStackEntry by navController.currentBackStackEntryAsState()
     // Get the name of the current screen
-    val currentScreenName = backStackEntry?.destination?.route ?: "home"
+    val currentScreenName = backStackEntry?.destination?.route ?: "Home"
 
     Scaffold(
         topBar = {
-            BackBar(
+            TopBar(
                 currentScreenName = currentScreenName,
-                navigateUp = {
-                    Log.d("Navigation", "Calling navigateUp")
-                    navController.navigateUp()
+                navigateToHome = {
+                    navController.popBackStack()
                 }
             )
          },
         bottomBar = {
-            if(currentScreenName != "upload")
+            if(currentScreenName != "Upload")
                 BottomNavBar(
-                    onHomeClick = { navigateToDestination(navController, "home")},
-                    onSearchClick = { navigateToDestination(navController, "search") },
-                    onPlusClick = { navigateToDestination(navController, "upload") },
-                    onProfileClick = { navigateToDestination(navController, "profile")},
+                    onHomeClick = { navigateToDestination(navController, "Home")},
+                    onSearchClick = { navigateToDestination(navController, "Search") },
+                    onPlusClick = { navigateToDestination(navController, "Upload") },
+                    onProfileClick = { navigateToDestination(navController, "Profile")},
                     profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8"
                 )
         }

@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.UploadPostRequest
@@ -29,7 +30,7 @@ import com.example.eatandtell.ui.WhiteTextField
 import com.example.eatandtell.ui.showToast
 
 @Composable
-fun UploadScreen(navController: NavController, context: ComponentActivity, viewModel: AppMainViewModel) {
+fun UploadScreen(navController: NavHostController, context: ComponentActivity, viewModel: AppMainViewModel) {
 
     var restaurantName by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -49,7 +50,7 @@ fun UploadScreen(navController: NavController, context: ComponentActivity, viewM
     val username = "Joshua-i"
     val userDescription = "고독한 미식가"
 
-    // Main content of LoginActivity
+    // Main content
     Column(
         modifier = Modifier
             .fillMaxSize().padding(horizontal = 20.dp)
@@ -128,7 +129,7 @@ fun UploadScreen(navController: NavController, context: ComponentActivity, viewM
             description = reviewDescription.text,
             context = context,
             onClick = {
-                navController.navigate("home")
+                navigateToDestination(navController, "Home")
             }
         )
 
