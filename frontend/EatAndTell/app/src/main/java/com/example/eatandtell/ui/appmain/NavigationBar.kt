@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.eatandtell.ui.ClickableProfileImage
@@ -80,6 +81,19 @@ fun BottomNav(navController: NavHostController, modifier: Modifier, context: Com
         composable(route = "profile") {
             ProfileScreen(navController)
         }
+    }
+}
+
+
+fun navigateToDestination(navController: NavHostController, destination: String) {
+    navController.navigate(destination) {
+        popUpTo(navController.graph.startDestinationId) {
+            saveState = true // Preserve state
+        }
+        // Avoid multiple copies of the same destination when re-selecting the same item
+        launchSingleTop = true
+        // Restore state when re-selecting a previously selected item
+        restoreState = true
     }
 }
 

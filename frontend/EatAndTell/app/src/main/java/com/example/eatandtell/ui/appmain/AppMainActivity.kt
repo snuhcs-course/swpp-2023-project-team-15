@@ -64,10 +64,10 @@ fun AppMain(
         bottomBar = {
             if(currentScreenName != "upload")
                 BottomNavBar(
-                    onHomeClick = { navController.navigate("home") },
-                    onSearchClick = { navController.navigate("search") },
-                    onPlusClick = { navController.navigate("upload") },
-                    onProfileClick = { navController.navigate("profile") },
+                    onHomeClick = { navigateToDestination(navController, "home")},
+                    onSearchClick = { navigateToDestination(navController, "search") },
+                    onPlusClick = { navigateToDestination(navController, "upload") },
+                    onProfileClick = { navigateToDestination(navController, "profile")},
                     profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8"
                 )
         }
