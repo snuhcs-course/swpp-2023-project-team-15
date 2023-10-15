@@ -245,7 +245,77 @@ fun PreviewMediumWhiteButton() {
     }
 }
 
+@Composable
+fun MediumRedButton(onClick: () -> Unit, text: String) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MainColor,
+            contentColor = White
+        ),
+        shape = RoundedCornerShape(size = 10.dp),
+        modifier = Modifier
+            .width(120.dp)
+            .height(36.dp),
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        Text(text, color = White,
+            style = TextStyle(
+                fontFamily = Inter,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Black,
+                textAlign = TextAlign.Center,
+            ), modifier = Modifier
+                .padding(0.dp)
+                .align(Alignment.CenterVertically) // Center the text vertically
+        )
+    }
+}
+@Preview
+@Composable
+fun PreviewMediumRedButton() {
+    EatAndTellTheme {
+        MediumRedButton(onClick = { /*TODO*/ }, text = "팔로우하기")
+    }
+}
 
+
+@Composable
+fun Tag(text: String) {
+    Box(
+        modifier = Modifier
+            .background(color = White, shape = RoundedCornerShape(size = 18.dp))
+            .border(2.dp, MainColor, RoundedCornerShape(size = 18.dp))
+            .padding(horizontal = 12.dp, vertical = 2.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = Black,
+            style = TextStyle(
+//                fontFamily = Inter,
+//                fontSize = 15.sp,
+//                lineHeight = 20.sp,
+//                letterSpacing = 0.15.sp,
+//                fontWeight = FontWeight.Black,
+//                textAlign = TextAlign.Center,
+                fontFamily = Inter,
+                fontSize = 16.sp,
+                lineHeight = 18.sp,
+                fontWeight = FontWeight(500),
+                color = Color.Black,
+            )
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewTag() {
+    EatAndTellTheme {
+        Tag(text = "#육식주의자")
+    }
+}
 
 // stars, ratings
 
