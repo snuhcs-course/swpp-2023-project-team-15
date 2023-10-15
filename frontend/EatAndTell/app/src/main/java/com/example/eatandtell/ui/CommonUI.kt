@@ -293,12 +293,6 @@ fun Tag(text: String) {
             text = text,
             color = Black,
             style = TextStyle(
-//                fontFamily = Inter,
-//                fontSize = 15.sp,
-//                lineHeight = 20.sp,
-//                letterSpacing = 0.15.sp,
-//                fontWeight = FontWeight.Black,
-//                textAlign = TextAlign.Center,
                 fontFamily = Inter,
                 fontSize = 16.sp,
                 lineHeight = 18.sp,

@@ -46,8 +46,9 @@ import com.google.accompanist.flowlayout.FlowRow
 
 @Composable
 fun ProfileRow(profileUrl: String, username: String, userDescription: String, followings: Int,
-               followers: Int, onClick: () -> Unit,tags: List<String>) {
+               followers: Int, onClick: () -> Unit,tags: List<String>, buttonText: String) {
     Column {
+        //Profile and follow button
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier
@@ -56,10 +57,11 @@ fun ProfileRow(profileUrl: String, username: String, userDescription: String, fo
             verticalAlignment = Alignment.CenterVertically
         ) {
             Profile(profileUrl, username, userDescription)
-            MediumRedButton(onClick = onClick, text = "팔로우하기")
+            MediumRedButton(onClick = onClick, text = buttonText)
         }
         Spacer(modifier = Modifier.height(11.dp))
 
+        //Followings and followers
         Row(
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier
@@ -86,36 +88,21 @@ fun ProfileRow(profileUrl: String, username: String, userDescription: String, fo
         }
         Spacer(modifier = Modifier.height(11.dp))
 
+        //Tags
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth(),
-            mainAxisSpacing = 8.dp,  // adjust as needed
-            crossAxisSpacing = 8.dp  // adjust as needed
+            mainAxisSpacing = 8.dp,
+            crossAxisSpacing = 8.dp
         ) {
             tags.forEach { tagName ->
                 Tag(tagName)
             }
         }
         Spacer(modifier = Modifier.height(15.dp))
-
     }
 }
 
-@Preview
-@Composable
-fun ProfileRowPreview() {
-    Surface{
-        ProfileRow(
-            profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
-            username = "joshua-i",
-            userDescription = "고독한 미식가",
-            followings = 10,
-            followers = 20,
-            onClick = {},
-            tags = listOf("#육식주의자", "#미식가", "#리뷰왕","#감성","#한식")
-        )
-    }
-}
 
 @Composable
 fun ProfileScreen() {
@@ -124,14 +111,16 @@ fun ProfileScreen() {
             .fillMaxSize()
             .padding(horizontal = 20.dp)
             .verticalScroll(rememberScrollState()),) {
+        val isCurrentUser = true // Assuming "joshua-i" is the profile's user
         ProfileRow(
             profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
             username = "joshua-i",
-            userDescription = "고독한 미식가",
+            userDescription = if (isCurrentUser) "본인 프로필입니다~" else "고독한 미식가",
             followings = 10,
             followers = 20,
             onClick = {},
-            tags = listOf("#육식주의자", "#미식가", "#리뷰왕","#감성","#한식")
+            tags = listOf("#육식주의자", "#미식가", "#리뷰왕","#감성","#한식"),
+            buttonText = if (isCurrentUser) "프로필 편집" else "팔로우하기"  // New buttonText parameter
         )
         repeat(5) {
             Post(
@@ -146,19 +135,31 @@ fun ProfileScreen() {
                 isLiked = false,
                 likes = 36,
             )
-//            Spacer(modifier = Modifier.height(15.dp)) // space between posts
-            Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(vertical = 16.dp))
+            Spacer(modifier = Modifier.height(15.dp)) // space between posts
 
         }
-
         // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
         Spacer(modifier = Modifier.height(70.dp))
     }
 }
 
 
-
-
+@Preview
+@Composable
+fun ProfileRowPreview() {
+    Surface{
+        ProfileRow(
+            profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
+            username = "joshua-i",
+            userDescription = "고독한 미식가",
+            followings = 10,
+            followers = 20,
+            onClick = {},
+            tags = listOf("#육식주의자", "#미식가", "#리뷰왕","#감성","#한식"),
+            buttonText = "팔로우하기"  // New buttonText parameter
+        )
+    }
+}
 
 
 @Preview
