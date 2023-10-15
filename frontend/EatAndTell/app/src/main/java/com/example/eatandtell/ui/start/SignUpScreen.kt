@@ -1,77 +1,29 @@
-// RegisterActivity.kt
-package com.example.eatandtell.ui.signup
+// SignUpScreen.kt
+package com.example.eatandtell.ui.start
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.eatandtell.R
+import androidx.navigation.NavController
 import com.example.eatandtell.ui.BlackSmallText
 import com.example.eatandtell.ui.CustomTextField
 import com.example.eatandtell.ui.GraySmallText
 import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.MainButton
-import com.example.eatandtell.ui.login.LoginActivity
-import com.example.eatandtell.ui.login.LoginScreen
+import com.example.eatandtell.ui.appmain.AppMainActivity
 import com.example.eatandtell.ui.showToast
-import com.example.eatandtell.ui.theme.Gray
-
-class RegisterActivity : ComponentActivity() {
-    private val registerViewModel: RegisterViewModel by viewModels()
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background
-            ) {
-
-                SignupScreen(this@RegisterActivity, registerViewModel)
-
-            }
-        }
-
-    }
-}
 
 @Composable
-fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
-    IconButton(onClick = onClick) {
-        val visibilityIcon = if (passwordHidden) {
-            painterResource(R.drawable.ic_visibility_off)
-        } else {
-            painterResource(R.drawable.ic_visibility)
-        }
-
-        Icon(painter = visibilityIcon, contentDescription = "visibility")
-    }
-}
-
-@Composable
-fun SignupScreen(context: ComponentActivity, viewModel: RegisterViewModel) {
+fun SignupScreen(navController: NavController, context: ComponentActivity, viewModel: StartViewModel) {
 
     var email by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -94,7 +46,8 @@ fun SignupScreen(context: ComponentActivity, viewModel: RegisterViewModel) {
     // Main content of SignupActivity
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)
     ) {
         Logo()
         Spacer(modifier = Modifier.height(17.dp))
@@ -109,7 +62,7 @@ fun SignupScreen(context: ComponentActivity, viewModel: RegisterViewModel) {
         CustomTextField(
             value = username.text,
             onValueChange = { username = TextFieldValue(it) },
-            placeholder = "아이디를 입력하세요 (4자 이상, 20자 이하)",
+            placeholder = "아이디를 입력하세요 (4~20자)",
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -125,7 +78,7 @@ fun SignupScreen(context: ComponentActivity, viewModel: RegisterViewModel) {
                     passwordHidden = !passwordHidden
                 }
             },
-            placeholder = "비밀번호를 입력하세요 (4자 이상, 20자 이하)",
+            placeholder = "비밀번호를 입력하세요 (4~20자)",
         )
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -146,7 +99,7 @@ fun SignupScreen(context: ComponentActivity, viewModel: RegisterViewModel) {
 
         SignupButton(
             onClick =  {
-                context.startActivity(Intent(context, LoginActivity::class.java))
+                context.startActivity(Intent(context, AppMainActivity::class.java))
                 context.finish()
             },
             email = email.text,
@@ -171,7 +124,7 @@ fun SignupScreen(context: ComponentActivity, viewModel: RegisterViewModel) {
             BlackSmallText(
                 text = "로그인",
                 modifier = Modifier.clickable {
-                    context.finish()
+                    navController.navigate("login")
                 }
             )
         }
@@ -182,7 +135,7 @@ fun SignupScreen(context: ComponentActivity, viewModel: RegisterViewModel) {
 
 @Composable
 fun SignupButton (
-    viewModel: RegisterViewModel,
+    viewModel: StartViewModel,
     onClick: () -> Unit,
     email: String,
     username: String,
@@ -207,7 +160,8 @@ fun SignupButton (
             confirmPassword.isBlank() -> showToast(context, "Please confirm your password")
             password != confirmPassword -> showToast(context, "Passwords do not match")
             else -> {
-                viewModel.registerUser(username, password, email, object: RegisterViewModel.RegisterCallback{
+                viewModel.registerUser(username, password, email, object:
+                    StartViewModel.RegisterCallback {
                     override fun onRegisterSuccess(token: String?) {
                         showToast(context, "회원가입에 성공하였습니다")
                         onClick()

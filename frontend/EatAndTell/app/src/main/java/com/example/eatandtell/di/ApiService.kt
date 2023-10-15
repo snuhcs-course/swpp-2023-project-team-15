@@ -17,4 +17,7 @@ interface ApiService {
     @POST("users/register/") // The registration endpoint
     fun registerUser(@Body registrationData: RegisterRequest): Call<RegisterResponse>
 
+    @POST("posts/") // The registration endpoint
+    fun uploadPost(@Body postData: UploadPostRequest): Call<PostDTO>
+
 }
