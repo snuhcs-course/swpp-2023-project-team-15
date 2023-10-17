@@ -27,7 +27,7 @@ interface ApiService {
                    @Body postData: UploadPostRequest): PostDTO
     @Multipart
     @POST("images/upload/") // The images endpoint
-    fun getImageURL(@Header("Authorization") authorization: String,
+    suspend fun getImageURL(@Header("Authorization") authorization: String,
                     @Part images: MultipartBody.Part?): ImageURLResponse
 
 }

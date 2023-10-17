@@ -54,15 +54,18 @@ class AppMainViewModel() : ViewModel() {
 
     fun getImageURL(fileToUpload: MultipartBody.Part?, context: Context, onSuccess: (String) -> Unit) {
         val authorization = "Token $token"
-        //does not want this function to be in coroutine; block the main thread
-        try {
-            val response = apiService.getImageURL(authorization, fileToUpload)
-            showToast(context, "Get image url success")
-            onSuccess(response.image_url)
-        } catch (e: Exception) {
-            val errorMessage = e.message ?: "Network error"
-            Log.d("getting image url error", errorMessage)
-            showToast(context, "Get image url failed $errorMessage")
+
+        viewModelScope.launch {
+            try {
+                val response = apiService.getImageURL(authorization, fileToUpload)
+                val imageUrl = response?.image_url
+                showToast(context, "Get image url success")
+                onSuccess(imageUrl!!)
+            } catch (e: Exception) {
+                val errorMessage = e.message ?: "Network error"
+                Log.d("get image url error", errorMessage)
+                showToast(context, "Get image url failed $errorMessage")
+            }
         }
 
     }

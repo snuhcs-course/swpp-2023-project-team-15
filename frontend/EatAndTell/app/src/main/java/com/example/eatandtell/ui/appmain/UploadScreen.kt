@@ -182,7 +182,6 @@ fun UploadButton(viewModel: AppMainViewModel,
             println(File(photoPath.toString()).name)
             val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("image", File(photoPath.toString()).name + ".jpg", requestBody)
             //get photo url from server
-            // TODO: create coroutine context here
                 viewModel.getImageURL(fileToUpload, context, onSuccess = { imageUrl ->
                     photoUrls = photoUrls + imageUrl
                     println("getting image urls in for iteration")
@@ -201,7 +200,6 @@ fun UploadButton(viewModel: AppMainViewModel,
             val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
             viewModel.uploadPost(postData, context, onSuccess = onClick)
         }
-
     }
 
     MainButton(onClickReal, "리뷰 작성")
