@@ -31,6 +31,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.eatandtell.ui.ClickableProfileImage
 import com.example.eatandtell.ui.Home
 import com.example.eatandtell.ui.PlusCircle
@@ -99,8 +100,8 @@ fun navigateToDestination(navController: NavHostController, destination: String)
         }
         // Avoid multiple copies of the same destination when re-selecting the same item
         launchSingleTop = true
-        // Restore state when re-selecting a previously selected item
-        restoreState = true
+        // if 'upload', do not restoreState (리뷰, 맛집명이 남아있는 것 방지)
+        restoreState = (destination != "Upload")
     }
 }
 

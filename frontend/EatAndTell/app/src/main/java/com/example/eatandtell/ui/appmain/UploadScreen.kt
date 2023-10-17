@@ -177,6 +177,7 @@ fun UploadButton(viewModel: AppMainViewModel,
             restaurant.name.isBlank() -> showToast(context, "맛집명을 입력해주세요")
             description.isBlank() -> showToast(context, "리뷰를 입력해주세요")
             rating == "0" -> showToast(context, "별점을 입력해주세요")
+
             else -> {
                 for(photoPath in photoPaths) {
                     //change photoPath in to photo with formData type
@@ -188,9 +189,9 @@ fun UploadButton(viewModel: AppMainViewModel,
                     val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("image", File(photoPath.toString()).name + ".jpg", requestBody)
                     //get photo url from server
                     viewModel.getImageURL(fileToUpload, context, onSuccess = { imageUrl ->
-                        photoUrls = photoUrls + imageUrl
-                        println("getting image urls in for iteration")
-                    }
+                            photoUrls = photoUrls + imageUrl
+                            println("getting image urls in for iteration")
+                        }
                     )
                 }
 
