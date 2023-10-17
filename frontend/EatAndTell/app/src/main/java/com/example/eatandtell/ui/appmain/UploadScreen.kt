@@ -180,7 +180,6 @@ fun UploadButton(viewModel: AppMainViewModel,
             val byteArray: ByteArray? = inputStream?.readBytes()
             val requestBody: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray!!)
             val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("file", File(photoPath.toString()).name, requestBody)
-
             //TODO: fileToUpload, 토큰 다 넣어줬는데 400 에러가 난다..
             //get photo url from server
             viewModel.getImageURL(fileToUpload, object: AppMainViewModel.ImageCallback {
@@ -190,28 +189,35 @@ fun UploadButton(viewModel: AppMainViewModel,
                     }
                 }
                 override fun onImageError(errorMessage: String) {
-                    Log.d("getting image url error", errorMessage+photoPath.path.toString())
+                    Log.d("getting image url error", errorMessage+" photo path is "+photoPath.path.toString())
                     showToast(context, errorMessage)
                 }
             })
-
         }
 
-        var photos = photoUrls.map { PhotoReqDTO(it) }
+        //upload post
+        if(photoUrls.isEmpty()) {
+            showToast(context, "photo Url이 없어 업로드에 실패했습니다.")
+        }
+        else {
+            var photos = photoUrls.map { PhotoReqDTO(it) }
 
-        val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
+            val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
 
-        viewModel.uploadPost(postData, object: AppMainViewModel.UploadCallback{
-            override fun onUploadSuccess() {
-                onClick()
-            }
-            override fun onUploadError(errorMessage: String) {
-                Log.d("upload post error", errorMessage)
-                for (photo in photos) {
-                    Log.d("post images", photo.photo_url)
+            viewModel.uploadPost(postData, object: AppMainViewModel.UploadCallback{
+                override fun onUploadSuccess() {
+                    onClick()
                 }
-                showToast(context, errorMessage)
-            } } )}
+                override fun onUploadError(errorMessage: String) {
+                    Log.d("upload post error", errorMessage)
+                    for (photo in photos) {
+                        Log.d("post images", photo.photo_url)
+                    }
+                    showToast(context, errorMessage)
+                } } )
+        }
+
+    }
 
     MainButton(onClickReal, "리뷰 작성")
 }

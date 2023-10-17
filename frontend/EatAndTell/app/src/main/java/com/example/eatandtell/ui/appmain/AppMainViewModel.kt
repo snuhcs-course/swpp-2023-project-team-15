@@ -40,8 +40,8 @@ class AppMainViewModel() : ViewModel() {
                     callback.onUploadSuccess()
                 } else {
                     val errorMessage = response.message()
-                    Log.d("upload post error", ""+response.code()+errorMessage+authorization)
-                    callback.onUploadError("Upload post failed: $errorMessage $authorization")
+                    Log.d("upload post error", ""+response.code()+" error message is "+errorMessage)
+                    callback.onUploadError("Upload post failed: $errorMessage")
                 }
             }
 
@@ -62,7 +62,7 @@ class AppMainViewModel() : ViewModel() {
                     callback.onImageSuccess(response.body()?.image_url)
                 } else {
                     val errorMessage = response.message()
-                    callback.onImageError(""+response.code()+errorMessage)
+                    callback.onImageError(""+response.code()+" error message is "+errorMessage)
                 }
             }
 
