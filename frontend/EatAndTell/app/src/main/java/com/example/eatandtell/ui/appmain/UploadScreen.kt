@@ -176,6 +176,7 @@ fun UploadButton(viewModel: AppMainViewModel,
         when {
             restaurant.name.isBlank() -> showToast(context, "맛집명을 입력해주세요")
             description.isBlank() -> showToast(context, "리뷰를 입력해주세요")
+            rating == "0" -> showToast(context, "별점을 입력해주세요")
             else -> {
                 for(photoPath in photoPaths) {
                     //change photoPath in to photo with formData type
