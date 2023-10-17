@@ -18,12 +18,14 @@ fi
 
 # Use SSH to run commands on the remote server
 ssh -o "IdentitiesOnly yes" -i "$KEY" "$USER_HOST" <<ENDSSH
+set -e # stops on the first error
+set -x # print commands for debugging
+
 cd swpp-2023-project-team-15/backend/
-git pull
-git checkout origin/$CURRENT_BRANCH
+git pull origin $CURRENT_BRANCH
+git checkout $CURRENT_BRANCH
 poetry install
 sudo systemctl restart gunicorn
 
 echo "Deployed branch $CURRENT_BRANCH on $(date)" >> deploy.log
-echo "Deployed branch $CURRENT_BRANCH on $(date)"
 ENDSSH
