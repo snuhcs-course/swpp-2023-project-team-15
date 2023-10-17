@@ -11,7 +11,8 @@ class LogErrorsMiddleware(MiddlewareMixin):
             # Log the entire response
             # This can be adjusted to log specific details depending on your needs
             logger.error(
-                "Error response: [%s] %s",
+                "Error response on %s: [%s] %s",
+                request.path,
                 response.status_code,
                 response.content,
             )
