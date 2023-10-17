@@ -179,12 +179,15 @@ fun UploadButton(viewModel: AppMainViewModel,
             val inputStream: InputStream? = contentResolver.openInputStream(photoPath)
             val byteArray: ByteArray? = inputStream?.readBytes()
             val requestBody: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray!!)
-            val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("file", File(photoPath.toString()).name, requestBody)
+            println(File(photoPath.toString()).name)
+            val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("image", File(photoPath.toString()).name + ".jpg", requestBody)
             //TODO: fileToUpload, 토큰 다 넣어줬는데 400 에러가 난다..
             //get photo url from server
+            // TODO: create coroutine context here
             viewModel.getImageURL(fileToUpload, object: AppMainViewModel.ImageCallback {
                 override fun onImageSuccess(imageUrl: String?) {
                     if (imageUrl != null) {
+                        println("Success 2, image url is $imageUrl")
                         photoUrls = photoUrls + imageUrl
                     }
                 }
@@ -194,6 +197,8 @@ fun UploadButton(viewModel: AppMainViewModel,
                 }
             })
         }
+
+        println("Enqueued")
 
         //upload post
         if(photoUrls.isEmpty()) {

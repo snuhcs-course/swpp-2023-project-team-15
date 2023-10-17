@@ -11,6 +11,7 @@ import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import retrofit2.await
 
 class AppMainViewModel() : ViewModel() {
     //interface for callback
@@ -52,26 +53,30 @@ class AppMainViewModel() : ViewModel() {
         })
     }
 
-    fun getImageURL(fileToUpload: MultipartBody.Part?, callback: ImageCallback) {
+    suspend fun getImageURL(fileToUpload: MultipartBody.Part?, callback: ImageCallback) {
         val authorization = "Token $token"
-        val call = apiService.getImageURL(authorization, fileToUpload)
-
-        call.enqueue(object : Callback<ImageURLResponse> {
-            override fun onResponse(call: Call<ImageURLResponse>, response: Response<ImageURLResponse>) {
-                if (response.isSuccessful) {
-                    callback.onImageSuccess(response.body()?.image_url)
-                } else {
-                    val errorMessage = response.message()
-                    callback.onImageError(""+response.code()+" error message is "+errorMessage)
-                }
-            }
-
-            override fun onFailure(call: Call<ImageURLResponse>, t: Throwable) {
-                Log.d("getting image url on Failure", "")
-                val errorMessage = t.message ?: "Network error"
-                callback.onImageError(errorMessage)
-            }
-        })
+        try {
+            val call = apiService.getImageURL(authorization, fileToUpload).await()
+            // onsuccess
+        } catch (e) {
+            // onfailure
+//        }
+//
+//        call.enqueue(object : Callback<ImageURLResponse> {
+//            override fun onResponse(call: Call<ImageURLResponse>, response: Response<ImageURLResponse>) {
+//                if (response.isSuccessful) {
+//                } else {
+//                    val errorMessage = response.errorBody()?.string()
+//                    callback.onImageError(""+response.code()+" error message is "+errorMessage)
+//                }
+//            }
+//
+//            override fun onFailure(call: Call<ImageURLResponse>, t: Throwable) {
+//                Log.d("getting image url on Failure", "")
+//                val errorMessage = t.message ?: "Network error"
+//                callback.onImageError(errorMessage)
+//            }
+//        })
     }
 
 
