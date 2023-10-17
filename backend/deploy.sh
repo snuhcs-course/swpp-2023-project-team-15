@@ -20,7 +20,10 @@ fi
 ssh -o "IdentitiesOnly yes" -i "$KEY" "$USER_HOST" <<ENDSSH
 cd swpp-2023-project-team-15/backend/
 git pull
-git checkout $CURRENT_BRANCH
+git checkout origin/$CURRENT_BRANCH
 poetry install
 sudo systemctl restart gunicorn
+
+echo "Deployed branch $CURRENT_BRANCH on $(date)" >> deploy.log
+echo "Deployed branch $CURRENT_BRANCH on $(date)"
 ENDSSH
