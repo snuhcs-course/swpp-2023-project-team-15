@@ -1,8 +1,9 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
-
+from django.contrib.auth import get_user_model
 from .models import Post, PostPhoto, Restaurant
 
+
+User= get_user_model()
 
 class RestaurantSerializer(serializers.ModelSerializer):
     class Meta:
