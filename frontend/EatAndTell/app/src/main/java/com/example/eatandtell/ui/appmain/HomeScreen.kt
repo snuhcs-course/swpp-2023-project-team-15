@@ -38,9 +38,6 @@ import com.example.eatandtell.ui.theme.MainColor
 
 @Composable
 fun Post(
-    profileUrl: String,
-    username: String,
-    userDescription: String,
     restaurantName: String,
     rating: String,
     imageUrls: List<String>,
@@ -52,11 +49,6 @@ fun Post(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        // Profile Row
-        Spacer(modifier = Modifier.height(8.dp))
-        Profile(profileUrl, username, userDescription);
-
-        Spacer(modifier = Modifier.height(11.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -137,10 +129,39 @@ fun Post(
     }
 }
 
+@Composable
+fun HomePost(profileUrl: String,
+             username: String,
+             userDescription: String,
+             restaurantName: String,
+             rating: String,
+             imageUrls: List<String>,
+             restaurantDescription: String,
+             isLiked : Boolean,
+             likes : Int,){
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        // Profile Row
+        Spacer(modifier = Modifier.height(8.dp))
+        Profile(profileUrl, username, userDescription);
+        Spacer(modifier = Modifier.height(11.dp))
+        Post(
+            restaurantName ,
+            rating  ,
+            imageUrls ,
+            restaurantDescription  ,
+            isLiked  ,
+            likes
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
-fun PostPreview() {
-    Post(
+fun HomePostPreview() {
+    HomePost(
         profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
         username = "Joshua-i",
         userDescription = "고독한 미식가",
@@ -165,10 +186,12 @@ fun HomeScreen() {
             .padding(horizontal = 20.dp)
             .verticalScroll(rememberScrollState()),) {
         repeat(5) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Profile(profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
+                    username = "Joshua-i",
+                    userDescription = "고독한 미식가");
+            Spacer(modifier = Modifier.height(11.dp))
             Post(
-                profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
-                username = "Joshua-i",
-                userDescription = "고독한 미식가",
                 restaurantName = "포케앤 샐러드",
                 rating = "3.5",
                 imageUrls = listOf(
@@ -187,7 +210,7 @@ fun HomeScreen() {
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
     Surface(

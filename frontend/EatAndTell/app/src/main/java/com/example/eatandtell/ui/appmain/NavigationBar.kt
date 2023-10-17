@@ -86,7 +86,7 @@ fun BottomNav(navController: NavHostController, modifier: Modifier, context: Com
 
         }
         composable(route = "Profile") {
-            ProfileScreen(navController)
+            ProfileScreen()
         }
     }
 }
@@ -111,9 +111,6 @@ fun SearchScreen(navController: NavHostController) {
      Text(text = "Search Screen")
 }
 
-@Composable
-fun ProfileScreen(navController: NavHostController) {      Text(text = "Profile Screen")
-}
 
 @Preview
 @Composable
