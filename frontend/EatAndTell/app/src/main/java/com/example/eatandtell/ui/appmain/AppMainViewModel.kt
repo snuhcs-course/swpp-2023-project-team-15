@@ -1,12 +1,16 @@
 package com.example.eatandtell.ui.appmain
 import RetrofitClient
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.example.eatandtell.di.ApiService
 import com.example.eatandtell.dto.ImageURLResponse
 import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.UploadPostRequest
+import com.example.eatandtell.ui.showToast
+import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -31,52 +35,36 @@ class AppMainViewModel() : ViewModel() {
     }
 
     private val apiService = RetrofitClient.retro.create(ApiService::class.java)
-    fun uploadPost(postData: UploadPostRequest,  callback: UploadCallback) {
+
+    fun uploadPost(postData: UploadPostRequest, context: Context, onSuccess: () -> Unit) {
         val authorization = "Token $token"
-        val call = apiService.uploadPost(authorization, postData)
 
-        call.enqueue(object : Callback<PostDTO> {
-            override fun onResponse(call: Call<PostDTO>, response: Response<PostDTO>) {
-                if (response.isSuccessful) {
-                    callback.onUploadSuccess()
-                } else {
-                    val errorMessage = response.message()
-                    Log.d("upload post error", ""+response.code()+" error message is "+errorMessage)
-                    callback.onUploadError("Upload post failed: $errorMessage")
-                }
+        viewModelScope.launch {
+            try {
+                val response = apiService.uploadPost(authorization, postData)
+                showToast(context, "Upload post success")
+                onSuccess()
+            } catch (e: Exception) {
+                val errorMessage = e.message ?: "Network error"
+                Log.d("upload post error", errorMessage)
+                showToast(context, "Upload post failed $errorMessage")
             }
-
-            override fun onFailure(call: Call<PostDTO>, t: Throwable) {
-                val errorMessage = t.message ?: "Network error"
-                callback.onUploadError(errorMessage)
-            }
-        })
+        }
     }
 
-    suspend fun getImageURL(fileToUpload: MultipartBody.Part?, callback: ImageCallback) {
+    fun getImageURL(fileToUpload: MultipartBody.Part?, context: Context, onSuccess: (String) -> Unit) {
         val authorization = "Token $token"
+        //does not want this function to be in coroutine; block the main thread
         try {
-            val call = apiService.getImageURL(authorization, fileToUpload).await()
-            // onsuccess
-        } catch (e) {
-            // onfailure
-//        }
-//
-//        call.enqueue(object : Callback<ImageURLResponse> {
-//            override fun onResponse(call: Call<ImageURLResponse>, response: Response<ImageURLResponse>) {
-//                if (response.isSuccessful) {
-//                } else {
-//                    val errorMessage = response.errorBody()?.string()
-//                    callback.onImageError(""+response.code()+" error message is "+errorMessage)
-//                }
-//            }
-//
-//            override fun onFailure(call: Call<ImageURLResponse>, t: Throwable) {
-//                Log.d("getting image url on Failure", "")
-//                val errorMessage = t.message ?: "Network error"
-//                callback.onImageError(errorMessage)
-//            }
-//        })
+            val response = apiService.getImageURL(authorization, fileToUpload)
+            showToast(context, "Get image url success")
+            onSuccess(response.image_url)
+        } catch (e: Exception) {
+            val errorMessage = e.message ?: "Network error"
+            Log.d("getting image url error", errorMessage)
+            showToast(context, "Get image url failed $errorMessage")
+        }
+
     }
 
 

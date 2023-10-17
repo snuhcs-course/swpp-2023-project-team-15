@@ -17,17 +17,17 @@ import retrofit2.http.Part
 
 interface ApiService {
     @POST("users/login/") // The login endpoint (hypothetical)
-    fun loginUser(@Body loginData: LoginRequest): Call<LoginResponse>
+    suspend fun loginUser(@Body loginData: LoginRequest): LoginResponse
 
     @POST("users/register/") // The registration endpoint
-    fun registerUser(@Body registrationData: RegisterRequest): Call<RegisterResponse>
+    suspend fun registerUser(@Body registrationData: RegisterRequest): RegisterResponse
 
     @POST("posts/") // The posts endpoint
-    fun uploadPost(@Header("Authorization") authorization: String,
-                   @Body postData: UploadPostRequest): Call<PostDTO>
+    suspend fun uploadPost(@Header("Authorization") authorization: String,
+                   @Body postData: UploadPostRequest): PostDTO
     @Multipart
     @POST("images/upload/") // The images endpoint
     fun getImageURL(@Header("Authorization") authorization: String,
-                    @Part images: MultipartBody.Part?): Call<ImageURLResponse>
+                    @Part images: MultipartBody.Part?): ImageURLResponse
 
 }

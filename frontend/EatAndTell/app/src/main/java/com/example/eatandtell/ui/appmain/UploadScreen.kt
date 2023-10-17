@@ -181,45 +181,25 @@ fun UploadButton(viewModel: AppMainViewModel,
             val requestBody: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray!!)
             println(File(photoPath.toString()).name)
             val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("image", File(photoPath.toString()).name + ".jpg", requestBody)
-            //TODO: fileToUpload, 토큰 다 넣어줬는데 400 에러가 난다..
             //get photo url from server
             // TODO: create coroutine context here
-            viewModel.getImageURL(fileToUpload, object: AppMainViewModel.ImageCallback {
-                override fun onImageSuccess(imageUrl: String?) {
-                    if (imageUrl != null) {
-                        println("Success 2, image url is $imageUrl")
-                        photoUrls = photoUrls + imageUrl
-                    }
+                viewModel.getImageURL(fileToUpload, context, onSuccess = { imageUrl ->
+                    photoUrls = photoUrls + imageUrl
+                    println("getting image urls in for iteration")
                 }
-                override fun onImageError(errorMessage: String) {
-                    Log.d("getting image url error", errorMessage+" photo path is "+photoPath.path.toString())
-                    showToast(context, errorMessage)
-                }
-            })
+            )
         }
 
-        println("Enqueued")
+        println("for iteration done")
 
         //upload post
-        if(photoUrls.isEmpty()) {
+        if(photoPaths.isNotEmpty() && photoUrls.isEmpty()) {
             showToast(context, "photo Url이 없어 업로드에 실패했습니다.")
         }
         else {
             var photos = photoUrls.map { PhotoReqDTO(it) }
-
             val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
-
-            viewModel.uploadPost(postData, object: AppMainViewModel.UploadCallback{
-                override fun onUploadSuccess() {
-                    onClick()
-                }
-                override fun onUploadError(errorMessage: String) {
-                    Log.d("upload post error", errorMessage)
-                    for (photo in photos) {
-                        Log.d("post images", photo.photo_url)
-                    }
-                    showToast(context, errorMessage)
-                } } )
+            viewModel.uploadPost(postData, context, onSuccess = onClick)
         }
 
     }

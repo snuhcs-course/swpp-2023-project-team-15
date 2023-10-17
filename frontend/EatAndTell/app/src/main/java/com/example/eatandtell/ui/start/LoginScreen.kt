@@ -137,13 +137,8 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
 @Composable
 fun LoginButton(viewModel: StartViewModel, id: String, password: String, context: Context, onClick: (String?) -> Unit) {
     val onClickReal = {
-        viewModel.loginUser(id, password, object: StartViewModel.LoginCallback{
-            override fun onLoginSuccess(token: String?) {
-                onClick(token)
-            }
-            override fun onLoginError(errorMessage: String) {
-                showToast(context, errorMessage)
-            } } )}
+        viewModel.loginUser(id, password, context, onClick)
+    }
     MainButton(onClickReal, "로그인")
 }
 
