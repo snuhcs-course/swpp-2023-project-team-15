@@ -173,32 +173,38 @@ fun UploadButton(viewModel: AppMainViewModel,
     var photoUrls = listOf<String>() // 실제 서버에 업로드할 주소
 
     val onClickReal = {
-        for(photoPath in photoPaths) {
-            //change photoPath in to photo with formData type
-            val contentResolver: ContentResolver = context.contentResolver
-            val inputStream: InputStream? = contentResolver.openInputStream(photoPath)
-            val byteArray: ByteArray? = inputStream?.readBytes()
-            val requestBody: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray!!)
-            println(File(photoPath.toString()).name)
-            val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("image", File(photoPath.toString()).name + ".jpg", requestBody)
-            //get photo url from server
-                viewModel.getImageURL(fileToUpload, context, onSuccess = { imageUrl ->
-                    photoUrls = photoUrls + imageUrl
-                    println("getting image urls in for iteration")
+        when {
+            restaurant.name.isBlank() -> showToast(context, "맛집명을 입력해주세요")
+            description.isBlank() -> showToast(context, "리뷰를 입력해주세요")
+            else -> {
+                for(photoPath in photoPaths) {
+                    //change photoPath in to photo with formData type
+                    val contentResolver: ContentResolver = context.contentResolver
+                    val inputStream: InputStream? = contentResolver.openInputStream(photoPath)
+                    val byteArray: ByteArray? = inputStream?.readBytes()
+                    val requestBody: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray!!)
+                    println(File(photoPath.toString()).name)
+                    val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("image", File(photoPath.toString()).name + ".jpg", requestBody)
+                    //get photo url from server
+                    viewModel.getImageURL(fileToUpload, context, onSuccess = { imageUrl ->
+                        photoUrls = photoUrls + imageUrl
+                        println("getting image urls in for iteration")
+                    }
+                    )
                 }
-            )
-        }
 
-        println("for iteration done")
+                println("for iteration done")
 
-        //upload post
-        if(photoPaths.isNotEmpty() && photoUrls.isEmpty()) {
-            showToast(context, "photo Url이 없어 업로드에 실패했습니다.")
-        }
-        else {
-            var photos = photoUrls.map { PhotoReqDTO(it) }
-            val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
-            viewModel.uploadPost(postData, context, onSuccess = onClick)
+                //upload post
+                if(photoPaths.isNotEmpty() && photoUrls.isEmpty()) {
+                    showToast(context, "photo Url이 없어 업로드에 실패했습니다.")
+                }
+                else {
+                    var photos = photoUrls.map { PhotoReqDTO(it) }
+                    val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
+                    viewModel.uploadPost(postData, context, onSuccess = onClick)
+                }
+            }
         }
     }
 
