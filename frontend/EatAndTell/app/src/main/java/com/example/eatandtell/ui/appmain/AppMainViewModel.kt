@@ -1,20 +1,14 @@
 package com.example.eatandtell.ui.appmain
 import RetrofitClient
-import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.eatandtell.di.ApiService
 import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.ui.showToast
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -43,30 +37,18 @@ class AppMainViewModel() : ViewModel() {
             return null
         }
 
-        val deferredImageUrls = mutableListOf<Deferred<String>>()
+        val photoUrls = mutableListOf<String>()
         val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it) }
         for(byteArray in photoByteArrays) {
-            //change photoPath in to photo with formData type
             val requestBody: RequestBody = byteArray.toRequestBody("image/*".toMediaTypeOrNull())
             val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("image", "this_name_does_not_matter.jpg", requestBody)
-            //get photo url from server
-            val deferredImageUrl = viewModelScope.async {
-                getImageURL(fileToUpload, context)
-            }
-            deferredImageUrls.add(deferredImageUrl)
+            val imageUrl = getImageURL(fileToUpload, context)
+            photoUrls.add(imageUrl)
         }
         try {
-            val imageUrls = deferredImageUrls.awaitAll() // This will suspend until all uploads are done
-            val photoUrls = imageUrls.toMutableList() // Assuming photoUrls is a MutableList<String>
-
-            // Proceed with the post upload
-            if (photoByteArrays.isNotEmpty() && photoUrls.isEmpty()) {
-                showToast(context, "photo Url이 없어 업로드에 실패했습니다.")
-            } else {
-                val photos = photoUrls.map { PhotoReqDTO(it) }
-                val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
-                this.uploadPost(postData, context)
-            }
+            val photos = photoUrls.map { PhotoReqDTO(it) }
+            val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
+            this.uploadPost(postData, context)
         } catch (e: Exception) {
             // Handle exceptions, e.g., from network calls, here
             showToast(context, "An error occurred: ${e.message}")
@@ -77,7 +59,7 @@ class AppMainViewModel() : ViewModel() {
         val authorization = "Token $token"
 
         try {
-            val response = apiService.uploadPost(authorization, postData)
+            apiService.uploadPost(authorization, postData)
             showToast(context, "Upload post success")
         } catch (e: Exception) {
             val errorMessage = e.message ?: "Network error"
