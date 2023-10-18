@@ -55,7 +55,8 @@ class AppMainViewModel() : ViewModel() {
             this.uploadPost(postData, context)
         } catch (e: Exception) {
             // Handle exceptions, e.g., from network calls, here
-            showToast(context, "An error occurred: ${e.message}")
+            Log.d("upload photos and post error", e.message ?: "Network error")
+            showToast(context, "포스트 업로드에 실패했습니다")
         }
     }
 
@@ -64,11 +65,10 @@ class AppMainViewModel() : ViewModel() {
 
         try {
             apiService.uploadPost(authorization, postData)
-            showToast(context, "Upload post success")
+            showToast(context, "포스트가 업로드되었습니다")
         } catch (e: Exception) {
             val errorMessage = e.message ?: "Network error"
             Log.d("upload post error", errorMessage)
-            showToast(context, "Upload post failed $errorMessage")
             throw e // rethrow the exception to be caught in the calling function
         }
     }
@@ -79,12 +79,10 @@ class AppMainViewModel() : ViewModel() {
         try {
             val response = apiService.getImageURL(authorization, fileToUpload) // Assuming this is a suspend function call
             val imageUrl = response.image_url
-            showToast(context, "Get image url success")
             return imageUrl
         } catch (e: Exception) {
             val errorMessage = e.message ?: "Network error"
             Log.d("get image url error", errorMessage)
-            showToast(context, "Get image url failed $errorMessage")
             throw e // rethrow the exception to be caught in the calling function
         }
     }
@@ -93,11 +91,8 @@ class AppMainViewModel() : ViewModel() {
         val authorization = "Token $token"
         try {
             val response = apiService.getAllPosts(authorization)
-            showToast(context, "피드 로딩에 성공하였습니다")
             onSuccess(response.data)
         } catch (e: Exception) {
-            val errorMessage = e.message ?: "Network error"
-            showToast(context, "피드 로딩에 실패하였습니다")
             throw e // rethrow the exception to be caught in the calling function
         }
     }

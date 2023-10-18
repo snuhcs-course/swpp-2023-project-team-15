@@ -26,11 +26,12 @@ class StartViewModel : ViewModel() {
             try {
                 val response = apiService.loginUser(loginData)
                 val token = response?.token
-                showToast(context, "Log in successful")
+                Log.d("login", "success")
                 onSuccess(token)
             } catch (e: Exception) {
                 val errorMessage = e.message ?: "Network error"
-                showToast(context, "Log in failed $errorMessage")
+                Log.d("login", "error$errorMessage")
+                showToast(context, "로그인에 실패하였습니다")
             }
         }
     }
@@ -42,11 +43,12 @@ class StartViewModel : ViewModel() {
             try {
                 val response = apiService.registerUser(registrationData)
                 val token = response?.token
-                showToast(context, "Sign up successful")
+                Log.d("sign up", "success")
                 onSuccess(token)
             } catch (e: Exception) {
                 val errorMessage = e.message ?: "Network error"
-                showToast(context, "Sign up failed $errorMessage")
+                Log.d("sign up", "error$errorMessage")
+                showToast(context, "회원가입에 실패하였습니다")
             }
         }
     }

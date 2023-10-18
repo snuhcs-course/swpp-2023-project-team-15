@@ -1,5 +1,6 @@
 package com.example.eatandtell.ui.appmain
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -53,10 +54,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun Post(
-//    restaurantName: String,
-//    rating: String,
-//    imageUrls: List<String>,
-//    restaurantDescription: String,
     post : PostDTO,
     isLiked : Boolean,
     likes : Int,
@@ -155,30 +152,6 @@ fun Post(
 }
 
 @Composable
-fun HomePost(profileUrl: String,
-             username: String,
-             userDescription: String,
-             post: PostDTO,
-             isLiked : Boolean,
-             likes : Int,){
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        // Profile Row
-        Spacer(modifier = Modifier.height(8.dp))
-        Profile(profileUrl, username, userDescription);
-        Spacer(modifier = Modifier.height(11.dp))
-        Post(
-            post,
-            isLiked,
-            likes
-        )
-    }
-}
-
-
-@Composable
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
     var feedPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
     var loading by remember { mutableStateOf(true) }
@@ -195,8 +168,8 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
             loading = false
         }
         catch (e: Exception) {
-            println("getAllPosts error: ${e.message}")
-            showToast(context, "getAllPosts error: ${e.message}")
+            println("home feed load error")
+            showToast(context, "피드 로딩에 실패하였습니다")
         }
 
     }
@@ -208,9 +181,9 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
-                //put at the center of the screen
+                //로딩 화면
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(70.dp)
             )
         }
     }

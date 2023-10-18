@@ -353,7 +353,7 @@ fun StarHalf(size : Dp) {
 fun StarRating(rating: String, size: Dp = 16.dp) {
     val rate = rating.toFloat()
     val fullStars = rate.toInt()
-    val hasHalfStar = rate - fullStars >= 0.5
+    val hasHalfStar = false // rate - fullStars >= 0.5
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(0.dp), // 조절 가능한 간격
@@ -365,9 +365,9 @@ fun StarRating(rating: String, size: Dp = 16.dp) {
         }
 
         // Half star
-        if (hasHalfStar) {
-            StarHalf(size)
-        }
+//        if (hasHalfStar) {
+//            StarHalf(size)
+//        }
 
         // Empty stars
         repeat(5 - fullStars - if (hasHalfStar) 1 else 0) {
