@@ -44,7 +44,4 @@ class UserSerializer(serializers.ModelSerializer):
             return "https://default_avatar-url.com"
         return value
     
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['posts'] = sorted(representation['posts'], key=lambda x: x['created_at'], reverse=True)
-        return representation
+

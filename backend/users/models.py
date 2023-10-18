@@ -11,4 +11,4 @@ class User(AbstractUser):
 
 class Tag(models.Model):
     #implementation may change 
-    name= models.Charfield(max_length=50, default= '')
+    name= models.CharField(max_length=50, default= '')
