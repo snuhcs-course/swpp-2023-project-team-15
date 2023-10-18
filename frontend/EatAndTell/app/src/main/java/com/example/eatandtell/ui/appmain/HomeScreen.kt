@@ -17,6 +17,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -49,6 +52,7 @@ import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.ui.HeartEmpty
 import com.example.eatandtell.ui.HeartFull
 import com.example.eatandtell.ui.ImageDialog
+import com.example.eatandtell.ui.Post
 import com.example.eatandtell.ui.PostImage
 import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.StarRating
@@ -59,111 +63,6 @@ import kotlinx.coroutines.launch
 
 //TODO: 이후 좋아요가 PostDTO에 추가되면 like를 PostDTO에서 가져오도록 수정
 
-@Composable
-fun Post(
-    post : PostDTO,
-    isLiked : Boolean,
-    likes : Int,
-) {
-
-    val restaurantName = post.restaurant.name
-    val rating = post.rating
-    //get list of photo urls from post.photos list's photo_url
-    val imageUrls = if (post.photos!=null) post.photos.map { photo -> photo.photo_url } else listOf()
-    val description = post.description
-    var clickedImageIndex by remember { mutableStateOf(-1) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            //식당 이름
-            Text(text = restaurantName, style = TextStyle(
-                fontSize = 14.sp,
-                lineHeight = 21.sp,
-                fontWeight = FontWeight(700),
-                color = Black,
-            ), modifier = Modifier
-                .weight(1f)
-                .height(20.dp),
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-
-            //ratings
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.Start),
-                verticalAlignment = Alignment.Bottom,
-                modifier = Modifier
-                    .width(80.dp)
-                    .height(16.dp)
-            ) {
-                StarRating(rating)
-                // 다른 child views 추가
-            }
-        }
-
-        Spacer(modifier = Modifier.height(7.dp))
-
-        // Images Row
-        if (imageUrls.isNotEmpty()) {
-            Row(
-                modifier = Modifier
-                    .height(160.dp)
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                for ((index, imageUrl) in imageUrls.withIndex()) {
-                    PostImage(imageUrl, onImageClick = { clickedImageIndex = index }
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Restaurant Description
-        Text(text = description, style = TextStyle(
-            fontSize = 14.sp,
-            lineHeight = 18.sp,
-            fontWeight = FontWeight(500),
-            color = Color(0xFF262626),
-        ), modifier = Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min),
-            overflow = TextOverflow.Ellipsis)
-
-        Row(
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            Text(
-                text = likes.toString(),
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    lineHeight = 16.5.sp,
-                    fontWeight = FontWeight(500),
-                    color = MainColor,
-                ),
-                modifier = Modifier
-                    .width(16.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            if(isLiked) HeartFull() else HeartEmpty()
-        }
-    }
-
-    //If Image Clicked, show Image Dialog
-    if (clickedImageIndex != -1) {
-        ImageDialog(imageUrl = imageUrls[clickedImageIndex] , onClick = { clickedImageIndex = -1 })
-    }
-}
 
 @Composable
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
@@ -202,30 +101,35 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
         }
     }
     else {
-        Column(
+        LazyColumn(
+            state = rememberLazyListState(),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 20.dp)
-                .verticalScroll(rememberScrollState()),
+                .padding(horizontal = 20.dp),
         ) {
-            for (post in feedPosts) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Profile(
-                    profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
-                    username = "Joshua-i",
-                    userDescription = "고독한 미식가"
-                );
-                Spacer(modifier = Modifier.height(11.dp))
-                Post(
-                    post = post,
-                    isLiked = false,
-                    likes = 36,
-                )
+            item { Spacer(modifier = Modifier.height(8.dp)) }
+            items(feedPosts) { post ->
+                HomePost(post)
             }
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
-            Spacer(modifier = Modifier.height(70.dp))
+            item { Spacer(modifier = Modifier.height(70.dp)) }
         }
+
     }
 }
 
+@Composable
+fun HomePost(post: PostDTO) {
+    Profile(
+        profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
+        username = "Joshua-i",
+        userDescription = "고독한 미식가"
+    );
+    Spacer(modifier = Modifier.height(11.dp))
+    Post(
+        post = post,
+        isLiked = false,
+        likes = 36,
+    )
+}

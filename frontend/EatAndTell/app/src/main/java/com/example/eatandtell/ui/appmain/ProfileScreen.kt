@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,6 +44,7 @@ import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.ui.HeartEmpty
 import com.example.eatandtell.ui.HeartFull
 import com.example.eatandtell.ui.MediumRedButton
+import com.example.eatandtell.ui.Post
 import com.example.eatandtell.ui.PostImage
 import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.StarRating
@@ -154,13 +158,14 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
         }
     }
     else {
-        Column(
+        LazyColumn(
+            state = rememberLazyListState(),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 20.dp)
-                .verticalScroll(rememberScrollState()),) {
+                .padding(horizontal = 20.dp)) {
             val isCurrentUser = true // Assuming "joshua-i" is the profile's user
-            ProfileRow(
+
+            item {ProfileRow(
                 profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
                 username = "joshua-i",
                 userDescription = if (isCurrentUser) "본인 프로필입니다~" else "고독한 미식가",
@@ -169,19 +174,13 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
                 onClick = {},
                 tags = listOf("#육식주의자", "#미식가", "#리뷰왕","#감성","#한식"),
                 buttonText = if (isCurrentUser) "프로필 편집" else "팔로우하기"  // New buttonText parameter
-            )
+            )}
 
-            for (post in myPosts) {
-                Spacer(modifier = Modifier.height(18.dp))
-                Post(
-                    post = post,
-                    isLiked = false,
-                    likes = 36,
-                )
+            items(myPosts) { post ->
+                Post(post, isLiked = false, likes = 36)
             }
-
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
-            Spacer(modifier = Modifier.height(70.dp))
+            item {Spacer(modifier = Modifier.height(70.dp))}
         }
     }
 

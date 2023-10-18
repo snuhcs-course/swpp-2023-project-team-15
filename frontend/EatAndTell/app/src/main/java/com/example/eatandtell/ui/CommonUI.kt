@@ -14,7 +14,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
@@ -34,6 +36,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -44,6 +47,7 @@ import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.example.eatandtell.R
+import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.EatAndTellTheme
 import com.example.eatandtell.ui.theme.Gray
@@ -530,6 +534,114 @@ fun ImageDialogPreview() {
     }
 }
 
+
+@Composable
+fun Post(
+    post : PostDTO,
+    isLiked : Boolean,
+    likes : Int,
+) {
+
+    val restaurantName = post.restaurant.name
+    val rating = post.rating
+    //get list of photo urls from post.photos list's photo_url
+    val imageUrls = if (post.photos!=null) post.photos.map { photo -> photo.photo_url } else listOf()
+    val description = post.description
+    var clickedImageIndex by remember { mutableStateOf(-1) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            //식당 이름
+            Text(text = restaurantName, style = TextStyle(
+                fontSize = 16.sp,
+                lineHeight = 21.sp,
+                fontWeight = FontWeight(700),
+                color = Black,
+            ), modifier = Modifier
+                .weight(1f)
+                .height(22.dp),
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+
+            //ratings
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.Start),
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier
+                    .wrapContentWidth(Alignment.End)
+                    .height(22.dp)
+            ) {
+                StarRating(rating, size = 18.dp)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(7.dp))
+
+        // Images Row
+        if (imageUrls.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .height(160.dp)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                for ((index, imageUrl) in imageUrls.withIndex()) {
+                    PostImage(imageUrl, onImageClick = { clickedImageIndex = index }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Restaurant Description
+        Text(text = description, style = TextStyle(
+            fontSize = 14.sp,
+            lineHeight = 18.sp,
+            fontWeight = FontWeight(500),
+            color = Color(0xFF262626),
+        ), modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
+            overflow = TextOverflow.Ellipsis)
+
+        Row(
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Text(
+                text = likes.toString(),
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    lineHeight = 16.5.sp,
+                    fontWeight = FontWeight(500),
+                    color = MainColor,
+                ),
+                modifier = Modifier
+                    .width(16.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            if(isLiked) HeartFull() else HeartEmpty()
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+
+    //If Image Clicked, show Image Dialog
+    if (clickedImageIndex != -1) {
+        ImageDialog(imageUrl = imageUrls[clickedImageIndex] , onClick = { clickedImageIndex = -1 })
+    }
+}
 
 
 @Composable
