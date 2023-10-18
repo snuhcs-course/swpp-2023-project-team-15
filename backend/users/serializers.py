@@ -46,4 +46,14 @@ class UserSerializer(serializers.ModelSerializer):
             return "https://default_avatar-url.com"
         return value
     
+class UserPostSerializer(serializers.ModelSerializer):
+    posts = PostSerializer(source='post_set', many=True, read_only=True)
+    
+    class Meta:
+        model = Post
+        fields=('posts',)
 
+class UserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=User
+        fields=('username', 'avatar_url', 'description')

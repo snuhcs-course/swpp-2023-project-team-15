@@ -5,7 +5,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .serializers import UserSerializer
+from .serializers import UserSerializer,UserPostSerializer, UserInfoSerializer
 from django.shortcuts import get_object_or_404
 
 
@@ -86,4 +86,16 @@ def get_my_profile(request):
 def get_user_profile(request, pk):
     user = get_object_or_404(User, pk=pk)
     serializer = UserSerializer(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_user_posts(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    serializer = UserPostSerializer(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_user_info(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    serializer = UserInfoSerializer(user)
     return Response(serializer.data, status=status.HTTP_200_OK)
