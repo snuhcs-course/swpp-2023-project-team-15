@@ -32,6 +32,7 @@ def register(request):
         token = Token.objects.create(user=user)
         return Response({'token': token.key}, status=status.HTTP_201_CREATED)
     except Exception as e:
+        print(e)
         return Response({'error': 'An error occurred while creating the user'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -57,9 +58,9 @@ def register(request):
 '''
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
-def profile_update(request, user_id):
+def profile_update(request):
     try:
-        user_instance = User.objects.get(id=user_id)
+        user_instance = request.user
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 

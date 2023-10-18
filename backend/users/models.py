@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     description = models.TextField(default='')
     #for searching based on tags
-    userTags = models.ManyToManyField('Tag', blank=True)
+   # userTags = models.ManyToManyField('Tag', blank=True)
     avatar_url = models.URLField(default='https://default-avatar.com' )
     follower_count = models.PositiveIntegerField(default=0)
     following_count = models.PositiveIntegerField(default=0)

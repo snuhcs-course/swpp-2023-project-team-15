@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from posts.serializers import PostSerializer
 from posts.models import Post
+from django.db import models
 
 
 User= get_user_model()
@@ -9,11 +10,12 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, style={
                                      'input_type': 'password'})
     posts = PostSerializer(source='post_set', many=True, read_only=True)
+    email = models.EmailField(unique=True, blank=False) 
 
     class Meta:
         model = User
         fields = ('id', 'username', 'password', 'email','description', 
-                  'userTags', 'avatar_url', 'follower_count', 'following_count')
+                  'avatar_url', 'follower_count', 'following_count','posts')
         error_messages={
             'username':{'error': 'Username is already taken'},
             'email':{'error': 'Email is already in use'}
@@ -22,7 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(
             username=validated_data['username'],
-            email=validated_data.get('email', ''),
+            email=validated_data['email'],
             password=validated_data['password'],
             description= validated_data.get('description', ''),
             avatar_url=validated_data.get('avatar_url', 'https://default_avatar-url.com'),
