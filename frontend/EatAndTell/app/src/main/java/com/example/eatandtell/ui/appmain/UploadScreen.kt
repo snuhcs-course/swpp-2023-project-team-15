@@ -58,13 +58,7 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
 
     var myRating by rememberSaveable { mutableStateOf("0") }
 
-
     val profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8"
-//    val photoUrls = listOf(
-//        "https://api.nudge-community.com/attachments/339560",
-//        "https://img.siksinhot.com/place/1650516612762055.jpg?w=560&h=448&c=Y",
-//        "https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FdKS0uX%2FbtrScbvc9HH%2F5I2m53vgz0LWvszHQ9PQNk%2Fimg.jpg"
-//    ) //TODO: get from gallery
 
     var photoPaths by remember { mutableStateOf(listOf<Uri>()) } //핸드폰 내의 파일 경로
 

@@ -97,4 +97,14 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
+    suspend fun getMyPosts(context: Context, onSuccess: (List<PostDTO>) -> Unit) {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.getMyPosts(authorization)
+            onSuccess(response.data)
+        } catch (e: Exception) {
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
 }

@@ -8,5 +8,9 @@ data class UploadPostRequest(
 )
 
 data class GetAllPostsResponse(
-    var data : List<PostDTO> //TODO
+    var data : List<PostDTO>
+)
+
+data class GetMyPostsResponse(
+    var data : List<PostDTO>
 )

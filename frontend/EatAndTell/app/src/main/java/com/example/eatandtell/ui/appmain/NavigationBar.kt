@@ -39,7 +39,7 @@ import com.example.eatandtell.ui.SearchRefraction
 import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.EatAndTellTheme
 
-//TODO: 스크린이 전체가 다 안 참
+
 @Composable
 fun BottomNavBar(
     onHomeClick: () -> Unit,
@@ -80,14 +80,14 @@ fun BottomNav(navController: NavHostController, modifier: Modifier, context: Com
             HomeScreen(context, viewModel)
         }
         composable(route = "Search") {
-            SearchScreen(navController)
+            SearchScreen()
         }
         composable(route = "Upload") {
             UploadScreen(navController, context, viewModel)
 
         }
         composable(route = "Profile") {
-            ProfileScreen()
+            ProfileScreen(context, viewModel)
         }
     }
 }
@@ -108,7 +108,7 @@ fun navigateToDestination(navController: NavHostController, destination: String)
 
 //Delete when done Implementing Each Screens
 @Composable
-fun SearchScreen(navController: NavHostController) {
+fun SearchScreen() {
      Text(text = "Search Screen")
 }
 
@@ -119,10 +119,10 @@ fun PreviewNavigationBar() {
     Surface {
         BottomNavBar(
             profileUrl = "https://avatars.githubusercontent.com/u/44080404?v=4",
-            onHomeClick = { /*TODO: Home Clicked*/ },
-            onSearchClick = { /*TODO: Search Clicked*/ },
-            onPlusClick = { /*TODO: Plus Clicked*/ },
-            onProfileClick = { /*TODO: Profile Clicked*/ },
+            onHomeClick = { /*Home Clicked*/ },
+            onSearchClick = { /*Search Clicked*/ },
+            onPlusClick = { /*Plus Clicked*/ },
+            onProfileClick = { /*Profile Clicked*/ },
         )
     }
 }

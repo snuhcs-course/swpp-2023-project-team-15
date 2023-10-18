@@ -6,6 +6,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,8 +50,7 @@ import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.MainColor
 import kotlinx.coroutines.launch
 
-
-//TODO: parameter PostDTO로 바꾸기
+//TODO: 이후 좋아요가 PostDTO에 추가되면 like를 PostDTO에서 가져오도록 수정
 
 @Composable
 fun Post(
@@ -125,7 +125,7 @@ fun Post(
             color = Color(0xFF262626),
         ), modifier = Modifier
             .fillMaxWidth()
-            .height(54.dp),
+            .height(IntrinsicSize.Min),
             overflow = TextOverflow.Ellipsis)
 
         Row(

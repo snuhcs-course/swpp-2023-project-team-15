@@ -241,7 +241,7 @@ fun MediumWhiteButton(onClick: () -> Unit, text: String) {
 @Composable
 fun PreviewMediumWhiteButton() {
     EatAndTellTheme {
-        MediumWhiteButton(onClick = { /*TODO*/ }, text = "사진 추가하기")
+        MediumWhiteButton(onClick = { /**/ }, text = "사진 추가하기")
     }
 }
 
@@ -275,7 +275,7 @@ fun MediumRedButton(onClick: () -> Unit, text: String) {
 @Composable
 fun PreviewMediumRedButton() {
     EatAndTellTheme {
-        MediumRedButton(onClick = { /*TODO*/ }, text = "팔로우하기")
+        MediumRedButton(onClick = { /**/ }, text = "팔로우하기")
     }
 }
 
