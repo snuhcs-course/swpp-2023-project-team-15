@@ -11,6 +11,7 @@ import retrofit2.http.POST
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.Part
@@ -22,6 +23,9 @@ interface ApiService {
     @POST("users/register/") // The registration endpoint
     suspend fun registerUser(@Body registrationData: RegisterRequest): RegisterResponse
 
+    @GET("posts/") // The posts endpoint
+    suspend fun getAllPosts(@Header("Authorization") authorization: String,
+                           ): GetAllPostsResponse
     @POST("posts/") // The posts endpoint
     suspend fun uploadPost(@Header("Authorization") authorization: String,
                    @Body postData: UploadPostRequest): PostDTO

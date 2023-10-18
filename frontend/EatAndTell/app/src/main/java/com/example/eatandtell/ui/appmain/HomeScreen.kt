@@ -1,7 +1,9 @@
 package com.example.eatandtell.ui.appmain
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,13 +11,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,26 +36,38 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.ui.HeartEmpty
 import com.example.eatandtell.ui.HeartFull
 import com.example.eatandtell.ui.PostImage
 import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.StarRating
+import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.MainColor
+import kotlinx.coroutines.launch
 
 
 //TODO: parameter PostDTO로 바꾸기
 
 @Composable
 fun Post(
-    restaurantName: String,
-    rating: String,
-    imageUrls: List<String>,
-    restaurantDescription: String,
+//    restaurantName: String,
+//    rating: String,
+//    imageUrls: List<String>,
+//    restaurantDescription: String,
+    post : PostDTO,
     isLiked : Boolean,
     likes : Int,
 ) {
+
+    val restaurantName = post.restaurant.name
+    val rating = post.rating
+    //get list of photo urls from post.photos list's photo_url
+    val imageUrls = if (post.photos!=null) post.photos.map { photo -> photo.photo_url } else listOf()
+    val description = post.description
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -82,21 +105,23 @@ fun Post(
         Spacer(modifier = Modifier.height(7.dp))
 
         // Images Row
-        Row(
-            modifier = Modifier
-                .height(160.dp)
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            for (imageUrl in imageUrls) {
-                PostImage(imageUrl)
+        if (imageUrls.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .height(160.dp)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                for (imageUrl in imageUrls) {
+                    PostImage(imageUrl)
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Restaurant Description
-        Text(text = restaurantDescription, style = TextStyle(
+        Text(text = description, style = TextStyle(
             fontSize = 14.sp,
             lineHeight = 18.sp,
             fontWeight = FontWeight(500),
@@ -133,10 +158,7 @@ fun Post(
 fun HomePost(profileUrl: String,
              username: String,
              userDescription: String,
-             restaurantName: String,
-             rating: String,
-             imageUrls: List<String>,
-             restaurantDescription: String,
+             post: PostDTO,
              isLiked : Boolean,
              likes : Int,){
     Column(
@@ -148,77 +170,75 @@ fun HomePost(profileUrl: String,
         Profile(profileUrl, username, userDescription);
         Spacer(modifier = Modifier.height(11.dp))
         Post(
-            restaurantName ,
-            rating  ,
-            imageUrls ,
-            restaurantDescription  ,
-            isLiked  ,
+            post,
+            isLiked,
             likes
         )
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun HomePostPreview() {
-    HomePost(
-        profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
-        username = "Joshua-i",
-        userDescription = "고독한 미식가",
-        restaurantName = "포케앤 샐러드",
-        rating = "3.5",
-        imageUrls = listOf(
-            "https://api.nudge-community.com/attachments/339560",
-            "https://img.siksinhot.com/place/1650516612762055.jpg?w=560&h=448&c=Y",
-            "https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FdKS0uX%2FbtrScbvc9HH%2F5I2m53vgz0LWvszHQ9PQNk%2Fimg.jpg"
-        ),
-        restaurantDescription = "정직한 가격에 맛도 있고, 대만족합니다. 매장이 큰편은 아니지만 서빙하시는 분도 친절하시고 양도 배부르네요... 어쩌구저쩌구",
-        isLiked = false,
-        likes = 36,
-    )
-}
 
 @Composable
-fun HomeScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp)
-            .verticalScroll(rememberScrollState()),) {
-        repeat(5) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Profile(profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
-                    username = "Joshua-i",
-                    userDescription = "고독한 미식가");
-            Spacer(modifier = Modifier.height(11.dp))
-            Post(
-                restaurantName = "포케앤 샐러드",
-                rating = "3.5",
-                imageUrls = listOf(
-                    "https://api.nudge-community.com/attachments/339560",
-                    "https://img.siksinhot.com/place/1650516612762055.jpg?w=560&h=448&c=Y",
-                    "https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FdKS0uX%2FbtrScbvc9HH%2F5I2m53vgz0LWvszHQ9PQNk%2Fimg.jpg"
-                ),
-                restaurantDescription = "정직한 가격에 맛도 있고, 대만족합니다. 매장이 큰편은 아니지만 서빙하시는 분도 친절하시고 양도 배부르네요... 어쩌구저쩌구",
-                isLiked = false,
-                likes = 36,
+fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
+    var feedPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
+    var loading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(loading) {
+        try {
+            viewModel.getAllPosts(
+                context,
+                onSuccess = { posts ->
+                    feedPosts = posts
+                    println("feedPosts: ${feedPosts.size}")
+                },
             )
+            loading = false
+        }
+        catch (e: Exception) {
+            println("getAllPosts error: ${e.message}")
+            showToast(context, "getAllPosts error: ${e.message}")
         }
 
-        // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
-        Spacer(modifier = Modifier.height(70.dp))
+    }
+
+    if(loading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                //put at the center of the screen
+                modifier = Modifier
+                    .size(100.dp)
+            )
+        }
+    }
+    else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp)
+                .verticalScroll(rememberScrollState()),
+        ) {
+            for (post in feedPosts) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Profile(
+                    profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
+                    username = "Joshua-i",
+                    userDescription = "고독한 미식가"
+                );
+                Spacer(modifier = Modifier.height(11.dp))
+                Post(
+                    post = post,
+                    isLiked = false,
+                    likes = 36,
+                )
+            }
+
+            // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
+            Spacer(modifier = Modifier.height(70.dp))
+        }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        HomeScreen()
-    }
-}

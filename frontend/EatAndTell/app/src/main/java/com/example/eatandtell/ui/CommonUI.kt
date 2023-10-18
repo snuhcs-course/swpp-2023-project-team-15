@@ -96,7 +96,6 @@ fun CustomTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    supportingText: String = "",
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
@@ -132,7 +131,6 @@ fun WhiteTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    maxLines : Int = 1,
     modifier : Modifier,
     width : Dp? = null,
     height : Dp? = null,
@@ -161,8 +159,6 @@ fun WhiteTextField(
             fontWeight = FontWeight(400),
             color = Black,
         ),
-        maxLines = maxLines
-
     )
 }
 

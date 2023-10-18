@@ -77,7 +77,7 @@ fun BottomNav(navController: NavHostController, modifier: Modifier, context: Com
         startDestination = "Home"
     ) {
         composable(route = "Home") {
-            HomeScreen()
+            HomeScreen(context, viewModel)
         }
         composable(route = "Search") {
             SearchScreen(navController)

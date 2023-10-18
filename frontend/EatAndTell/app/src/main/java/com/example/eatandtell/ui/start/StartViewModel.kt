@@ -42,7 +42,7 @@ class StartViewModel : ViewModel() {
             try {
                 val response = apiService.registerUser(registrationData)
                 val token = response?.token
-                showToast(context, "Sing up successful")
+                showToast(context, "Sign up successful")
                 onSuccess(token)
             } catch (e: Exception) {
                 val errorMessage = e.message ?: "Network error"

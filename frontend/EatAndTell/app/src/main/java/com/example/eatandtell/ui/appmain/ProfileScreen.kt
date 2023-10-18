@@ -123,19 +123,19 @@ fun ProfileScreen() {
             buttonText = if (isCurrentUser) "프로필 편집" else "팔로우하기"  // New buttonText parameter
         )
         repeat(5) {
-            Post(
-                restaurantName = "포케앤 샐러드",
-                rating = "3.5",
-                imageUrls = listOf(
-                    "https://api.nudge-community.com/attachments/339560",
-                    "https://img.siksinhot.com/place/1650516612762055.jpg?w=560&h=448&c=Y",
-                    "https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FdKS0uX%2FbtrScbvc9HH%2F5I2m53vgz0LWvszHQ9PQNk%2Fimg.jpg"
-                ),
-                restaurantDescription = "정직한 가격에 맛도 있고, 대만족합니다. 매장이 큰편은 아니지만 서빙하시는 분도 친절하시고 양도 배부르네요... 어쩌구저쩌구",
-                isLiked = false,
-                likes = 36,
-            )
-            Spacer(modifier = Modifier.height(15.dp)) // space between posts
+//            Post(
+//                restaurantName = "포케앤 샐러드",
+//                rating = "3.5",
+//                imageUrls = listOf(
+//                    "https://api.nudge-community.com/attachments/339560",
+//                    "https://img.siksinhot.com/place/1650516612762055.jpg?w=560&h=448&c=Y",
+//                    "https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FdKS0uX%2FbtrScbvc9HH%2F5I2m53vgz0LWvszHQ9PQNk%2Fimg.jpg"
+//                ),
+//                restaurantDescription = "정직한 가격에 맛도 있고, 대만족합니다. 매장이 큰편은 아니지만 서빙하시는 분도 친절하시고 양도 배부르네요... 어쩌구저쩌구",
+//                isLiked = false,
+//                likes = 36,
+//            )
+//            Spacer(modifier = Modifier.height(15.dp)) // space between posts
 
         }
         // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding

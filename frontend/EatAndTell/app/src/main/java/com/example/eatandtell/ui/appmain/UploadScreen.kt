@@ -144,7 +144,8 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                     shape = RoundedCornerShape(size = 4.dp)
                 )
                 .fillMaxWidth()
-                .weight(1f) // 남은 세로 길이 모두 리뷰 공간으로 할당
+                .weight(1f) // 남은 세로 길이 모두 리뷰 공간으로 할당,
+            ,
         )
 
         // Upload Button

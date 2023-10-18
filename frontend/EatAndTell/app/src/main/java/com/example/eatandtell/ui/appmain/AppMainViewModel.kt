@@ -4,11 +4,15 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.eatandtell.di.ApiService
 import com.example.eatandtell.dto.PhotoReqDTO
+import com.example.eatandtell.dto.PostDTO
+import com.example.eatandtell.dto.RegisterRequest
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.ui.showToast
+import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -65,6 +69,7 @@ class AppMainViewModel() : ViewModel() {
             val errorMessage = e.message ?: "Network error"
             Log.d("upload post error", errorMessage)
             showToast(context, "Upload post failed $errorMessage")
+            throw e // rethrow the exception to be caught in the calling function
         }
     }
 
@@ -83,4 +88,18 @@ class AppMainViewModel() : ViewModel() {
             throw e // rethrow the exception to be caught in the calling function
         }
     }
+
+    suspend fun getAllPosts(context: Context, onSuccess: (List<PostDTO>) -> Unit) {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.getAllPosts(authorization)
+            showToast(context, "피드 로딩에 성공하였습니다")
+            onSuccess(response.data)
+        } catch (e: Exception) {
+            val errorMessage = e.message ?: "Network error"
+            showToast(context, "피드 로딩에 실패하였습니다")
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
 }

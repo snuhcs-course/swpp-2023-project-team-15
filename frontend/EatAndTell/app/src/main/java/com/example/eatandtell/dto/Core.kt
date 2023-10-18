@@ -16,7 +16,7 @@ data class RestaurantDTO(
 
 data class PhotoDTO(
     val id : Int?,
-    val photoUrl : String,
+    val photo_url : String,
     val post : Int?
 )
 
