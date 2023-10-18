@@ -27,6 +27,7 @@ import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.ui.DraggableStarRating
+import com.example.eatandtell.ui.ImageDialog
 import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.MediumWhiteButton
 import com.example.eatandtell.ui.PostImage
@@ -67,6 +68,9 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
             photoPaths = it
         }
 
+    var clickedImageIndex by remember { mutableStateOf(-1) }
+
+
 
     val username = "Joshua-i"
     val userDescription = "고독한 미식가"
@@ -92,8 +96,10 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            for (photoPath in photoPaths) {
-                PostImage(photoPath.toString())
+
+            for ((index, photoPath) in photoPaths.withIndex()) {
+                PostImage(photoPath.toString(), onImageClick = { clickedImageIndex = index }
+                )
             }
         }
 
@@ -157,6 +163,11 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
         )
 
         Spacer(modifier = Modifier.height(20.dp))
+    }
+
+    //If Image Clicked, show Image Dialog
+    if (clickedImageIndex != -1) {
+        ImageDialog(imageUrl = photoPaths[clickedImageIndex].toString(), onClick = { clickedImageIndex = -1 })
     }
 
 }

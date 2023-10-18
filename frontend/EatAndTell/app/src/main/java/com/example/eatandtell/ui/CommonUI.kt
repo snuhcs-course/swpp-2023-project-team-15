@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,6 +38,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.example.eatandtell.R
@@ -110,7 +114,7 @@ fun CustomTextField(
                 color = Color(0xFFC5C5C5),
                 shape = RoundedCornerShape(size = 4.dp)
             )
-            .width(320.dp)
+            .fillMaxWidth()
             .height(IntrinsicSize.Min),
         colors = TextFieldDefaults.textFieldColors(
             containerColor = Color(0xFFEEEEEE),
@@ -460,7 +464,7 @@ fun Profile(profileUrl: String, username: String, userDescription: String) {
 
 // Post Photos
 @Composable
-fun PostImage(imageUrl: String) {
+fun PostImage(imageUrl: String, onImageClick: () -> Unit) {
     Image(
         painter = rememberImagePainter(
             data = imageUrl,
@@ -472,7 +476,58 @@ fun PostImage(imageUrl: String) {
             .height(150.dp)
             .aspectRatio(1f)
             .clip(RoundedCornerShape(8.dp))
+            .clickable { onImageClick() }
     )
+}
+
+@Composable
+fun ImageDialog(imageUrl: String, onClick: () -> Unit) {
+    Dialog(
+        onDismissRequest = { onClick() },
+        properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true),
+
+    ) {
+        Box (
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Close,
+                    contentDescription = "back",
+                    tint = Black,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .align(Alignment.End)
+                        .clickable { onClick() }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Image(
+                    painter = rememberImagePainter(data = imageUrl),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillWidth,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ImageDialogPreview() {
+    EatAndTellTheme {
+        ImageDialog(
+            imageUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
+            onClick = { /**/ }
+        )
+    }
 }
 
 
