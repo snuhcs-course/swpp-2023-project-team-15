@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.RestReqDTO
@@ -32,6 +33,10 @@ import com.example.eatandtell.ui.PostImage
 import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.WhiteTextField
 import com.example.eatandtell.ui.showToast
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -162,6 +167,7 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
 }
 
 
+
 @Composable
 fun UploadButton(viewModel: AppMainViewModel,
                  restaurant : RestReqDTO,
@@ -170,43 +176,32 @@ fun UploadButton(viewModel: AppMainViewModel,
                  description: String,
                  context: Context,
                  onClick: () -> Unit) {
-    var photoUrls = listOf<String>() // 실제 서버에 업로드할 주소
+    val coroutineScope = rememberCoroutineScope()
 
-    val onClickReal = {
+    val onClickReal: () -> Unit = {
         when {
             restaurant.name.isBlank() -> showToast(context, "맛집명을 입력해주세요")
             description.isBlank() -> showToast(context, "리뷰를 입력해주세요")
             rating == "0" -> showToast(context, "별점을 입력해주세요")
 
             else -> {
-                for(photoPath in photoPaths) {
-                    //change photoPath in to photo with formData type
-                    val contentResolver: ContentResolver = context.contentResolver
-                    val inputStream: InputStream? = contentResolver.openInputStream(photoPath)
-                    val byteArray: ByteArray? = inputStream?.readBytes()
-                    val requestBody: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray!!)
-                    println(File(photoPath.toString()).name)
-                    val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("image", File(photoPath.toString()).name + ".jpg", requestBody)
-                    //get photo url from server
-                    viewModel.getImageURL(fileToUpload, context, onSuccess = { imageUrl ->
-                            photoUrls = photoUrls + imageUrl
-                            println("getting image urls in for iteration")
-                        }
-                    )
-                }
-
-                println("for iteration done")
-
-                //upload post
-                if(photoPaths.isNotEmpty() && photoUrls.isEmpty()) {
-                    showToast(context, "photo Url이 없어 업로드에 실패했습니다.")
-                }
-                else {
-                    var photos = photoUrls.map { PhotoReqDTO(it) }
-                    val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
-                    viewModel.uploadPost(postData, context, onSuccess = onClick)
+                try {
+                    coroutineScope.launch {
+                        viewModel.uploadPhotosAndPost(
+                            photoPaths = photoPaths,
+                            restaurant = restaurant,
+                            rating = rating,
+                            description = description,
+                            context = context
+                        )
+                        onClick()
+                    }
+                } catch (e: Exception) {
+                    // Handle exceptions, e.g., from network calls, here
+                    showToast(context, "An error occurred: ${e.message}")
                 }
             }
+
         }
     }
 

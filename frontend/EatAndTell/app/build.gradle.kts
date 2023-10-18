@@ -76,4 +76,10 @@ dependencies {
     implementation ("androidx.navigation:navigation-compose:2.4.0-alpha10")
     implementation ("androidx.compose.material:material:1.0.5" )
     implementation("com.google.accompanist:accompanist-flowlayout:0.30.1")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    runtimeOnly("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    runtimeOnly("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
 }
