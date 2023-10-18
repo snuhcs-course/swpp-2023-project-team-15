@@ -19,8 +19,8 @@ class PostPhotoSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'id')
-        read_only_fields = ('username', 'id')
+        fields = ('username', 'id', 'avatar_url', 'description')
+        read_only_fields = ('username', 'id', 'avatar_url','description')
 
 class PostSerializer(serializers.ModelSerializer):
     restaurant = RestaurantSerializer()

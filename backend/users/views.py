@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer,UserPostSerializer, UserInfoSerializer
 from django.shortcuts import get_object_or_404
+from drf_yasg.utils import swagger_auto_schema
 
 
 User= get_user_model()
@@ -35,27 +36,7 @@ def register(request):
         print(e)
         return Response({'error': 'An error occurred while creating the user'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-    '''username = request.data.get('username')
-    password = request.data.get('password')
-    email = request.data.get('email')
-    # Validation: Check if all required fields are provided
-    if not username or not password or not email:
-        return Response({'error': 'All fields are required'}, status=status.HTTP_400_BAD_REQUEST)
-
-    # Check if the username or email is already taken
-    if User.objects.filter(username=username).exists():
-        return Response({'error': 'Username is already taken'}, status=status.HTTP_400_BAD_REQUEST)
-    if User.objects.filter(email=email).exists():
-        return Response({'error': 'Email is already in use'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    try:
-        user = User.objects.create_user(username=username, email=email, password=password)
-        token = Token.objects.create(user=user)
-        return Response({'token': token.key}, status=status.HTTP_201_CREATED)
-    except Exception as e:
-        return Response({'error': 'An error occurred while creating the user'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-'''
+#@swagger_auto_schema(request_body=UserSerializer, responses={200: Response})
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def profile_update(request):
@@ -73,7 +54,8 @@ def profile_update(request):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+#@swagger_auto_schema(request_body=UserSerializer, responses={200: Response})   
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_my_profile(request):
@@ -82,12 +64,14 @@ def get_my_profile(request):
     serializer = UserSerializer(user)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+#@swagger_auto_schema(request_body=UserSerializer, responses={200: Response})
 @api_view(['GET'])
 def get_user_profile(request, pk):
     user = get_object_or_404(User, pk=pk)
     serializer = UserSerializer(user)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+#@swagger_auto_schema(request_body=UserPostSerializer, responses={200: Response})
 @api_view(['GET'])
 def get_user_posts(request, pk):
     user = get_object_or_404(User, pk=pk)
