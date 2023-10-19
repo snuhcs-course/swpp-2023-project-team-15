@@ -27,6 +27,9 @@ git fetch origin
 # Check if the branch exists in remote's context, and create a local branch that tracks the remote branch if necessary
 git checkout $CURRENT_BRANCH 2>/dev/null || git checkout --track origin/$CURRENT_BRANCH
 
+# Pull the latest changes from the remote branch
+git pull
+
 poetry install
 sudo systemctl restart gunicorn
 
