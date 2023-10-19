@@ -36,7 +36,6 @@ def register(request):
         print(e)
         return Response({'error': 'An error occurred while creating the user'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-#@swagger_auto_schema(request_body=UserSerializer, responses={200: Response})
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def profile_update(request):
@@ -55,7 +54,6 @@ def profile_update(request):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#@swagger_auto_schema(request_body=UserSerializer, responses={200: Response})   
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_my_profile(request):
@@ -64,22 +62,24 @@ def get_my_profile(request):
     serializer = UserSerializer(user, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-#@swagger_auto_schema(request_body=UserSerializer, responses={200: Response})
 @api_view(['GET'])
 def get_user_profile(request, pk):
     user = get_object_or_404(User, pk=pk)
     serializer = UserSerializer(user, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-#@swagger_auto_schema(request_body=UserPostSerializer, responses={200: Response})
 @api_view(['GET'])
 def get_user_posts(request, pk):
     user = get_object_or_404(User, pk=pk)
     serializer = UserPostSerializer(user, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 @api_view(['GET'])
-def get_user_info(request, pk):
-    user = get_object_or_404(User, pk=pk)
-    serializer = UserInfoSerializer(user, context={'request': request})
+def filter_users(request):
+    queryset = User.objects.all()
+    username = request.query_params.get('username')
+    if username is not None:
+        queryset = queryset.filter(username__icontains=username)
+    serializer = UserSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
