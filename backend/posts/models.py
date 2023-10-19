@@ -20,6 +20,9 @@ class Post(models.Model):
     rating = models.DecimalField(max_digits=5, decimal_places=1)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
 
     def __str__(self):
         return f"{self.pk}"
@@ -31,3 +34,5 @@ class PostPhoto(models.Model):
 
     def __str__(self):
         return f"Photo for {self.post.id}"
+    
+
