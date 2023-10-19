@@ -42,5 +42,4 @@ class CustomUserAdmin(UserAdmin):
     list_display = (
         "username",
         "description",
-        "avatar_url",
     )
