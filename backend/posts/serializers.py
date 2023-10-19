@@ -26,9 +26,11 @@ class PostSerializer(serializers.ModelSerializer):
     restaurant = RestaurantSerializer()
     photos = PostPhotoSerializer(many=True, required=False)
     user = UserSerializer(read_only=True)
+    is_liked = serializers.SerializerMethodField()
+    like_count = serializers.SerializerMethodField()
     class Meta:
         model = Post
-        fields = '__all__'
+        fields = ('id', 'restaurant', 'photos', 'user', 'rating', 'description', 'created_at', 'is_liked', 'like_count')
         read_only_fields = ('user',)
 
     def create(self, validated_data):
@@ -43,6 +45,15 @@ class PostSerializer(serializers.ModelSerializer):
             PostPhoto.objects.create(post=post, **photo_data)
 
         return post
+
+    def get_is_liked(self, obj):
+        request = self.context.get('request', None)
+        if request:
+            return obj.likes.filter(id=request.user.id).exists()
+        return False
+    
+    def get_like_count(self, obj):
+        return obj.likes.count()
 
 def data_list(serializer):
     class DataListSerializer(serializers.Serializer):

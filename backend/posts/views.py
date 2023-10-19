@@ -27,10 +27,10 @@ class PostViewSet(viewsets.ModelViewSet):
 
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.get_serializer(page, many=True, context={"request": request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True, context={"request": request})
         return Response({"data": serializer.data})
 
     @action(detail=True, methods=['put'], url_path='likes', permission_classes=[permissions.IsAuthenticated])
@@ -46,3 +46,13 @@ class PostViewSet(viewsets.ModelViewSet):
         else:
             post.likes.add(user)  # This is where the user is added to the likes
             return Response({"message": "Post liked"}, status=status.HTTP_200_OK)
+
+    def get_serializer_context(self):
+        """
+        Extra context provided to the serializer class.
+        """
+        context = super(PostViewSet, self).get_serializer_context()
+        context.update({
+            "request": self.request
+        })
+        return context
