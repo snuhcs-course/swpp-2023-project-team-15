@@ -121,10 +121,11 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
 
 @Composable
 fun HomePost(post: PostDTO) {
+    val user = post.user
     Profile(
-        profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
-        username = "Joshua-i",
-        userDescription = "고독한 미식가"
+        user.avatar_url,
+        user.username,
+        user.description,
     );
     Spacer(modifier = Modifier.height(11.dp))
     Post(
