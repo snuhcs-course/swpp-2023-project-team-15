@@ -27,6 +27,7 @@ import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.ui.DraggableStarRating
+import com.example.eatandtell.ui.ImageDialog
 import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.MediumWhiteButton
 import com.example.eatandtell.ui.PostImage
@@ -58,13 +59,7 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
 
     var myRating by rememberSaveable { mutableStateOf("0") }
 
-
     val profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8"
-//    val photoUrls = listOf(
-//        "https://api.nudge-community.com/attachments/339560",
-//        "https://img.siksinhot.com/place/1650516612762055.jpg?w=560&h=448&c=Y",
-//        "https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FdKS0uX%2FbtrScbvc9HH%2F5I2m53vgz0LWvszHQ9PQNk%2Fimg.jpg"
-//    ) //TODO: get from gallery
 
     var photoPaths by remember { mutableStateOf(listOf<Uri>()) } //핸드폰 내의 파일 경로
 
@@ -72,6 +67,9 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
         rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) {
             photoPaths = it
         }
+
+    var clickedImageIndex by remember { mutableStateOf(-1) }
+
 
 
     val username = "Joshua-i"
@@ -98,8 +96,10 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            for (photoPath in photoPaths) {
-                PostImage(photoPath.toString())
+
+            for ((index, photoPath) in photoPaths.withIndex()) {
+                PostImage(photoPath.toString(), onImageClick = { clickedImageIndex = index }
+                )
             }
         }
 
@@ -144,7 +144,8 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                     shape = RoundedCornerShape(size = 4.dp)
                 )
                 .fillMaxWidth()
-                .weight(1f) // 남은 세로 길이 모두 리뷰 공간으로 할당
+                .weight(1f) // 남은 세로 길이 모두 리뷰 공간으로 할당,
+            ,
         )
 
         // Upload Button
@@ -162,6 +163,11 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
         )
 
         Spacer(modifier = Modifier.height(20.dp))
+    }
+
+    //If Image Clicked, show Image Dialog
+    if (clickedImageIndex != -1) {
+        ImageDialog(imageUrl = photoPaths[clickedImageIndex].toString(), onClick = { clickedImageIndex = -1 })
     }
 
 }

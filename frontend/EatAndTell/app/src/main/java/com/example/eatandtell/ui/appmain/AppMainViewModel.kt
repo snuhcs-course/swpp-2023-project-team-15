@@ -4,11 +4,15 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.eatandtell.di.ApiService
 import com.example.eatandtell.dto.PhotoReqDTO
+import com.example.eatandtell.dto.PostDTO
+import com.example.eatandtell.dto.RegisterRequest
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.ui.showToast
+import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -51,7 +55,8 @@ class AppMainViewModel() : ViewModel() {
             this.uploadPost(postData, context)
         } catch (e: Exception) {
             // Handle exceptions, e.g., from network calls, here
-            showToast(context, "An error occurred: ${e.message}")
+            Log.d("upload photos and post error", e.message ?: "Network error")
+            showToast(context, "포스트 업로드에 실패했습니다")
         }
     }
 
@@ -60,11 +65,11 @@ class AppMainViewModel() : ViewModel() {
 
         try {
             apiService.uploadPost(authorization, postData)
-            showToast(context, "Upload post success")
+            showToast(context, "포스트가 업로드되었습니다")
         } catch (e: Exception) {
             val errorMessage = e.message ?: "Network error"
             Log.d("upload post error", errorMessage)
-            showToast(context, "Upload post failed $errorMessage")
+            throw e // rethrow the exception to be caught in the calling function
         }
     }
 
@@ -74,13 +79,32 @@ class AppMainViewModel() : ViewModel() {
         try {
             val response = apiService.getImageURL(authorization, fileToUpload) // Assuming this is a suspend function call
             val imageUrl = response.image_url
-            showToast(context, "Get image url success")
             return imageUrl
         } catch (e: Exception) {
             val errorMessage = e.message ?: "Network error"
             Log.d("get image url error", errorMessage)
-            showToast(context, "Get image url failed $errorMessage")
             throw e // rethrow the exception to be caught in the calling function
         }
     }
+
+    suspend fun getAllPosts(context: Context, onSuccess: (List<PostDTO>) -> Unit) {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.getAllPosts(authorization)
+            onSuccess(response.data)
+        } catch (e: Exception) {
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
+    suspend fun getMyPosts(context: Context, onSuccess: (List<PostDTO>) -> Unit) {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.getMyPosts(authorization)
+            onSuccess(response.data)
+        } catch (e: Exception) {
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
 }

@@ -14,11 +14,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,13 +36,18 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.example.eatandtell.R
+import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.EatAndTellTheme
 import com.example.eatandtell.ui.theme.Gray
@@ -96,7 +104,6 @@ fun CustomTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    supportingText: String = "",
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
@@ -111,7 +118,7 @@ fun CustomTextField(
                 color = Color(0xFFC5C5C5),
                 shape = RoundedCornerShape(size = 4.dp)
             )
-            .width(320.dp)
+            .fillMaxWidth()
             .height(IntrinsicSize.Min),
         colors = TextFieldDefaults.textFieldColors(
             containerColor = Color(0xFFEEEEEE),
@@ -132,7 +139,6 @@ fun WhiteTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    maxLines : Int = 1,
     modifier : Modifier,
     width : Dp? = null,
     height : Dp? = null,
@@ -161,8 +167,6 @@ fun WhiteTextField(
             fontWeight = FontWeight(400),
             color = Black,
         ),
-        maxLines = maxLines
-
     )
 }
 
@@ -245,7 +249,7 @@ fun MediumWhiteButton(onClick: () -> Unit, text: String) {
 @Composable
 fun PreviewMediumWhiteButton() {
     EatAndTellTheme {
-        MediumWhiteButton(onClick = { /*TODO*/ }, text = "사진 추가하기")
+        MediumWhiteButton(onClick = { /**/ }, text = "사진 추가하기")
     }
 }
 
@@ -279,7 +283,7 @@ fun MediumRedButton(onClick: () -> Unit, text: String) {
 @Composable
 fun PreviewMediumRedButton() {
     EatAndTellTheme {
-        MediumRedButton(onClick = { /*TODO*/ }, text = "팔로우하기")
+        MediumRedButton(onClick = { /**/ }, text = "팔로우하기")
     }
 }
 
@@ -357,7 +361,7 @@ fun StarHalf(size : Dp) {
 fun StarRating(rating: String, size: Dp = 16.dp) {
     val rate = rating.toFloat()
     val fullStars = rate.toInt()
-    val hasHalfStar = rate - fullStars >= 0.5
+    val hasHalfStar = false // rate - fullStars >= 0.5
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(0.dp), // 조절 가능한 간격
@@ -369,9 +373,9 @@ fun StarRating(rating: String, size: Dp = 16.dp) {
         }
 
         // Half star
-        if (hasHalfStar) {
-            StarHalf(size)
-        }
+//        if (hasHalfStar) {
+//            StarHalf(size)
+//        }
 
         // Empty stars
         repeat(5 - fullStars - if (hasHalfStar) 1 else 0) {
@@ -464,7 +468,7 @@ fun Profile(profileUrl: String, username: String, userDescription: String) {
 
 // Post Photos
 @Composable
-fun PostImage(imageUrl: String) {
+fun PostImage(imageUrl: String, onImageClick: () -> Unit) {
     Image(
         painter = rememberImagePainter(
             data = imageUrl,
@@ -476,9 +480,168 @@ fun PostImage(imageUrl: String) {
             .height(150.dp)
             .aspectRatio(1f)
             .clip(RoundedCornerShape(8.dp))
+            .clickable { onImageClick() }
     )
 }
 
+@Composable
+fun ImageDialog(imageUrl: String, onClick: () -> Unit) {
+    Dialog(
+        onDismissRequest = { onClick() },
+        properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true),
+
+    ) {
+        Box (
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Close,
+                    contentDescription = "back",
+                    tint = Black,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .align(Alignment.End)
+                        .clickable { onClick() }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Image(
+                    painter = rememberImagePainter(data = imageUrl),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillWidth,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ImageDialogPreview() {
+    EatAndTellTheme {
+        ImageDialog(
+            imageUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
+            onClick = { /**/ }
+        )
+    }
+}
+
+
+@Composable
+fun Post(
+    post : PostDTO,
+    isLiked : Boolean,
+    likes : Int,
+) {
+
+    val restaurantName = post.restaurant.name
+    val rating = post.rating
+    //get list of photo urls from post.photos list's photo_url
+    val imageUrls = if (post.photos!=null) post.photos.map { photo -> photo.photo_url } else listOf()
+    val description = post.description
+    var clickedImageIndex by remember { mutableStateOf(-1) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            //식당 이름
+            Text(text = restaurantName, style = TextStyle(
+                fontSize = 16.sp,
+                lineHeight = 21.sp,
+                fontWeight = FontWeight(700),
+                color = Black,
+            ), modifier = Modifier
+                .weight(1f)
+                .height(22.dp),
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+
+            //ratings
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.Start),
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier
+                    .wrapContentWidth(Alignment.End)
+                    .height(22.dp)
+            ) {
+                StarRating(rating, size = 18.dp)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(7.dp))
+
+        // Images Row
+        if (imageUrls.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .height(160.dp)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                for ((index, imageUrl) in imageUrls.withIndex()) {
+                    PostImage(imageUrl, onImageClick = { clickedImageIndex = index }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Restaurant Description
+        Text(text = description, style = TextStyle(
+            fontSize = 14.sp,
+            lineHeight = 18.sp,
+            fontWeight = FontWeight(500),
+            color = Color(0xFF262626),
+        ), modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
+            overflow = TextOverflow.Ellipsis)
+
+        Row(
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Text(
+                text = likes.toString(),
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    lineHeight = 16.5.sp,
+                    fontWeight = FontWeight(500),
+                    color = MainColor,
+                ),
+                modifier = Modifier
+                    .width(16.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            if(isLiked) HeartFull() else HeartEmpty()
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+
+    //If Image Clicked, show Image Dialog
+    if (clickedImageIndex != -1) {
+        ImageDialog(imageUrl = imageUrls[clickedImageIndex] , onClick = { clickedImageIndex = -1 })
+    }
+}
 
 
 @Composable

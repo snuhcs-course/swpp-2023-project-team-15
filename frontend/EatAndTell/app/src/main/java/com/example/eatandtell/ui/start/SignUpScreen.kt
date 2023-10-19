@@ -153,14 +153,14 @@ fun SignupButton (
 
     val onClickReal = {
         when {
-            email.isBlank() -> showToast(context, "Please enter your email")
-            !isEmailValid(email) -> showToast(context, "Invalid email address")
-            username.isBlank() -> showToast(context, "Please enter your username")
-            username.length !in 4..20 -> showToast(context, "Invalid ID")
-            password.isBlank() -> showToast(context, "Please enter your password")
-            password.length !in 4..20 -> showToast(context, "Invalid password")
-            confirmPassword.isBlank() -> showToast(context, "Please confirm your password")
-            password != confirmPassword -> showToast(context, "Passwords do not match")
+            email.isBlank() -> showToast(context, "이메일을 입력하세요")
+            !isEmailValid(email) -> showToast(context, "이메일 주소가 올바르지 않습니다")
+            username.isBlank() -> showToast(context, "아이디를 입력하세요")
+            username.length !in 4..20 -> showToast(context, "아이디가 올바르지 않습니다")
+            password.isBlank() -> showToast(context, "비밀번호를 입력하세요")
+            password.length !in 4..20 -> showToast(context, "비밀번호가 올바르지 않습니다")
+            confirmPassword.isBlank() -> showToast(context, "비밀번호 확인을 입력하세요")
+            password != confirmPassword -> showToast(context, "비밀번호 확인이 틀립니다")
             else -> {
                 viewModel.registerUser(username, password, email, context, onSuccess = onClick)
             }
