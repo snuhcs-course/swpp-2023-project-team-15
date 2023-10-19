@@ -5,7 +5,7 @@ from .models import Post, PostPhoto, Restaurant
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ["id", "user", "restaurant_id", "rating", "created_at"]
+    list_display = ["id", "user", "description", "restaurant_id", "restaurant", "rating", "created_at"]
     search_fields = ["description"]
     list_filter = ["created_at", "rating"]
     ordering = ["-created_at"]
