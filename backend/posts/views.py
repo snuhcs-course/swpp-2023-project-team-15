@@ -17,19 +17,24 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+        
+    def get_queryset(self):
+        """
+        Optionally restricts the returned purchases to a given user,
+        by filtering against a `username` query parameter in the URL.
+        """
+        queryset = Post.objects.all()
+        restaurant_name = self.request.query_params.get('restaurant_name')
+        if restaurant_name is not None:
+            queryset = queryset.filter(restaurant__name__icontains=restaurant_name)
+        return queryset
 
     @swagger_auto_schema(
         operation_description="List all posts",
         responses={200: data_list(PostSerializer)}
     )
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
-
+        queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True, context={"request": request})
         return Response({"data": serializer.data})
 
