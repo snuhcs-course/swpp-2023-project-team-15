@@ -88,7 +88,10 @@ fun BottomNav(navController: NavHostController, modifier: Modifier, context: Com
 
         }
         composable(route = "Profile") {
-            ProfileScreen(context, viewModel)
+            ProfileScreen(context, viewModel, navController)
+        }
+        composable(route = "EditProfile") {
+            EditProfileScreen(context, viewModel)
         }
     }
 }
