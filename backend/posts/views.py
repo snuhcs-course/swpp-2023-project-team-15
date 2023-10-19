@@ -1,5 +1,6 @@
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import filters, permissions, viewsets
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import Post
@@ -31,3 +32,17 @@ class PostViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response({"data": serializer.data})
+
+    @action(detail=True, methods=['put'], url_path='likes', permission_classes=[permissions.IsAuthenticated])
+    def like_post(self, request, pk=None):
+        post = self.get_object()  # retrieve the post by its pk.
+        user = request.user
+
+        # Check if the user already liked this post
+        if post.likes.filter(id=user.id).exists():
+            # You can decide what to do here, for example, remove the like or simply do nothing
+            post.likes.remove(user)  # To unlike the post
+            return Response({"message": "Post unliked"}, status=status.HTTP_200_OK)
+        else:
+            post.likes.add(user)  # This is where the user is added to the likes
+            return Response({"message": "Post liked"}, status=status.HTTP_200_OK)
