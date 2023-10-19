@@ -20,3 +20,7 @@ data class GetMyFeedResponse(
     val following_count: Int,
     val posts: List<PostDTO>
 )
+
+data class toggleLikeResponse(
+    val message : String,
+)

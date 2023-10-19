@@ -48,14 +48,15 @@ class AppMainViewModel() : ViewModel() {
         for(byteArray in photoByteArrays) {
             val requestBody: RequestBody = byteArray.toRequestBody("image/*".toMediaTypeOrNull())
             val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("image", "this_name_does_not_matter.jpg", requestBody)
-            val imageUrl = getImageURL(fileToUpload, context)
+            val imageUrl = getImageURL(fileToUpload)
             photoUrls.add(imageUrl)
         }
         try {
             Log.d("upload photos and post",  "trying")
             val photos = photoUrls.map { PhotoReqDTO(it) }
             val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
-            this.uploadPost(postData, context)
+            this.uploadPost(postData)
+            showToast(context, "포스트가 업로드되었습니다")
         } catch (e: Exception) {
             // Handle exceptions, e.g., from network calls, here
             Log.d("upload photos and post error", e.message ?: "Network error")
@@ -63,12 +64,11 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
-    private suspend fun uploadPost(postData: UploadPostRequest, context: Context) {
+    private suspend fun uploadPost(postData: UploadPostRequest) {
         val authorization = "Token $token"
 
         try {
             apiService.uploadPost(authorization, postData)
-            showToast(context, "포스트가 업로드되었습니다")
         } catch (e: Exception) {
             val errorMessage = e.message ?: "Network error"
             Log.d("upload post error", errorMessage)
@@ -76,7 +76,7 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
-    private suspend fun getImageURL(fileToUpload: MultipartBody.Part?, context: Context): String {
+    private suspend fun getImageURL(fileToUpload: MultipartBody.Part?): String {
         val authorization = "Token $token"
 
         try {
@@ -90,7 +90,7 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
-    suspend fun getAllPosts(context: Context, onSuccess: (List<PostDTO>) -> Unit) {
+    suspend fun getAllPosts(onSuccess: (List<PostDTO>) -> Unit) {
         val authorization = "Token $token"
         try {
             val response = apiService.getAllPosts(authorization)
@@ -100,7 +100,7 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
-    suspend fun getMyFeed(context: Context, onSuccess: (UserInfoDTO, List<PostDTO>) -> Unit) {
+    suspend fun getMyFeed(onSuccess: (UserInfoDTO, List<PostDTO>) -> Unit) {
         val authorization = "Token $token"
         try {
             val response = apiService.getMyFeed(authorization)
@@ -111,6 +111,16 @@ class AppMainViewModel() : ViewModel() {
         } catch (e: Exception) {
             Log.d("get my feed error", e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
+    suspend fun toggleLike(post_id: Int) {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.toggleLike(authorization, post_id)
+            Log.d("toggle like", "success")
+        } catch (e: Exception) {
+            Log.d("toggle like error", e.message ?: "Network error")
         }
     }
 

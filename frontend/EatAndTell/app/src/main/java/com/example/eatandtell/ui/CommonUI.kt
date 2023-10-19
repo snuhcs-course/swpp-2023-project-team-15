@@ -74,24 +74,28 @@ fun Logo() {
 // hearts
 
 @Composable
-fun HeartFull() {
+fun HeartFull(onClick: (Int) -> Unit, post_id: Int) {
     Icon(
         painter = painterResource(R.drawable.ic_heart_full),
         modifier = Modifier
             .width(24.dp)
-            .height(24.dp),
+            .height(24.dp)
+            .clickable { onClick(post_id) }
+        ,
         contentDescription = "heart_full",
-        tint = MainColor
+        tint = MainColor,
     )
 }
 
 @Composable
-fun HeartEmpty() {
+fun HeartEmpty(onClick: (Int) -> Unit, post_id: Int) {
     Icon(
         painter = painterResource(R.drawable.ic_heart_empty),
         modifier = Modifier
             .width(24.dp)
-            .height(24.dp),
+            .height(24.dp)
+            .clickable { onClick(post_id) }
+        ,
         contentDescription = "heart_empty",
         tint = MainColor
     )
@@ -450,7 +454,8 @@ fun ProfileText(username: String, userDescription: String) {
                 color = Color(0xFF848484),
             ),  modifier = Modifier
                 .padding(top = 2.dp)
-                .width(150.dp),
+                .width(150.dp)
+                .height(20.dp),
                 overflow = TextOverflow.Ellipsis
         )
     }
@@ -541,16 +546,17 @@ fun ImageDialogPreview() {
 @Composable
 fun Post(
     post : PostDTO,
-    isLiked : Boolean,
-    likes : Int,
+    onHeartClick: (Int) -> Unit = { }
 ) {
-
+    val post_id = post.id
     val restaurantName = post.restaurant.name
     val rating = post.rating
     //get list of photo urls from post.photos list's photo_url
     val imageUrls = if (post.photos!=null) post.photos.map { photo -> photo.photo_url } else listOf()
     val description = post.description
     var clickedImageIndex by remember { mutableStateOf(-1) }
+    var isLiked by remember { mutableStateOf(post.is_liked) }
+    var likes by remember { mutableStateOf(post.like_count) }
 
     Column(
         modifier = Modifier
@@ -634,7 +640,16 @@ fun Post(
                     .width(16.dp)
             )
             Spacer(modifier = Modifier.width(4.dp))
-            if(isLiked) HeartFull() else HeartEmpty()
+            if(isLiked) HeartFull(onClick = {
+                onHeartClick(post_id)
+                isLiked = !isLiked
+                likes = likes -1
+            }, post_id = post_id)
+            else HeartEmpty(onClick = {
+                onHeartClick(post_id)
+                isLiked = !isLiked
+                likes = likes +1
+            }, post_id = post_id)
         }
 
         Spacer(modifier = Modifier.height(24.dp))

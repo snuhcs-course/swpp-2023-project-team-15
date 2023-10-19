@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,7 +57,7 @@ import com.example.eatandtell.ui.theme.Inter
 import com.example.eatandtell.ui.theme.MainColor
 
 import com.google.accompanist.flowlayout.FlowRow
-
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -124,11 +125,12 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
     var myPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
     var myInfo by remember { mutableStateOf(UserInfoDTO(0, "", "", "", 0, 0)) }
     var loading by remember { mutableStateOf(true) }
+    val coroutinescope = rememberCoroutineScope()
+
 
     LaunchedEffect(loading) {
         try {
             viewModel.getMyFeed(
-                context,
                 onSuccess = { info, posts ->
                     myInfo = info
                     myPosts = posts
@@ -173,7 +175,11 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
             )}
 
             items(myPosts) { post ->
-                Post(post, isLiked = false, likes = 36)
+                Post(post, onHeartClick = {
+                    coroutinescope.launch {
+                        viewModel.toggleLike(post.id)
+                    }
+                })
             }
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
             item {Spacer(modifier = Modifier.height(70.dp))}

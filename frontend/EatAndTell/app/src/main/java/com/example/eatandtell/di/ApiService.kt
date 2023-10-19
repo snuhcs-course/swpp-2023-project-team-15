@@ -14,7 +14,9 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
+import retrofit2.http.PUT
 import retrofit2.http.Part
+import retrofit2.http.Path
 
 interface ApiService {
     @POST("users/login/") // The login endpoint (hypothetical)
@@ -38,5 +40,9 @@ interface ApiService {
     @POST("images/upload/") // The images endpoint
     suspend fun getImageURL(@Header("Authorization") authorization: String,
                     @Part images: MultipartBody.Part?): ImageURLResponse
+
+    @PUT("posts/{post_id}/likes/") // The posts endpoint
+    suspend fun toggleLike(@Header("Authorization") authorization: String,
+                           @Path("post_id") post_id: Int): toggleLikeResponse
 
 }
