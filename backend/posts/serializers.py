@@ -46,13 +46,13 @@ class PostSerializer(serializers.ModelSerializer):
 
         return post
 
-    def get_is_liked(self, obj):
+    def get_is_liked(self, obj) -> bool:
         request = self.context.get('request', None)
         if request:
             return obj.likes.filter(id=request.user.id).exists()
         return False
     
-    def get_like_count(self, obj):
+    def get_like_count(self, obj) -> int:
         return obj.likes.count()
 
 def data_list(serializer):
