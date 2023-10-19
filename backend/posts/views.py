@@ -33,7 +33,7 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True, context={"request": request})
         return Response({"data": serializer.data})
 
-    @action(detail=True, methods=['put'], url_path='likes', permission_classes=[permissions.IsAuthenticated])
+    @action(detail=True, methods=['put'], url_path='likes', permission_classes=[permissions.IsAuthenticated], serializer_class=None)
     def like_post(self, request, pk=None):
         post = self.get_object()  # retrieve the post by its pk.
         user = request.user
