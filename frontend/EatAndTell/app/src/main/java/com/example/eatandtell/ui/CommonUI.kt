@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -446,9 +447,11 @@ fun ProfileText(username: String, userDescription: String) {
                 fontSize = 13.sp,
                 lineHeight = 18.sp,
                 fontWeight = FontWeight(500),
-                color = Color(0xFF848484)
-            )
-
+                color = Color(0xFF848484),
+            ),  modifier = Modifier
+                .padding(top = 2.dp)
+                .width(150.dp),
+                overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -682,6 +685,20 @@ fun SearchRefraction(onClick: () -> Unit) {
             .height(24.dp)
             .clickable(onClick = onClick),
         contentDescription = "search_refraction",
+        tint = Black
+    )
+}
+
+@Composable
+fun MyIcon(onClick: () -> Unit) {
+    Icon(
+        imageVector = Icons.Outlined.Person,
+        modifier = Modifier
+            .padding(1.dp)
+            .width(24.dp)
+            .height(24.dp)
+            .clickable(onClick = onClick),
+        contentDescription = "my_home",
         tint = Black
     )
 }

@@ -11,6 +11,8 @@ import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.RegisterRequest
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.UploadPostRequest
+import com.example.eatandtell.dto.UserDTO
+import com.example.eatandtell.dto.UserInfoDTO
 import com.example.eatandtell.ui.showToast
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -50,6 +52,7 @@ class AppMainViewModel() : ViewModel() {
             photoUrls.add(imageUrl)
         }
         try {
+            Log.d("upload photos and post",  "trying")
             val photos = photoUrls.map { PhotoReqDTO(it) }
             val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
             this.uploadPost(postData, context)
@@ -97,12 +100,16 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
-    suspend fun getMyPosts(context: Context, onSuccess: (List<PostDTO>) -> Unit) {
+    suspend fun getMyFeed(context: Context, onSuccess: (UserInfoDTO, List<PostDTO>) -> Unit) {
         val authorization = "Token $token"
         try {
-            val response = apiService.getMyPosts(authorization)
-            onSuccess(response.data)
+            val response = apiService.getMyFeed(authorization)
+            val myInfo = UserInfoDTO(response.id, response.username, response.description, response.avatar_url, response.follower_count, response.following_count)
+            val myPosts = response.posts
+            Log.d("get my feed", "success")
+            onSuccess(myInfo, myPosts)
         } catch (e: Exception) {
+            Log.d("get my feed error", e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function
         }
     }

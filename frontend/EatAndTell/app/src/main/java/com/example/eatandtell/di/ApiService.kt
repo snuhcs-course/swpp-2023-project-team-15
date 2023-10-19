@@ -27,9 +27,9 @@ interface ApiService {
     suspend fun getAllPosts(@Header("Authorization") authorization: String,
                            ): GetAllPostsResponse
 
-    @GET("posts/") // The posts endpoint //TODO: change to getMyPosts
-    suspend fun getMyPosts(@Header("Authorization") authorization: String,
-    ): GetMyPostsResponse
+    @GET("users/me/") // The posts endpoint //TODO: change to getMyPosts
+    suspend fun getMyFeed(@Header("Authorization") authorization: String,
+    ): GetMyFeedResponse
 
     @POST("posts/") // The posts endpoint
     suspend fun uploadPost(@Header("Authorization") authorization: String,

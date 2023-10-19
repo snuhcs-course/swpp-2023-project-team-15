@@ -5,8 +5,19 @@ import retrofit2.http.Url
 import java.net.URL
 
 data class UserDTO(
-    val username: String,
     val id: Int,
+    val username: String,
+    val description: String,
+    val avatar_url: String,
+)
+
+data class UserInfoDTO(
+    val id : Int,
+    val username : String,
+    val description : String,
+    val avatar_url : String,
+    val follower_count : Int,
+    val following_count : Int,
 )
 
 data class RestaurantDTO(
