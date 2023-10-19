@@ -3,6 +3,7 @@ package com.example.eatandtell
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -40,9 +41,19 @@ class MainActivity : ComponentActivity() {
                             // 기다릴 시간(1초)
                             delay(1000)
 
-                            // 1초 후에 login으로 이동
-                            startActivity(Intent(this@MainActivity, StartActivity::class.java))
-                            finish()
+                            val tokenInfo = SharedPreferencesManager.getToken(this@MainActivity)
+                            val t = tokenInfo["Token"]
+                            Log.d("shared getting token", "Token: $t")
+                            if (t != "") {
+                                // 1초 후에 appmain으로 이동
+                                startActivity(Intent(this@MainActivity, AppMainActivity::class.java).putExtra("Token", t))
+                                finish()
+                            }
+                            else {
+                                // 1초 후에 login으로 이동
+                                startActivity(Intent(this@MainActivity, StartActivity::class.java))
+                                finish()
+                            }
                         }
                     }
                 }

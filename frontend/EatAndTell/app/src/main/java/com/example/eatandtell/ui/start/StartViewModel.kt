@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.eatandtell.SharedPreferencesManager
 import com.example.eatandtell.di.ApiService
 import com.example.eatandtell.dto.LoginRequest
 import com.example.eatandtell.dto.LoginResponse
@@ -27,6 +28,9 @@ class StartViewModel : ViewModel() {
                 val response = apiService.loginUser(loginData)
                 val token = response?.token
                 Log.d("login", "success")
+                if(token!=null) {
+                    SharedPreferencesManager.setToken(context, token)
+                }
                 onSuccess(token)
             } catch (e: Exception) {
                 val errorMessage = e.message ?: "Network error"
@@ -44,6 +48,7 @@ class StartViewModel : ViewModel() {
                 val response = apiService.registerUser(registrationData)
                 val token = response?.token
                 Log.d("sign up", "success")
+                if(token!=null) SharedPreferencesManager.setToken(context, token)
                 onSuccess(token)
             } catch (e: Exception) {
                 val errorMessage = e.message ?: "Network error"
