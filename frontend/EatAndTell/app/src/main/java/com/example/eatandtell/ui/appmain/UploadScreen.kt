@@ -1,33 +1,49 @@
 // SignUpScreen.kt
 package com.example.eatandtell.ui.appmain
+
+import android.R.attr.path
+import android.content.ContentResolver
 import android.content.Context
-import android.content.Intent
+import android.net.Uri
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-
-import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.graphics.Color
-import androidx.navigation.NavController
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.UploadPostRequest
+import com.example.eatandtell.ui.DraggableStarRating
 import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.MediumWhiteButton
 import com.example.eatandtell.ui.PostImage
 import com.example.eatandtell.ui.Profile
-import com.example.eatandtell.ui.StarRating
 import com.example.eatandtell.ui.WhiteTextField
 import com.example.eatandtell.ui.showToast
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import java.io.File
+import java.io.InputStream
+
 
 @Composable
 fun UploadScreen(navController: NavHostController, context: ComponentActivity, viewModel: AppMainViewModel) {
@@ -40,26 +56,37 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
         mutableStateOf(TextFieldValue(""))
     }
 
+    var myRating by rememberSaveable { mutableStateOf("0") }
+
 
     val profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8"
-    val photoUrls = listOf(
-        "https://api.nudge-community.com/attachments/339560",
-        "https://img.siksinhot.com/place/1650516612762055.jpg?w=560&h=448&c=Y",
-        "https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FdKS0uX%2FbtrScbvc9HH%2F5I2m53vgz0LWvszHQ9PQNk%2Fimg.jpg"
-    )
+//    val photoUrls = listOf(
+//        "https://api.nudge-community.com/attachments/339560",
+//        "https://img.siksinhot.com/place/1650516612762055.jpg?w=560&h=448&c=Y",
+//        "https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FdKS0uX%2FbtrScbvc9HH%2F5I2m53vgz0LWvszHQ9PQNk%2Fimg.jpg"
+//    ) //TODO: get from gallery
+
+    var photoPaths by remember { mutableStateOf(listOf<Uri>()) } //핸드폰 내의 파일 경로
+
+    val galleryLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) {
+            photoPaths = it
+        }
+
+
     val username = "Joshua-i"
     val userDescription = "고독한 미식가"
 
     // Main content
     Column(
         modifier = Modifier
-            .fillMaxSize().padding(horizontal = 20.dp)
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)
     ) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Profile Row
-//        Spacer(modifier = Modifier.height(10.dp))
         Profile(profileUrl, username, userDescription);
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -71,14 +98,14 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            for (photoUrl in photoUrls) {
-                PostImage(photoUrl)
+            for (photoPath in photoPaths) {
+                PostImage(photoPath.toString())
             }
         }
 
         // Medium White Button
         Spacer(modifier = Modifier.height(16.dp))
-        MediumWhiteButton(onClick = { /*TODO*/ }, text = "사진 추가하기")
+        MediumWhiteButton(onClick = { galleryLauncher.launch("image/*") }, text = "사진 추가하기")
 
         // Restaurant Name Text Field and Rating
         Spacer(modifier = Modifier.height(16.dp))
@@ -101,7 +128,8 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                     .height(IntrinsicSize.Min)
                     .width(160.dp)
             )
-            StarRating(rating = "0", size = 24.dp)
+            Spacer(modifier = Modifier.width(16.dp))
+            DraggableStarRating(currentRating = myRating.toInt(), onRatingChanged = {myRating = it.toString()} )
         }
 
         // Review Text Field
@@ -124,8 +152,8 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
         UploadButton(
             viewModel = viewModel,
             restaurant = RestReqDTO(name = restaurantName.text),
-            photos = photoUrls.map { PhotoReqDTO(it) } ,
-            rating = "4",
+            photoPaths = photoPaths ,
+            rating = myRating,
             description = reviewDescription.text,
             context = context,
             onClick = {
@@ -138,28 +166,44 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
 
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun UploadScreenPreview() {
-//    UploadScreen(UploadActivity())
-//}
+
 
 @Composable
 fun UploadButton(viewModel: AppMainViewModel,
                  restaurant : RestReqDTO,
-                 photos: List<PhotoReqDTO>,
+                 photoPaths: List<Uri>,
                  rating: String,
                  description: String,
                  context: Context,
                  onClick: () -> Unit) {
-    val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
-    val onClickReal = {
-        viewModel.uploadPost(postData, object: AppMainViewModel.UploadCallback{
-            override fun onUploadSuccess() {
-                onClick()
+    val coroutineScope = rememberCoroutineScope()
+
+    val onClickReal: () -> Unit = {
+        when {
+            restaurant.name.isBlank() -> showToast(context, "맛집명을 입력해주세요")
+            description.isBlank() -> showToast(context, "리뷰를 입력해주세요")
+            rating == "0" -> showToast(context, "별점을 입력해주세요")
+
+            else -> {
+                try {
+                    coroutineScope.launch {
+                        viewModel.uploadPhotosAndPost(
+                            photoPaths = photoPaths,
+                            restaurant = restaurant,
+                            rating = rating,
+                            description = description,
+                            context = context
+                        )
+                        onClick()
+                    }
+                } catch (e: Exception) {
+                    // Handle exceptions, e.g., from network calls, here
+                    showToast(context, "An error occurred: ${e.message}")
+                }
             }
-            override fun onUploadError(errorMessage: String) {
-                showToast(context, errorMessage)
-            } } )}
-    MainButton(onClick, "리뷰 작성") //TODO: 이후 onClickReal로 변경해야 백엔드와 연결됨
+
+        }
+    }
+
+    MainButton(onClickReal, "리뷰 작성")
 }

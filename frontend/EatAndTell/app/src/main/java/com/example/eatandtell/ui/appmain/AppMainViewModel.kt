@@ -1,43 +1,86 @@
 package com.example.eatandtell.ui.appmain
 import RetrofitClient
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.eatandtell.di.ApiService
-import com.example.eatandtell.dto.PostDTO
+import com.example.eatandtell.dto.PhotoReqDTO
+import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.UploadPostRequest
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.eatandtell.ui.showToast
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
-class AppMainViewModel : ViewModel() {
-    //interface for callback
-    interface UploadCallback {
-        fun onUploadSuccess()
-        fun onUploadError(errorMessage: String)
+class AppMainViewModel() : ViewModel() {
+
+    private var token: String? = null
+    fun initialize(token: String?) {
+        this.token = token
     }
 
     private val apiService = RetrofitClient.retro.create(ApiService::class.java)
-    fun uploadPost(postData: UploadPostRequest,  callback: UploadCallback) {
-        val call = apiService.uploadPost(postData)
 
-        call.enqueue(object : Callback<PostDTO> {
-            override fun onResponse(call: Call<PostDTO>, response: Response<PostDTO>) {
-                if (response.isSuccessful) {
-                    callback.onUploadSuccess()
-                } else {
-                    val errorMessage = response.message()
-                    Log.d("upload post error", ""+response.code()+errorMessage)
-                    callback.onUploadError("Upload post failed: $errorMessage")
-                }
+    suspend fun uploadPhotosAndPost(photoPaths: List<Uri>,
+                                    restaurant : RestReqDTO,
+                                    rating: String,
+                                    description: String,
+                                    context: Context
+                                    ) {
+        fun prepareFileData(photoPath: Uri): ByteArray? {
+            val contentResolver = context.contentResolver
+            contentResolver.openInputStream(photoPath)?.use { inputStream ->
+                return inputStream.readBytes()
             }
+            return null
+        }
 
-            override fun onFailure(call: Call<PostDTO>, t: Throwable) {
-                val errorMessage = t.message ?: "Network error"
-                callback.onUploadError(errorMessage)
-            }
-        })
+        val photoUrls = mutableListOf<String>()
+        val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it) }
+        for(byteArray in photoByteArrays) {
+            val requestBody: RequestBody = byteArray.toRequestBody("image/*".toMediaTypeOrNull())
+            val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("image", "this_name_does_not_matter.jpg", requestBody)
+            val imageUrl = getImageURL(fileToUpload, context)
+            photoUrls.add(imageUrl)
+        }
+        try {
+            val photos = photoUrls.map { PhotoReqDTO(it) }
+            val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
+            this.uploadPost(postData, context)
+        } catch (e: Exception) {
+            // Handle exceptions, e.g., from network calls, here
+            showToast(context, "An error occurred: ${e.message}")
+        }
     }
 
+    private suspend fun uploadPost(postData: UploadPostRequest, context: Context) {
+        val authorization = "Token $token"
 
+        try {
+            apiService.uploadPost(authorization, postData)
+            showToast(context, "Upload post success")
+        } catch (e: Exception) {
+            val errorMessage = e.message ?: "Network error"
+            Log.d("upload post error", errorMessage)
+            showToast(context, "Upload post failed $errorMessage")
+        }
+    }
+
+    private suspend fun getImageURL(fileToUpload: MultipartBody.Part?, context: Context): String {
+        val authorization = "Token $token"
+
+        try {
+            val response = apiService.getImageURL(authorization, fileToUpload) // Assuming this is a suspend function call
+            val imageUrl = response.image_url
+            showToast(context, "Get image url success")
+            return imageUrl
+        } catch (e: Exception) {
+            val errorMessage = e.message ?: "Network error"
+            Log.d("get image url error", errorMessage)
+            showToast(context, "Get image url failed $errorMessage")
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
 }
-

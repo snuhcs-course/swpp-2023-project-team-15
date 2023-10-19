@@ -26,6 +26,9 @@ class AppMainActivity : ComponentActivity() {
     private val appMainViewModel: AppMainViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val token = intent.getStringExtra("Token")
+        appMainViewModel.initialize(token)
+
         setContent {
             Surface(
                 modifier = Modifier

@@ -1,6 +1,8 @@
 package com.example.eatandtell.di
 
 import com.example.eatandtell.dto.*
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 
 import retrofit2.Call
 import retrofit2.Callback
@@ -9,15 +11,23 @@ import retrofit2.http.POST
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.http.Header
+import retrofit2.http.Multipart
+import retrofit2.http.Part
 
 interface ApiService {
     @POST("users/login/") // The login endpoint (hypothetical)
-    fun loginUser(@Body loginData: LoginRequest): Call<LoginResponse>
+    suspend fun loginUser(@Body loginData: LoginRequest): LoginResponse
 
     @POST("users/register/") // The registration endpoint
-    fun registerUser(@Body registrationData: RegisterRequest): Call<RegisterResponse>
+    suspend fun registerUser(@Body registrationData: RegisterRequest): RegisterResponse
 
-    @POST("posts/") // The registration endpoint
-    fun uploadPost(@Body postData: UploadPostRequest): Call<PostDTO>
+    @POST("posts/") // The posts endpoint
+    suspend fun uploadPost(@Header("Authorization") authorization: String,
+                   @Body postData: UploadPostRequest): PostDTO
+    @Multipart
+    @POST("images/upload/") // The images endpoint
+    suspend fun getImageURL(@Header("Authorization") authorization: String,
+                    @Part images: MultipartBody.Part?): ImageURLResponse
 
 }

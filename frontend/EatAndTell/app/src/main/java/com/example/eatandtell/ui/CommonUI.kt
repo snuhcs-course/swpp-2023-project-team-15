@@ -4,6 +4,7 @@ package com.example.eatandtell.ui
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -12,16 +13,19 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -375,6 +379,25 @@ fun StarRating(rating: String, size: Dp = 16.dp) {
         }
     }
 }
+
+@Composable
+fun DraggableStarRating(currentRating: Int, onRatingChanged: (Int) -> Unit) {
+    //TODO: 0.5점은 구현이 안 됐음. 만약 정수 단위로 평점을 줄 거라면 그냥 int로 받아오면 될 듯
+        Row {
+            for (i in 1..5) {
+                Icon(
+                    painter = if (i <= currentRating) painterResource(R.drawable.ic_star_filled)
+                                else painterResource(R.drawable.ic_star_empty),
+                    modifier = Modifier
+                        .width(24.dp)
+                        .height(24.dp)
+                        .clickable { onRatingChanged(i) },
+                    contentDescription = "star",
+                    tint = MainColor,
+                )
+            }
+        }
+    }
 
 //profile image
 @Composable

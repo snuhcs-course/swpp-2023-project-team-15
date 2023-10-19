@@ -83,9 +83,11 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
         Spacer(modifier = Modifier.height(12.dp))
 
         LoginButton(
-            onClick = {
+            onClick = { token ->
                 Log.d("login screen", "ID: ${id.text}, Password: ${password.text}")
-                context.startActivity(Intent(context, AppMainActivity::class.java))
+                val intent = Intent(context, AppMainActivity::class.java)
+                intent.putExtra("Token", token) // 토큰 넘겨주기
+                context.startActivity(intent)
                 context.finish()
             },
             id = id.text,
@@ -133,15 +135,10 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
 }
 
 @Composable
-fun LoginButton(viewModel: StartViewModel, id: String, password: String, context: Context, onClick: () -> Unit) {
+fun LoginButton(viewModel: StartViewModel, id: String, password: String, context: Context, onClick: (String?) -> Unit) {
     val onClickReal = {
-        viewModel.loginUser(id, password, object: StartViewModel.LoginCallback{
-            override fun onLoginSuccess(token: String?) {
-                onClick()
-            }
-            override fun onLoginError(errorMessage: String) {
-                showToast(context, errorMessage)
-            } } )}
+        viewModel.loginUser(id, password, context, onClick)
+    }
     MainButton(onClickReal, "로그인")
 }
 

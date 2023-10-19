@@ -98,8 +98,10 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
         Spacer(modifier = Modifier.height(12.dp))
 
         SignupButton(
-            onClick =  {
-                context.startActivity(Intent(context, AppMainActivity::class.java))
+            onClick =  { token ->
+                val intent = Intent(context, AppMainActivity::class.java)
+                intent.putExtra("Token", token) // 토큰 넘겨주기
+                context.startActivity(intent)
                 context.finish()
             },
             email = email.text,
@@ -136,7 +138,7 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
 @Composable
 fun SignupButton (
     viewModel: StartViewModel,
-    onClick: () -> Unit,
+    onClick: (String?) -> Unit,
     email: String,
     username: String,
     password: String,
@@ -160,17 +162,7 @@ fun SignupButton (
             confirmPassword.isBlank() -> showToast(context, "Please confirm your password")
             password != confirmPassword -> showToast(context, "Passwords do not match")
             else -> {
-                viewModel.registerUser(username, password, email, object:
-                    StartViewModel.RegisterCallback {
-                    override fun onRegisterSuccess(token: String?) {
-                        showToast(context, "회원가입에 성공하였습니다")
-                        onClick()
-                    }
-
-                    override fun onRegisterError(errorMessage: String) {
-                        showToast(context, errorMessage)
-                    }
-                })
+                viewModel.registerUser(username, password, email, context, onSuccess = onClick)
             }
         }
 
