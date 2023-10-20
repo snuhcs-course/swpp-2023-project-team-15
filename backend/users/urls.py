@@ -10,5 +10,5 @@ urlpatterns = [
     path('me/', get_my_profile, name='my_profile'),
     path('<int:pk>/', get_user_profile, name='user_profile'),
     path('posts/<int:pk>/',get_user_posts, name='user_posts'),
-    path('info/<int:pk>/',get_user_info, name='user_info'),
+    path('filter/', filter_users, name='filter_users'),
 ]

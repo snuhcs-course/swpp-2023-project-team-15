@@ -22,8 +22,14 @@ set -e # stops on the first error
 set -x # print commands for debugging
 
 cd swpp-2023-project-team-15/backend/
-git pull origin $CURRENT_BRANCH
-git checkout $CURRENT_BRANCH
+git fetch origin
+
+# Check if the branch exists in remote's context, and create a local branch that tracks the remote branch if necessary
+git checkout $CURRENT_BRANCH 2>/dev/null || git checkout --track origin/$CURRENT_BRANCH
+
+# Pull the latest changes from the remote branch
+git pull
+
 poetry install
 sudo systemctl restart gunicorn
 

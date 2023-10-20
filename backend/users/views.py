@@ -1,14 +1,14 @@
-from django.db import IntegrityError
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
+from django.shortcuts import get_object_or_404
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .serializers import UserSerializer,UserPostSerializer, UserInfoSerializer
-from django.shortcuts import get_object_or_404
-from drf_yasg.utils import swagger_auto_schema
+from rest_framework.response import Response
 
+from .serializers import UserInfoSerializer, UserPostSerializer, UserSerializer
 
 User= get_user_model()
 
@@ -36,7 +36,6 @@ def register(request):
         print(e)
         return Response({'error': 'An error occurred while creating the user'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-#@swagger_auto_schema(request_body=UserSerializer, responses={200: Response})
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def profile_update(request):
@@ -49,37 +48,38 @@ def profile_update(request):
     if request.user != user_instance:
         return Response(status=status.HTTP_403_FORBIDDEN)
     if request.method == 'PATCH':
-        serializer = UserSerializer(user_instance, data=request.data, partial=True)
+        serializer = UserSerializer(user_instance, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#@swagger_auto_schema(request_body=UserSerializer, responses={200: Response})   
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_my_profile(request):
     user = request.user
     # Serialize the user data and return it
-    serializer = UserSerializer(user)
+    serializer = UserSerializer(user, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-#@swagger_auto_schema(request_body=UserSerializer, responses={200: Response})
 @api_view(['GET'])
 def get_user_profile(request, pk):
     user = get_object_or_404(User, pk=pk)
-    serializer = UserSerializer(user)
+    serializer = UserSerializer(user, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-#@swagger_auto_schema(request_body=UserPostSerializer, responses={200: Response})
 @api_view(['GET'])
 def get_user_posts(request, pk):
     user = get_object_or_404(User, pk=pk)
-    serializer = UserPostSerializer(user)
+    serializer = UserPostSerializer(user, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 @api_view(['GET'])
-def get_user_info(request, pk):
-    user = get_object_or_404(User, pk=pk)
-    serializer = UserInfoSerializer(user)
+def filter_users(request):
+    queryset = User.objects.all()
+    username = request.query_params.get('username')
+    if username is not None:
+        queryset = queryset.filter(username__icontains=username)
+    serializer = UserSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
