@@ -1,4 +1,5 @@
 package com.example.eatandtell.ui.appmain
+import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.RestaurantDTO
 import com.example.eatandtell.dto.UserDTO
@@ -121,7 +123,7 @@ fun ProfileRow(userInfo: UserInfoDTO, onClick: () -> Unit,tags: List<String>, bu
 
 
 @Composable
-fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
+fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navController: NavHostController) {
     var myPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
     var myInfo by remember { mutableStateOf(UserInfoDTO(0, "", "", "", 0, 0)) }
     var loading by remember { mutableStateOf(true) }
@@ -169,7 +171,9 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
 
             item {ProfileRow(
                 userInfo = myInfo,
-                onClick = {},
+                onClick = {
+                    navigateToDestination(navController, "EditProfile")
+                },
                 tags = listOf("#육식주의자", "#미식가", "#리뷰왕","#감성","#한식"),
                 buttonText = if (isCurrentUser) "프로필 편집" else "팔로우하기"  // New buttonText parameter
             )}
