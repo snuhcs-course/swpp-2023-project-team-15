@@ -34,6 +34,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.eatandtell.ui.ClickableProfileImage
 import com.example.eatandtell.ui.Home
+import com.example.eatandtell.ui.MyIcon
 import com.example.eatandtell.ui.PlusCircle
 import com.example.eatandtell.ui.SearchRefraction
 import com.example.eatandtell.ui.theme.Black
@@ -63,8 +64,8 @@ fun BottomNavBar(
             // Plus (Upload)
             PlusCircle(onClick = onPlusClick)
             // Profile
-            ClickableProfileImage(profileUrl, onClick = onProfileClick)
-
+//            ClickableProfileImage(profileUrl, onClick = onProfileClick)
+            MyIcon(onClick = onProfileClick)
         }
     }
 }

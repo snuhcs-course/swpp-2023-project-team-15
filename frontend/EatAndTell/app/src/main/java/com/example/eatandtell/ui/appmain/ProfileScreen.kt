@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.RestaurantDTO
 import com.example.eatandtell.dto.UserDTO
+import com.example.eatandtell.dto.UserInfoDTO
 import com.example.eatandtell.ui.HeartEmpty
 import com.example.eatandtell.ui.HeartFull
 import com.example.eatandtell.ui.MediumRedButton
@@ -55,12 +57,11 @@ import com.example.eatandtell.ui.theme.Inter
 import com.example.eatandtell.ui.theme.MainColor
 
 import com.google.accompanist.flowlayout.FlowRow
-
+import kotlinx.coroutines.launch
 
 
 @Composable
-fun ProfileRow(profileUrl: String, username: String, userDescription: String, followings: Int,
-               followers: Int, onClick: () -> Unit,tags: List<String>, buttonText: String) {
+fun ProfileRow(userInfo: UserInfoDTO, onClick: () -> Unit,tags: List<String>, buttonText: String) {
     Column {
         //Profile and follow button
         Spacer(modifier = Modifier.height(8.dp))
@@ -70,7 +71,7 @@ fun ProfileRow(profileUrl: String, username: String, userDescription: String, fo
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Profile(profileUrl, username, userDescription)
+            Profile(userInfo.avatar_url, userInfo.username, userInfo.description)
             MediumRedButton(onClick = onClick, text = buttonText)
         }
         Spacer(modifier = Modifier.height(11.dp))
@@ -81,7 +82,7 @@ fun ProfileRow(profileUrl: String, username: String, userDescription: String, fo
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(text = "$followings Followings" ,
+            Text(text = "${userInfo.follower_count} Followings" ,
                  style = TextStyle(
                      fontSize = 16.sp,
                      lineHeight = 18.sp,
@@ -90,7 +91,7 @@ fun ProfileRow(profileUrl: String, username: String, userDescription: String, fo
                         color = Color.Black,
                      )
             )
-            Text(text = "$followers Followers",
+            Text(text = "${userInfo.following_count} Followers",
                 style = TextStyle(
                     fontSize = 16.sp,
                     lineHeight = 18.sp,
@@ -116,21 +117,22 @@ fun ProfileRow(profileUrl: String, username: String, userDescription: String, fo
         Spacer(modifier = Modifier.height(15.dp))
     }
 
-
-
 }
 
 
 @Composable
 fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
     var myPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
+    var myInfo by remember { mutableStateOf(UserInfoDTO(0, "", "", "", 0, 0)) }
     var loading by remember { mutableStateOf(true) }
+    val coroutinescope = rememberCoroutineScope()
+
 
     LaunchedEffect(loading) {
         try {
-            viewModel.getMyPosts(
-                context,
-                onSuccess = { posts ->
+            viewModel.getMyFeed(
+                onSuccess = { info, posts ->
+                    myInfo = info
                     myPosts = posts
                     println("feedPosts: ${myPosts.size}")
                 },
@@ -166,18 +168,18 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
             val isCurrentUser = true // Assuming "joshua-i" is the profile's user
 
             item {ProfileRow(
-                profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
-                username = "joshua-i",
-                userDescription = if (isCurrentUser) "본인 프로필입니다~" else "고독한 미식가",
-                followings = 10,
-                followers = 20,
+                userInfo = myInfo,
                 onClick = {},
                 tags = listOf("#육식주의자", "#미식가", "#리뷰왕","#감성","#한식"),
                 buttonText = if (isCurrentUser) "프로필 편집" else "팔로우하기"  // New buttonText parameter
             )}
 
             items(myPosts) { post ->
-                Post(post, isLiked = false, likes = 36)
+                Post(post, onHeartClick = {
+                    coroutinescope.launch {
+                        viewModel.toggleLike(post.id)
+                    }
+                })
             }
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
             item {Spacer(modifier = Modifier.height(70.dp))}
@@ -194,11 +196,7 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
 fun ProfileRowPreview() {
     Surface{
         ProfileRow(
-            profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
-            username = "joshua-i",
-            userDescription = "고독한 미식가",
-            followings = 10,
-            followers = 20,
+            userInfo = UserInfoDTO(0, "joshua-i", "본인 프로필입니다~", "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8", 10, 20),
             onClick = {},
             tags = listOf("#육식주의자", "#미식가", "#리뷰왕","#감성","#한식"),
             buttonText = "팔로우하기"  // New buttonText parameter

@@ -46,6 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
 import com.example.eatandtell.dto.PostDTO
@@ -72,7 +73,6 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
     LaunchedEffect(loading) {
         try {
             viewModel.getAllPosts(
-                context,
                 onSuccess = { posts ->
                     feedPosts = posts
                     println("feedPosts: ${feedPosts.size}")
@@ -109,7 +109,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
             items(feedPosts) { post ->
-                HomePost(post)
+                HomePost(post, viewModel = viewModel)
             }
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
@@ -120,16 +120,22 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
 }
 
 @Composable
-fun HomePost(post: PostDTO) {
+fun HomePost(post: PostDTO, viewModel: AppMainViewModel) {
+    val user = post.user
+    val coroutinescope = rememberCoroutineScope()
+
     Profile(
-        profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8",
-        username = "Joshua-i",
-        userDescription = "고독한 미식가"
+        user.avatar_url,
+        user.username,
+        user.description,
     );
     Spacer(modifier = Modifier.height(11.dp))
     Post(
         post = post,
-        isLiked = false,
-        likes = 36,
+        onHeartClick = {
+            coroutinescope.launch {
+                viewModel.toggleLike(post.id)
+            }
+        },
     )
 }
