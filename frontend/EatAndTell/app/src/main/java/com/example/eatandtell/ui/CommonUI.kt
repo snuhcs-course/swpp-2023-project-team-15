@@ -138,6 +138,18 @@ fun CustomTextField(
     )
 }
 
+@Preview
+@Composable
+fun PreviewCustomTextField() {
+    EatAndTellTheme {
+        CustomTextField(
+            value = "테스트",
+            onValueChange = { /**/ },
+            placeholder = "테스트",
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WhiteTextField(
@@ -175,6 +187,20 @@ fun WhiteTextField(
     )
 }
 
+@Preview
+@Composable
+fun PreviewWhiteTextField() {
+    EatAndTellTheme {
+        WhiteTextField(
+            value = "테스트",
+            onValueChange = { /**/ },
+            placeholder = "테스트",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+        )
+    }
+}
 
 @Composable
 fun GraySmallText(text: String) {
@@ -221,6 +247,8 @@ fun MainButton(onClick: () -> Unit, text: String) {
         )
     }
 }
+
+
 
 @Composable
 fun MediumWhiteButton(onClick: () -> Unit, text: String) {

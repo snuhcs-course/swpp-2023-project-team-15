@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.eatandtell.ui.start.StartViewModel
@@ -74,8 +76,31 @@ fun AppMain(
                 )
         }
     ) { innerPadding ->
-        BottomNav(navController = navController, modifier = Modifier.padding(innerPadding), context, viewModel)
+        AppMainNavigate(navController = navController, modifier = Modifier.padding(innerPadding), context, viewModel)
     }
+}
 
+@Composable
+fun AppMainNavigate(navController: NavHostController, modifier: Modifier, context: ComponentActivity, viewModel: AppMainViewModel) {
+    NavHost(
+        navController = navController,
+        startDestination = "Home"
+    ) {
+        composable(route = "Home") {
+            HomeScreen(context, viewModel)
+        }
+        composable(route = "Search") {
+            SearchScreen()
+        }
+        composable(route = "Upload") {
+            UploadScreen(navController, context, viewModel)
 
+        }
+        composable(route = "Profile") {
+            ProfileScreen(context, viewModel, navController)
+        }
+        composable(route = "EditProfile") {
+            EditProfileScreen(context, viewModel)
+        }
+    }
 }

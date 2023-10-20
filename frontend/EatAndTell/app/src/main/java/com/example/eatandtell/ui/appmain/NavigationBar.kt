@@ -71,32 +71,6 @@ fun BottomNavBar(
 }
 
 
-@Composable
-fun BottomNav(navController: NavHostController, modifier: Modifier, context: ComponentActivity, viewModel: AppMainViewModel) {
-    NavHost(
-        navController = navController,
-        startDestination = "Home"
-    ) {
-        composable(route = "Home") {
-            HomeScreen(context, viewModel)
-        }
-        composable(route = "Search") {
-            SearchScreen()
-        }
-        composable(route = "Upload") {
-            UploadScreen(navController, context, viewModel)
-
-        }
-        composable(route = "Profile") {
-            ProfileScreen(context, viewModel, navController)
-        }
-        composable(route = "EditProfile") {
-            EditProfileScreen(context, viewModel)
-        }
-    }
-}
-
-
 fun navigateToDestination(navController: NavHostController, destination: String) {
     navController.navigate(destination) {
         popUpTo(navController.graph.startDestinationId) {
