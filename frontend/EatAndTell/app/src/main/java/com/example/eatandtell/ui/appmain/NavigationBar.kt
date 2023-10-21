@@ -47,7 +47,6 @@ fun BottomNavBar(
     onSearchClick: () -> Unit,
     onPlusClick: () -> Unit,
     onProfileClick: () -> Unit,
-    profileUrl: String
     ) {
     Surface {
         Row(
@@ -83,20 +82,11 @@ fun navigateToDestination(navController: NavHostController, destination: String)
     }
 }
 
-
-//Delete when done Implementing Each Screens
-@Composable
-fun SearchScreen() {
-     Text(text = "Search Screen")
-}
-
-
 @Preview
 @Composable
 fun PreviewNavigationBar() {
     Surface {
         BottomNavBar(
-            profileUrl = "https://avatars.githubusercontent.com/u/44080404?v=4",
             onHomeClick = { /*Home Clicked*/ },
             onSearchClick = { /*Search Clicked*/ },
             onPlusClick = { /*Plus Clicked*/ },
@@ -131,7 +121,6 @@ fun TopBar(currentScreenName: String, navigateToHome: () -> Unit) {
             }
         }
     )
-
 }
 
 @Preview(showBackground = true)

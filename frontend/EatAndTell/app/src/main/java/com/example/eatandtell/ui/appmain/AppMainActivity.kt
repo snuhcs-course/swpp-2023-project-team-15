@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Scaffold
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -72,7 +73,6 @@ fun AppMain(
                     onSearchClick = { navigateToDestination(navController, "Search") },
                     onPlusClick = { navigateToDestination(navController, "Upload") },
                     onProfileClick = { navigateToDestination(navController, "Profile")},
-                    profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8"
                 )
         }
     ) { innerPadding ->
@@ -90,7 +90,7 @@ fun AppMainNavigate(navController: NavHostController, modifier: Modifier, contex
             HomeScreen(context, viewModel)
         }
         composable(route = "Search") {
-            SearchScreen()
+            SearchScreen(navController,context, viewModel)
         }
         composable(route = "Upload") {
             UploadScreen(navController, context, viewModel)

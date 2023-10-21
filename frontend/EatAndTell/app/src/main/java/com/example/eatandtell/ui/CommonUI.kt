@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Person
@@ -111,12 +112,17 @@ fun CustomTextField(
     placeholder: String,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: (@Composable () -> Unit)? = null,
+    onTrailingIconClick: (() -> Unit)? = null
 ) {
     TextField(
         value = value,
         onValueChange = onValueChange,
         visualTransformation = visualTransformation,
-        trailingIcon = trailingIcon,
+        trailingIcon = {
+            Box(modifier = Modifier.clickable { onTrailingIconClick?.invoke() }) {
+                trailingIcon?.invoke()
+            }
+        },
         modifier = Modifier
             .border(
                 width = 0.5.dp,
@@ -745,6 +751,8 @@ fun MyIcon(onClick: () -> Unit) {
         tint = Black
     )
 }
+
+
 
 @Composable
 fun ClickableProfileImage(profileUrl: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
