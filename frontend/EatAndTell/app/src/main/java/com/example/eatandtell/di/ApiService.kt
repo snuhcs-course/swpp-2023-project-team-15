@@ -27,6 +27,10 @@ interface ApiService {
     suspend fun getMyFeed(@Header("Authorization") authorization: String,
     ): GetFeedResponse
 
+    @GET("users/me/") // The posts endpoint //TODO: change to getMyPosts
+    suspend fun getMyInfo(@Header("Authorization") authorization: String,
+    ): UserDTO
+
     @POST("posts/") // The posts endpoint
     suspend fun uploadPost(@Header("Authorization") authorization: String,
                    @Body postData: UploadPostRequest): PostDTO
@@ -44,4 +48,5 @@ interface ApiService {
                             @Path("id") id: Int): GetFeedResponse
 //@GET("users/{id}/") // The users endpoint
 //suspend fun getUserProfile(@Path("id") id: Int): GetFeedResponse
+
 }

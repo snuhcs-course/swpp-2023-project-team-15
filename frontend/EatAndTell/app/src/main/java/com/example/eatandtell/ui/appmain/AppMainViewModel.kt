@@ -141,4 +141,18 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
+    suspend fun getMyInfo(onSuccess: (UserDTO) -> Unit){
+        val authorization = "Token $token"
+        try {
+            val response = apiService.getMyInfo(authorization)
+            val myInfo = UserDTO(response.id, response.username, response.description, response.avatar_url)
+            Log.d("getMyInfo", "success")
+            onSuccess(myInfo)
+        } catch (e: Exception) {
+            Log.d("getMyInfo error", e.message ?: "Network error")
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
+
 }

@@ -78,7 +78,7 @@ fun AppMain(
                     onHomeClick = { navigateToDestination(navController, "Home")},
                     onSearchClick = { navigateToDestination(navController, "Search") },
                     onPlusClick = { navigateToDestination(navController, "Upload") },
-                    onProfileClick = { navigateToDestination(navController, "Profile/ ")},
+                    onProfileClick = { navigateToDestination(navController, "Profile")},
                 )
         }
     ) { innerPadding ->
@@ -102,9 +102,9 @@ fun AppMainNavigate(navController: NavHostController, modifier: Modifier, contex
             UploadScreen(navController, context, viewModel)
 
         }
-//        composable(route = "Profile") {
-//            ProfileScreen(context, viewModel, navController)
-//        }
+        composable(route = "Profile") {
+            ProfileScreen(context, viewModel, navController)
+        }
         composable(route = "EditProfile") {
             EditProfileScreen(context, viewModel)
         }
