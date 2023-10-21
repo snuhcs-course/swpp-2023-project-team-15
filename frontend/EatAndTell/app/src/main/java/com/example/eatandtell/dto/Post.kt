@@ -11,7 +11,7 @@ data class GetAllPostsResponse(
     var data : List<PostDTO>
 )
 
-data class GetMyFeedResponse(
+data class GetFeedResponse(
     var id : Int,
     val username : String,
     val description: String,

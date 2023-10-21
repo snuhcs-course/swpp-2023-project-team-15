@@ -2,15 +2,9 @@ package com.example.eatandtell.di
 
 import com.example.eatandtell.dto.*
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 
-import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.http.Body
 import retrofit2.http.POST
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
@@ -31,7 +25,7 @@ interface ApiService {
 
     @GET("users/me/") // The posts endpoint //TODO: change to getMyPosts
     suspend fun getMyFeed(@Header("Authorization") authorization: String,
-    ): GetMyFeedResponse
+    ): GetFeedResponse
 
     @POST("posts/") // The posts endpoint
     suspend fun uploadPost(@Header("Authorization") authorization: String,
@@ -45,4 +39,9 @@ interface ApiService {
     suspend fun toggleLike(@Header("Authorization") authorization: String,
                            @Path("post_id") post_id: Int): toggleLikeResponse
 
+//    @GET("users/{id}/") // The users endpoint
+//    suspend fun getUserProfile(@Header("Authorization") authorization: String,
+//                            @Path("id") id: Int): GetFeedResponse
+@GET("users/{id}/") // The users endpoint
+suspend fun getUserProfile(@Path("id") id: Int): GetFeedResponse
 }

@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.navArgument
 import coil.compose.rememberImagePainter
 import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.ui.HeartEmpty
@@ -66,7 +67,7 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
+fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
     var feedPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
     var loading by remember { mutableStateOf(true) }
 
@@ -109,9 +110,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
             items(feedPosts) { post ->
-                HomePost(post, viewModel = viewModel, onClick = {
-                    //TODO: userProfile로 이동
-                })
+                HomePost(post, viewModel = viewModel, navHostController = navHostController)
             }
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
@@ -122,7 +121,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
 }
 
 @Composable
-fun HomePost(post: PostDTO, viewModel: AppMainViewModel, onClick: () -> Unit = {}) {
+fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController) {
     val user = post.user
     val coroutinescope = rememberCoroutineScope()
 
@@ -130,9 +129,9 @@ fun HomePost(post: PostDTO, viewModel: AppMainViewModel, onClick: () -> Unit = {
         user.avatar_url,
         user.username,
         user.description,
-        onImageClick = onClick,
-        onDescriptionClick = onClick,
-        onUsernameClick = onClick,
+        onImageClick = {navHostController.navigate("Profile/${user.id}") },
+        onDescriptionClick = {navHostController.navigate("Profile/${user.id}")},
+        onUsernameClick = {navHostController.navigate("Profile/${user.id}")},
     );
     Spacer(modifier = Modifier.height(11.dp))
     Post(
@@ -144,3 +143,5 @@ fun HomePost(post: PostDTO, viewModel: AppMainViewModel, onClick: () -> Unit = {
         },
     )
 }
+
+

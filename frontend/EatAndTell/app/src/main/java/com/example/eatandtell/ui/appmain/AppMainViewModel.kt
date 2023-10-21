@@ -114,6 +114,23 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
+    suspend fun getUserProfile(userId: Int, onSuccess: (UserInfoDTO, List<PostDTO>) -> Unit) {
+//        val authorization = "Token $token"
+        try {
+//            val response = apiService.getUserProfile(authorization, userId)
+            val response = apiService.getUserProfile( userId)
+            val myInfo = UserInfoDTO(response.id, response.username, response.description, response.avatar_url, response.follower_count, response.following_count)
+            val myPosts = response.posts
+            Log.d("getUserProfile", "success")
+            onSuccess(myInfo, myPosts)
+        } catch (e: Exception) {
+            Log.d("getUserProfile error", e.message ?: "Network error")
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
+
+
     suspend fun toggleLike(post_id: Int) {
         val authorization = "Token $token"
         try {
