@@ -17,10 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.eatandtell.ui.start.StartViewModel
 
 //import com.example.eatandtell.ui.AppNavigation
@@ -55,8 +57,12 @@ fun AppMain(
     // Get current back stack entry
     val backStackEntry by navController.currentBackStackEntryAsState()
     // Get the name of the current screen
-    val currentScreenName = backStackEntry?.destination?.route ?: "Home"
+//    val currentScreenName = backStackEntry?.destination?.route ?: "Home"
+    val currentScreenName = backStackEntry?.destination?.route?.substringBefore("/{") ?: "Home"
 
+//    val currentScreenName = backStackEntry?.destination?.route?.let {
+//        if (it.startsWith("Profile")) "Profile" else it
+//    } ?: "Home"
     Scaffold(
         topBar = {
             TopBar(
@@ -72,7 +78,7 @@ fun AppMain(
                     onHomeClick = { navigateToDestination(navController, "Home")},
                     onSearchClick = { navigateToDestination(navController, "Search") },
                     onPlusClick = { navigateToDestination(navController, "Upload") },
-                    onProfileClick = { navigateToDestination(navController, "Profile")},
+                    onProfileClick = { navigateToDestination(navController, "Profile/ ")},
                 )
         }
     ) { innerPadding ->
@@ -96,15 +102,28 @@ fun AppMainNavigate(navController: NavHostController, modifier: Modifier, contex
             UploadScreen(navController, context, viewModel)
 
         }
-        composable(route = "Profile") {
-            ProfileScreen(context, viewModel, navController)
-        }
+//        composable(route = "Profile") {
+//            ProfileScreen(context, viewModel, navController)
+//        }
         composable(route = "EditProfile") {
             EditProfileScreen(context, viewModel)
         }
-        composable("Profile/{userId}") { backStackEntry ->
+//        composable("Profile/{userId}") { backStackEntry ->
+//            val userId = backStackEntry.arguments?.getString("userId")
+//            ProfileScreen(context, viewModel, navController, userId?.toInt())
+//        }
+        composable(
+            route = "Profile/{userId}",
+            arguments = listOf(
+                navArgument("userId") {
+                    defaultValue = "self"  // set default value for self profile
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId")
-            ProfileScreen(context, viewModel, navController, userId?.toInt())
+            ProfileScreen(context, viewModel, navController, userId?.toIntOrNull())
         }
+
     }
 }

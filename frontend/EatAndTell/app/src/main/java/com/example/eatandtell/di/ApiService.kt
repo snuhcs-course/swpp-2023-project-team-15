@@ -39,9 +39,9 @@ interface ApiService {
     suspend fun toggleLike(@Header("Authorization") authorization: String,
                            @Path("post_id") post_id: Int): toggleLikeResponse
 
-//    @GET("users/{id}/") // The users endpoint
-//    suspend fun getUserProfile(@Header("Authorization") authorization: String,
-//                            @Path("id") id: Int): GetFeedResponse
-@GET("users/{id}/") // The users endpoint
-suspend fun getUserProfile(@Path("id") id: Int): GetFeedResponse
+    @GET("users/{id}/") // The users endpoint
+    suspend fun getUserProfile(@Header("Authorization") authorization: String,
+                            @Path("id") id: Int): GetFeedResponse
+//@GET("users/{id}/") // The users endpoint
+//suspend fun getUserProfile(@Path("id") id: Int): GetFeedResponse
 }
