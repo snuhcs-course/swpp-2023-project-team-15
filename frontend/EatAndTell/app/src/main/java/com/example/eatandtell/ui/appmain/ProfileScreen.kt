@@ -176,8 +176,7 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 20.dp)) {
-            val isCurrentUser = true // Assuming "joshua-i" is the profile's user
-
+            val isCurrentUser = userId == null
             item {ProfileRow(
                 userInfo = myInfo,
                 onClick = {

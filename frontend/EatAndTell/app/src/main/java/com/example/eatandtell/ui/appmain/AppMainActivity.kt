@@ -87,7 +87,7 @@ fun AppMainNavigate(navController: NavHostController, modifier: Modifier, contex
         startDestination = "Home"
     ) {
         composable(route = "Home") {
-            HomeScreen(context, viewModel)
+            HomeScreen(context, viewModel, navController)
         }
         composable(route = "Search") {
             SearchScreen(navController,context, viewModel)
@@ -101,6 +101,10 @@ fun AppMainNavigate(navController: NavHostController, modifier: Modifier, contex
         }
         composable(route = "EditProfile") {
             EditProfileScreen(context, viewModel)
+        }
+        composable("Profile/{userId}") { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
+            ProfileScreen(context, viewModel, navController, userId?.toInt())
         }
     }
 }
