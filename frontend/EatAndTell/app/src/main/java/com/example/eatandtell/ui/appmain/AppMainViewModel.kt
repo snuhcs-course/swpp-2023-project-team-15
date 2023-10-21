@@ -166,4 +166,15 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
+    suspend fun getFilteredByRestaurants(restaurantName: String, onSuccess: (List<PostDTO>) -> Unit) {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.getFilteredByRestaurants(authorization, restaurantName)
+            onSuccess(response.data)
+            Log.d("getFilteredByRestaurants", "success")
+        } catch (e: Exception) {
+            Log.d("getFilteredByRestaurants error", e.message ?: "Network error")
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
 }

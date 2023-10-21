@@ -46,6 +46,8 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
     }
     var userLists by remember { mutableStateOf(emptyList<UserDTO>()) }
 
+    var postLists by remember { mutableStateOf(emptyList<PostDTO>()) }
+
     var loading by remember { mutableStateOf(false) }
 
     var triggerSearch by remember { mutableStateOf(false) }
@@ -100,6 +102,13 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                             loading = false
                         },
                     )
+                    viewModel.getFilteredByRestaurants(
+                        searchText.text,
+                        onSuccess = { posts ->
+                            postLists = posts // resulted post Lists
+                            loading = false
+                        },
+                    )
                 }
                 catch (e: Exception) {
                     println("searchload error")
@@ -146,6 +155,10 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                             navController.navigate("Profile/${user.id}")
                         }
                     )
+                }
+                items(postLists.size) { index ->
+                    val post = postLists[index]
+                    HomePost(post, viewModel = viewModel, navHostController = navController, myInfo = post.user)
                 }
             }
         }
