@@ -442,9 +442,14 @@ fun DraggableStarRating(currentRating: Int, onRatingChanged: (Int) -> Unit) {
         }
     }
 
-//profile image
 @Composable
-fun ProfileImage(profileUrl: String, modifier: Modifier = Modifier) {
+fun ProfileImage(
+    profileUrl: String,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
+) {
+    val clickModifier = if (onClick != null) modifier.clickable(onClick = onClick) else modifier
+
     Image(
         painter = rememberImagePainter(
             data = profileUrl,
@@ -453,7 +458,7 @@ fun ProfileImage(profileUrl: String, modifier: Modifier = Modifier) {
             }
         ),
         contentDescription = null,
-        modifier = Modifier
+        modifier = clickModifier
             .border(
                 width = 2.dp,
                 color = Color(0xFFF23F18),
@@ -463,13 +468,19 @@ fun ProfileImage(profileUrl: String, modifier: Modifier = Modifier) {
             .width(45.dp)
             .height(45.dp)
             .background(
-                color = White,
+                color = Color.White,
                 shape = RoundedCornerShape(size = 100.dp)
-            ))
+            )
+    )
 }
 
 @Composable
-fun ProfileText(username: String, userDescription: String) {
+fun ProfileText(
+    username: String,
+    userDescription: String,
+    onUsernameClick: (() -> Unit)? = null,
+    onDescriptionClick: (() -> Unit)? = null
+) {
     Column {
         Text(
             text = username,
@@ -477,33 +488,39 @@ fun ProfileText(username: String, userDescription: String) {
                 fontSize = 16.sp,
                 lineHeight = 18.sp,
                 fontWeight = FontWeight(500),
-                color = Color(0xFF262626),
-            )
+                color = Color(0xFF262626)
+            ),
+            modifier = if (onUsernameClick != null) Modifier.clickable { onUsernameClick() } else Modifier
         )
-        Text(text = userDescription,
+        Text(
+            text = userDescription,
             style = TextStyle(
                 fontSize = 13.sp,
                 lineHeight = 18.sp,
                 fontWeight = FontWeight(500),
-                color = Color(0xFF848484),
-            ),  modifier = Modifier
-                .padding(top = 2.dp)
-                .width(150.dp)
-                .height(20.dp),
-                overflow = TextOverflow.Ellipsis
+                color = Color(0xFF848484)
+            ),
+            modifier = if (onDescriptionClick != null) Modifier.clickable { onDescriptionClick() } else Modifier
         )
     }
 }
 
 @Composable
-fun Profile(profileUrl: String, username: String, userDescription: String) {
+fun Profile(
+    profileUrl: String,
+    username: String,
+    userDescription: String,
+    onImageClick: (() -> Unit)? = null,
+    onUsernameClick: (() -> Unit)? = null,
+    onDescriptionClick: (() -> Unit)? = null
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.padding(4.dp)
     ) {
-        ProfileImage(profileUrl = profileUrl)
-        ProfileText(username = username, userDescription = userDescription)
+        ProfileImage(profileUrl = profileUrl, onClick = onImageClick)
+        ProfileText(username = username, userDescription = userDescription, onUsernameClick = onUsernameClick, onDescriptionClick = onDescriptionClick)
     }
 }
 
@@ -750,20 +767,4 @@ fun MyIcon(onClick: () -> Unit) {
         contentDescription = "my_home",
         tint = Black
     )
-}
-
-
-
-@Composable
-fun ClickableProfileImage(profileUrl: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier
-            .width(24.dp)
-            .height(24.dp)
-            .clickable(onClick = onClick), // Making the Surface clickable
-    ){
-        ProfileImage(
-            profileUrl = profileUrl
-        )
-    }
 }

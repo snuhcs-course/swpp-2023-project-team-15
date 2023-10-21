@@ -32,7 +32,6 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.eatandtell.ui.ClickableProfileImage
 import com.example.eatandtell.ui.Home
 import com.example.eatandtell.ui.MyIcon
 import com.example.eatandtell.ui.PlusCircle

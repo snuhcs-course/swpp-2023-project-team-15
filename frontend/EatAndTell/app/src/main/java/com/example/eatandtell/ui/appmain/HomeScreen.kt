@@ -109,7 +109,9 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
             items(feedPosts) { post ->
-                HomePost(post, viewModel = viewModel)
+                HomePost(post, viewModel = viewModel, onClick = {
+                    //TODO: userProfile로 이동
+                })
             }
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
@@ -120,7 +122,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
 }
 
 @Composable
-fun HomePost(post: PostDTO, viewModel: AppMainViewModel) {
+fun HomePost(post: PostDTO, viewModel: AppMainViewModel, onClick: () -> Unit = {}) {
     val user = post.user
     val coroutinescope = rememberCoroutineScope()
 
@@ -128,6 +130,9 @@ fun HomePost(post: PostDTO, viewModel: AppMainViewModel) {
         user.avatar_url,
         user.username,
         user.description,
+        onImageClick = onClick,
+        onDescriptionClick = onClick,
+        onUsernameClick = onClick,
     );
     Spacer(modifier = Modifier.height(11.dp))
     Post(
