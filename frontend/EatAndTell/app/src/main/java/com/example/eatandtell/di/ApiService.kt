@@ -11,6 +11,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
     @POST("users/login/") // The login endpoint (hypothetical)
@@ -48,5 +49,7 @@ interface ApiService {
                             @Path("id") id: Int): GetFeedResponse
 //@GET("users/{id}/") // The users endpoint
 //suspend fun getUserProfile(@Path("id") id: Int): GetFeedResponse
+    @GET("users/filter")
+    suspend fun getFilteredUsers(@Header("Authorization") authorization: String,@Query("username") username: String): List<UserDTO>
 
 }

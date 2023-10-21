@@ -154,5 +154,16 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
+    suspend fun getFilteredUsers(username: String, onSuccess: (List<UserDTO>) -> Unit) {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.getFilteredUsers(authorization, username)
+            onSuccess(response)
+            Log.d("getFilteredUsers", "success")
+        } catch (e: Exception) {
+            Log.d("getFilteredUsers error", e.message ?: "Network error")
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
 
 }
