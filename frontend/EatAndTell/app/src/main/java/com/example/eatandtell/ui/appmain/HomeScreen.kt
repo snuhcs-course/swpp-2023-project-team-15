@@ -48,8 +48,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.navArgument
 import coil.compose.rememberImagePainter
 import com.example.eatandtell.dto.PostDTO
+import com.example.eatandtell.dto.UserDTO
+import com.example.eatandtell.dto.UserInfoDTO
 import com.example.eatandtell.ui.HeartEmpty
 import com.example.eatandtell.ui.HeartFull
 import com.example.eatandtell.ui.ImageDialog
@@ -66,9 +69,10 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
+fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
     var feedPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
     var loading by remember { mutableStateOf(true) }
+    var myInfo by remember { mutableStateOf(UserDTO(0, "", "", "")) }
 
     LaunchedEffect(loading) {
         try {
@@ -77,6 +81,11 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
                     feedPosts = posts
                     println("feedPosts: ${feedPosts.size}")
                 },
+            )
+            viewModel.getMyInfo (
+                onSuccess = { info ->
+                    myInfo = info
+                }
             )
             loading = false
         }
@@ -109,7 +118,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
             items(feedPosts) { post ->
-                HomePost(post, viewModel = viewModel)
+                HomePost(post, viewModel = viewModel, navHostController = navHostController,myInfo)
             }
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
@@ -120,14 +129,33 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel) {
 }
 
 @Composable
-fun HomePost(post: PostDTO, viewModel: AppMainViewModel) {
+fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController,myInfo: UserDTO) {
     val user = post.user
     val coroutinescope = rememberCoroutineScope()
+
 
     Profile(
         user.avatar_url,
         user.username,
         user.description,
+        onImageClick = {
+            if(user.id == myInfo.id)
+                navigateToDestination(navHostController, "Profile")
+            else
+                navigateToDestination(navHostController, "Profile/${user.id}")
+        },
+        onDescriptionClick = {
+            if(user.id == myInfo.id)
+                navigateToDestination(navHostController, "Profile")
+            else
+        navigateToDestination(navHostController, "Profile/${user.id}")
+        },
+        onUsernameClick = {
+            if(user.id == myInfo.id)
+                navigateToDestination(navHostController, "Profile")
+            else
+                navigateToDestination(navHostController, "Profile/${user.id}")
+                          },
     );
     Spacer(modifier = Modifier.height(11.dp))
     Post(
@@ -139,3 +167,5 @@ fun HomePost(post: PostDTO, viewModel: AppMainViewModel) {
         },
     )
 }
+
+

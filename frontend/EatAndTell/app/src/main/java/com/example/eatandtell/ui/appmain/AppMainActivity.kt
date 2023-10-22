@@ -10,14 +10,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Scaffold
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.eatandtell.ui.start.StartViewModel
 
 //import com.example.eatandtell.ui.AppNavigation
@@ -52,8 +57,12 @@ fun AppMain(
     // Get current back stack entry
     val backStackEntry by navController.currentBackStackEntryAsState()
     // Get the name of the current screen
-    val currentScreenName = backStackEntry?.destination?.route ?: "Home"
+//    val currentScreenName = backStackEntry?.destination?.route ?: "Home"
+    val currentScreenName = backStackEntry?.destination?.route?.substringBefore("/{") ?: "Home"
 
+//    val currentScreenName = backStackEntry?.destination?.route?.let {
+//        if (it.startsWith("Profile")) "Profile" else it
+//    } ?: "Home"
     Scaffold(
         topBar = {
             TopBar(
@@ -70,12 +79,48 @@ fun AppMain(
                     onSearchClick = { navigateToDestination(navController, "Search") },
                     onPlusClick = { navigateToDestination(navController, "Upload") },
                     onProfileClick = { navigateToDestination(navController, "Profile")},
-                    profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8"
                 )
         }
     ) { innerPadding ->
-        BottomNav(navController = navController, modifier = Modifier.padding(innerPadding), context, viewModel)
+        AppMainNavigate(navController = navController, modifier = Modifier.padding(innerPadding), context, viewModel)
     }
+}
 
+@Composable
+fun AppMainNavigate(navController: NavHostController, modifier: Modifier, context: ComponentActivity, viewModel: AppMainViewModel) {
+    NavHost(
+        navController = navController,
+        startDestination = "Home"
+    ) {
+        composable(route = "Home") {
+            HomeScreen(context, viewModel, navController)
+        }
+        composable(route = "Search") {
+            SearchScreen(navController,context, viewModel)
+        }
+        composable(route = "Upload") {
+            UploadScreen(navController, context, viewModel)
 
+        }
+        composable(route = "Profile") {
+            ProfileScreen(context, viewModel, navController)
+        }
+        composable(route = "EditProfile") {
+            EditProfileScreen(context, viewModel)
+        }
+
+        composable(
+            route = "Profile/{userId}",
+            arguments = listOf(
+                navArgument("userId") {
+                    defaultValue = "self"  // set default value for self profile
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
+            ProfileScreen(context, viewModel, navController, userId?.toIntOrNull())
+        }
+
+    }
 }

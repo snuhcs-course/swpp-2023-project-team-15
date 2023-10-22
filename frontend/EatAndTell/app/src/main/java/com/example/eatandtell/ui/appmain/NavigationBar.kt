@@ -32,7 +32,6 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.eatandtell.ui.ClickableProfileImage
 import com.example.eatandtell.ui.Home
 import com.example.eatandtell.ui.MyIcon
 import com.example.eatandtell.ui.PlusCircle
@@ -47,7 +46,6 @@ fun BottomNavBar(
     onSearchClick: () -> Unit,
     onPlusClick: () -> Unit,
     onProfileClick: () -> Unit,
-    profileUrl: String
     ) {
     Surface {
         Row(
@@ -71,32 +69,6 @@ fun BottomNavBar(
 }
 
 
-@Composable
-fun BottomNav(navController: NavHostController, modifier: Modifier, context: ComponentActivity, viewModel: AppMainViewModel) {
-    NavHost(
-        navController = navController,
-        startDestination = "Home"
-    ) {
-        composable(route = "Home") {
-            HomeScreen(context, viewModel)
-        }
-        composable(route = "Search") {
-            SearchScreen()
-        }
-        composable(route = "Upload") {
-            UploadScreen(navController, context, viewModel)
-
-        }
-        composable(route = "Profile") {
-            ProfileScreen(context, viewModel, navController)
-        }
-        composable(route = "EditProfile") {
-            EditProfileScreen(context, viewModel)
-        }
-    }
-}
-
-
 fun navigateToDestination(navController: NavHostController, destination: String) {
     navController.navigate(destination) {
         popUpTo(navController.graph.startDestinationId) {
@@ -109,20 +81,11 @@ fun navigateToDestination(navController: NavHostController, destination: String)
     }
 }
 
-
-//Delete when done Implementing Each Screens
-@Composable
-fun SearchScreen() {
-     Text(text = "Search Screen")
-}
-
-
 @Preview
 @Composable
 fun PreviewNavigationBar() {
     Surface {
         BottomNavBar(
-            profileUrl = "https://avatars.githubusercontent.com/u/44080404?v=4",
             onHomeClick = { /*Home Clicked*/ },
             onSearchClick = { /*Search Clicked*/ },
             onPlusClick = { /*Plus Clicked*/ },
@@ -157,7 +120,6 @@ fun TopBar(currentScreenName: String, navigateToHome: () -> Unit) {
             }
         }
     )
-
 }
 
 @Preview(showBackground = true)

@@ -123,7 +123,7 @@ fun ProfileRow(userInfo: UserInfoDTO, onClick: () -> Unit,tags: List<String>, bu
 
 
 @Composable
-fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navController: NavHostController) {
+fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navController: NavHostController, userId: Int? = null ) {
     var myPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
     var myInfo by remember { mutableStateOf(UserInfoDTO(0, "", "", "", 0, 0)) }
     var loading by remember { mutableStateOf(true) }
@@ -132,13 +132,22 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
 
     LaunchedEffect(loading) {
         try {
-            viewModel.getMyFeed(
-                onSuccess = { info, posts ->
-                    myInfo = info
-                    myPosts = posts
-                    println("feedPosts: ${myPosts.size}")
-                },
-            )
+            if (userId != null) {
+                viewModel.getUserProfile(
+                    userId = userId,
+                    onSuccess = { info, posts ->
+                        myInfo = info
+                        myPosts = posts
+                    }
+                )
+            } else {
+                viewModel.getMyFeed(
+                    onSuccess = { info, posts ->
+                        myInfo = info
+                        myPosts = posts
+                    }
+                )
+            }
             loading = false
         }
         catch (e: Exception) {
@@ -167,8 +176,7 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 20.dp)) {
-            val isCurrentUser = true // Assuming "joshua-i" is the profile's user
-
+            val isCurrentUser = userId == null
             item {ProfileRow(
                 userInfo = myInfo,
                 onClick = {
