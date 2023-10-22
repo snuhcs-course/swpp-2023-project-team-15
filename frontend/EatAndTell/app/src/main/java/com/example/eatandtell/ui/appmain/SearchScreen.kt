@@ -64,7 +64,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
         CustomTextField(
             value = searchText.text,
             onValueChange = { searchText = TextFieldValue(it)},
-            placeholder = "Search by id, restaurant, user tags",
+            placeholder = "@: 유저, #: 태그, 없음: 식당 검색",
             trailingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
@@ -76,19 +76,21 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
             }
         )
         Spacer(modifier = Modifier.height(20.dp))
-        val tags = listOf("#육식주의자", "#미식가", "#리뷰왕", "#감성", "#한식")
-        //Tags
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth(),
-            mainAxisSpacing = 8.dp,
-            crossAxisSpacing = 8.dp
-        ) {
-            tags.forEach { tagName ->
-                Tag(tagName)
+        // Check if both lists are empty and triggerSearch is false
+        if (userLists.isEmpty() && postLists.isEmpty() && !triggerSearch) {
+            val tags = listOf("#육식주의자", "#미식가", "#리뷰왕", "#감성", "#한식")
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                mainAxisSpacing = 8.dp,
+                crossAxisSpacing = 8.dp
+            ) {
+                tags.forEach { tagName ->
+                    Tag(tagName)
+                }
             }
+            Spacer(modifier = Modifier.height(11.dp))
         }
-        Spacer(modifier = Modifier.height(11.dp))
 
         //search for userLists
         LaunchedEffect(triggerSearch) {
@@ -104,7 +106,11 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                             }
                         )
                         postLists = emptyList() // Reset post lists
-                    } else {
+                    }
+                    else if(searchText.text.startsWith("#")) {
+                        //TODO: search by tags
+                    }
+                    else {
                         viewModel.getFilteredByRestaurants(
                             searchText.text,
                             onSuccess = { posts ->
