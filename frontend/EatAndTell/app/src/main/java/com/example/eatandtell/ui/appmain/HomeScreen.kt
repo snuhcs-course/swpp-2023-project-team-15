@@ -140,23 +140,22 @@ fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHo
         user.description,
         onImageClick = {
             if(user.id == myInfo.id)
-                navHostController.navigate("Profile")
+                navigateToDestination(navHostController, "Profile")
             else
-                navHostController.navigate("Profile/${user.id}")
-                       },
+                navigateToDestination(navHostController, "Profile/${user.id}")
+        },
         onDescriptionClick = {
             if(user.id == myInfo.id)
-                navHostController.navigate("Profile")
+                navigateToDestination(navHostController, "Profile")
             else
-                navHostController.navigate("Profile/${user.id}")
-                             },
+        navigateToDestination(navHostController, "Profile/${user.id}")
+        },
         onUsernameClick = {
             if(user.id == myInfo.id)
-                navHostController.navigate("Profile")
+                navigateToDestination(navHostController, "Profile")
             else
-                navHostController.navigate("Profile/${user.id}")
+                navigateToDestination(navHostController, "Profile/${user.id}")
                           },
-//        onDescriptionClick = {navHostController.navigate("Profile/${user.id}")},
     );
     Spacer(modifier = Modifier.height(11.dp))
     Post(

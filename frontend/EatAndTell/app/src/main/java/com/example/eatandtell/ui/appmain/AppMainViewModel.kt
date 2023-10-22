@@ -144,7 +144,7 @@ class AppMainViewModel() : ViewModel() {
     suspend fun getMyInfo(onSuccess: (UserDTO) -> Unit){
         val authorization = "Token $token"
         try {
-            val response = apiService.getMyInfo(authorization)
+            val response = apiService.getMyFeed(authorization)
             val myInfo = UserDTO(response.id, response.username, response.description, response.avatar_url)
             Log.d("getMyInfo", "success")
             onSuccess(myInfo)

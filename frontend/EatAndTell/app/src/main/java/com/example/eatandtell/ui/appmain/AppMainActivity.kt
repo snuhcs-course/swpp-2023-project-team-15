@@ -108,10 +108,7 @@ fun AppMainNavigate(navController: NavHostController, modifier: Modifier, contex
         composable(route = "EditProfile") {
             EditProfileScreen(context, viewModel)
         }
-//        composable("Profile/{userId}") { backStackEntry ->
-//            val userId = backStackEntry.arguments?.getString("userId")
-//            ProfileScreen(context, viewModel, navController, userId?.toInt())
-//        }
+
         composable(
             route = "Profile/{userId}",
             arguments = listOf(

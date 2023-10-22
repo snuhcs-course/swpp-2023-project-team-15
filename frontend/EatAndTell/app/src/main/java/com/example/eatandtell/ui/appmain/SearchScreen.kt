@@ -1,6 +1,7 @@
 package com.example.eatandtell.ui.appmain
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -53,7 +54,6 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
     var triggerSearch by remember { mutableStateOf(false) }
 
 
-    //        SearchBar(searchText = searchText, onValueChange = { searchText = TextFieldValue(it)})
     //searchBar
     Column (
         modifier = Modifier
@@ -61,36 +61,15 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
             .padding(horizontal = 20.dp),)
     {
         Spacer(modifier = Modifier.height(11.dp))
-        CustomTextField(
-            value = searchText.text,
-            onValueChange = { searchText = TextFieldValue(it)},
-            placeholder = "@: 유저, #: 태그, 없음: 식당 검색",
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search Icon"
-                )
-            },
-            onTrailingIconClick = {
-                triggerSearch = true
-            }
+        SearchBar(
+            value = searchText,
+            onValueChange = { searchText = it },
+            onSearchClick = { triggerSearch = true }
         )
         Spacer(modifier = Modifier.height(20.dp))
         // Check if both lists are empty and triggerSearch is false
-        if (userLists.isEmpty() && postLists.isEmpty() && !triggerSearch) {
-            val tags = listOf("#육식주의자", "#미식가", "#리뷰왕", "#감성", "#한식")
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                mainAxisSpacing = 8.dp,
-                crossAxisSpacing = 8.dp
-            ) {
-                tags.forEach { tagName ->
-                    Tag(tagName)
-                }
-            }
-            Spacer(modifier = Modifier.height(11.dp))
-        }
+        DefaultTagView(userLists, postLists, triggerSearch)
+
 
         //search for userLists
         LaunchedEffect(triggerSearch) {
@@ -177,51 +156,49 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
 
 }
 
+@Composable
+fun SearchBar(value: TextFieldValue, onValueChange: (TextFieldValue) -> Unit, onSearchClick: () -> Unit) {
+    CustomTextField(
+        value = value.text,
+        onValueChange = { onValueChange(TextFieldValue(it)) },
+        placeholder = "@: 유저, #: 태그, 없음: 식당 검색",
+        trailingIcon = {
+            Box(
+                modifier = Modifier.clickable(onClick = onSearchClick),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search Icon"
+                )
+            }
+        }
+    )
+}
+
+@Composable
+fun DefaultTagView(userLists: List<UserDTO>, postLists: List<PostDTO>, triggerSearch: Boolean) {
+    if (userLists.isEmpty() && postLists.isEmpty() && !triggerSearch) {
+        val tags = listOf("#육식주의자", "#미식가", "#리뷰왕", "#감성", "#한식")
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            mainAxisSpacing = 8.dp,
+            crossAxisSpacing = 8.dp
+        ) {
+            tags.forEach { tagName ->
+                Tag(tagName)
+            }
+        }
+        Spacer(modifier = Modifier.height(11.dp))
+    }
+}
+
 @Preview
 @Composable
 fun SearchScreenPreview() {
     SearchScreen(navController = rememberNavController(), context = ComponentActivity(), viewModel = AppMainViewModel())
 }
-//
-//@Composable
-//fun SearchBar(searchText: TextFieldValue, onValueChange: (String) -> Unit){
-//    Column (
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(horizontal = 20.dp),)
-//    {
-//        Spacer(modifier = Modifier.height(11.dp))
-//        //SearchBar
-//        CustomTextField(
-//            value = searchText.text,
-//            onValueChange = onValueChange,
-//            placeholder = "Search by id, restaurant, user tags",
-//            trailingIcon = {
-//                Icon(
-//                    imageVector = Icons.Default.Search,
-//                    contentDescription = "Search Icon"
-//                )
-//            },
-//            onTrailingIconClick = {
-//                // Define your action here. For instance:
-////                viewModel.search(searchText.text) // assuming you have a search method in your viewModel
-//            }
-//        )
-//        Spacer(modifier = Modifier.height(20.dp))
-//        val tags = listOf("#육식주의자", "#미식가", "#리뷰왕", "#감성", "#한식")
-//        //Tags
-//        FlowRow(
-//            modifier = Modifier
-//                .fillMaxWidth(),
-//            mainAxisSpacing = 8.dp,
-//            crossAxisSpacing = 8.dp
-//        ) {
-//            tags.forEach { tagName ->
-//                Tag(tagName)
-//            }
-//        }
-//    }
-//}
+
 
 
 
