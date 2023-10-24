@@ -40,6 +40,8 @@ def ml_tagging(review_text, possible_tags):
         "parameters": {"candidate_labels": possible_tags},
     })
 
+    print("output222", output)
+
 
     label_score_dict = dict(zip(output['labels'], output['scores']))
 
