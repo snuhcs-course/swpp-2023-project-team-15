@@ -1,21 +1,22 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from posts.serializers import PostSerializer
-from posts.models import Post
 from django.db import models
+from rest_framework import serializers
 
+from posts.models import Post
+from posts.serializers import PostSerializer
 
 User= get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, style={
                                      'input_type': 'password'})
     posts = PostSerializer(source='post_set', many=True, read_only=True)
-    email = models.EmailField(unique=True, blank=False) 
+    email = models.EmailField(unique=True, blank=False)
+    is_followed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ('id', 'username', 'password', 'email','description', 
-                  'avatar_url', 'follower_count', 'following_count','posts')
+                  'avatar_url', 'follower_count', 'following_count','posts', 'is_followed')
         error_messages={
             'username':{'error': 'Username is already taken'},
             'email':{'error': 'Email is already in use'}
@@ -45,6 +46,9 @@ class UserSerializer(serializers.ModelSerializer):
         if not value:
             return "https://default_avatar-url.com"
         return value
+    
+    def get_is_followed(self, obj):
+        return False
     
 class UserPostSerializer(serializers.ModelSerializer):
     posts = PostSerializer(source='post_set', many=True, read_only=True)
