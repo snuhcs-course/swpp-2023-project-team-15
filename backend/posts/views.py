@@ -2,11 +2,25 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
 from tags.models import Tag
+from tags.utils import deepl_translate_ko_to_en, ml_tagging
+
 from .models import Post
-from tags.utils import ml_tagging, deepl_translate_ko_to_en
 from .serializers import PostSerializer, data_list
 
+
+def get_top_tags_after_translation(possible_tags, description):
+    translated_description = deepl_translate_ko_to_en(description)
+    label_score_dict = ml_tagging(translated_description, possible_tags)
+    max_label = max(label_score_dict, key=label_score_dict.get)
+    
+    print(f'가장 높은 스코어를 가진 레이블: {max_label}. 스코어: {label_score_dict[max_label]}')
+    if label_score_dict[max_label] > 0.3 :
+        matching_tag = Tag.objects.get(en_label=max_label)
+        return matching_tag
+    else:
+        return None
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
@@ -15,7 +29,7 @@ class PostViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['created_at']
     ordering = ['-created_at']
-
+    
     def create(self, request):
         serializer = PostSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -24,30 +38,18 @@ class PostViewSet(viewsets.ModelViewSet):
         tags_first_ten = Tag.objects.values('en_label')[:10]
         tags_second_ten = Tag.objects.values('en_label')[10:20]
         tags_third_ten = Tag.objects.values('en_label')[20:30]
-
-        possible_tags = [tag['en_label'] for tag in tags_first_ten]  # tags는 위에서 정의한 리스트
-        translated_description = deepl_translate_ko_to_en(serializer.validated_data['description'])
-        label_score_dict = ml_tagging(translated_description, possible_tags)
-        # label_score_dict에서 가장 높은 스코어를 가진 레이블 찾기
-        max_label = max(label_score_dict, key=label_score_dict.get)
-    
         
-        # 해당 레이블에 대응하는 태그 찾기
-        matching_tag = Tag.objects.get(en_label=max_label)
-
         # Post 생성 및 저장
         post = serializer.save(user=self.request.user)
         
-        if label_score_dict[max_label] > 0.3 :
-        # 해당 태그를 Post의 tags 필드에 추가
-            post.tags.add(matching_tag)
-
+        for possible_tags_queryset in [tags_first_ten, tags_second_ten, tags_third_ten]:
+            possible_tags = [tag['en_label'] for tag in possible_tags_queryset]
+            matching_tag = get_top_tags_after_translation(possible_tags, serializer.validated_data['description'])
+            if matching_tag is not None:
+                post.tags.add(matching_tag)            
+                
+        print(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def perform_create(self, serializer):
-        
-        serializer.save(user=self.request.user)
-
         
     def get_queryset(self):
         """
