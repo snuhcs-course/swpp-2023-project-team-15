@@ -12,11 +12,12 @@ class UserSerializer(serializers.ModelSerializer):
     posts = PostSerializer(source='post_set', many=True, read_only=True)
     email = models.EmailField(unique=True, blank=False)
     is_followed = serializers.SerializerMethodField()
+    tags = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ('id', 'username', 'password', 'email','description', 
-                  'avatar_url', 'follower_count', 'following_count','posts', 'is_followed')
+                  'avatar_url', 'follower_count', 'following_count','posts', 'is_followed', 'tags')
         error_messages={
             'username':{'error': 'Username is already taken'},
             'email':{'error': 'Email is already in use'}
@@ -49,6 +50,10 @@ class UserSerializer(serializers.ModelSerializer):
     
     def get_is_followed(self, obj):
         return False
+    
+    def get_tags(self, obj):
+        tags = obj.tags.all()
+        return [f"{tag.ko_label}" for tag in tags]
     
 class UserPostSerializer(serializers.ModelSerializer):
     posts = PostSerializer(source='post_set', many=True, read_only=True)
