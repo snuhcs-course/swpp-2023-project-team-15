@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "rest_framework",
     'posts',
     'users',
+    'tags',
     'drf_yasg',
     "rest_framework.authtoken",
 ]
