@@ -25,6 +25,8 @@ class Post(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     
+    tags = models.ManyToManyField('tags.Tag', related_name='posts', blank=True)
+    
     class Meta:
         ordering = ['-created_at']
 
