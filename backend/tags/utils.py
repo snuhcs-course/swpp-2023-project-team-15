@@ -24,3 +24,23 @@ def deepl_translate_ko_to_en(text):
         return translated_text
     else:
         return f"Error: {response.status_code}"
+
+
+def ml_tagging(review_text, possible_tags):
+
+    API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-mnli"
+    headers = {"Authorization": f'Bearer {config("HUGGINGFACE_AUTH_KEY")}'}
+
+    def query(payload):
+        response = requests.post(API_URL, headers=headers, json=payload)
+        return response.json()
+
+    output = query({
+        "inputs": review_text,
+        "parameters": {"candidate_labels": possible_tags},
+    })
+
+
+    label_score_dict = dict(zip(output['labels'], output['scores']))
+
+    return label_score_dict
