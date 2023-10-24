@@ -83,3 +83,29 @@ def filter_users(request):
         queryset = queryset.filter(username__icontains=username)
     serializer = UserSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def refresh_user_tags(request):
+    user = request.user
+
+    unique_tags = []
+    user_with_posts = User.objects.prefetch_related('posts__tags').get(id=user.id)
+
+    # Now, you can access the user's posts and their tags
+    user_posts = user_with_posts.posts.all()
+
+    for post in user_posts:
+        post_tags = post.tags.all()
+        # Do something with post_tags, such as printing their labels
+        for tag in post_tags:
+            if all(t.id != tag.id for t in unique_tags):
+                unique_tags.append(tag)
+
+    # Now, you can iterate through unique_tags and do something with them
+    # for tag in unique_tags:
+    #     print(tag['ko_label'], tag['en_label'])
+
+    # Update user's tags
+    user.tags.set(unique_tags)
+
+    return Response({"user_tags": [i.ko_label for i in unique_tags]})
