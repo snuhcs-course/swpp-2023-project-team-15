@@ -446,9 +446,7 @@ fun DraggableStarRating(currentRating: Int, onRatingChanged: (Int) -> Unit) {
 fun ProfileImage(
     profileUrl: String,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
 ) {
-    val clickModifier = if (onClick != null) modifier.clickable(onClick = onClick) else modifier
 
     Image(
         painter = rememberImagePainter(
@@ -458,7 +456,7 @@ fun ProfileImage(
             }
         ),
         contentDescription = null,
-        modifier = clickModifier
+        modifier = modifier
             .border(
                 width = 2.dp,
                 color = Color(0xFFF23F18),
@@ -478,8 +476,6 @@ fun ProfileImage(
 fun ProfileText(
     username: String,
     userDescription: String,
-    onUsernameClick: (() -> Unit)? = null,
-    onDescriptionClick: (() -> Unit)? = null
 ) {
     Column {
         Text(
@@ -490,7 +486,6 @@ fun ProfileText(
                 fontWeight = FontWeight(500),
                 color = Color(0xFF262626)
             ),
-            modifier = if (onUsernameClick != null) Modifier.clickable { onUsernameClick() } else Modifier
         )
         Text(
             text = userDescription,
@@ -500,7 +495,10 @@ fun ProfileText(
                 fontWeight = FontWeight(500),
                 color = Color(0xFF848484)
             ),
-            modifier = if (onDescriptionClick != null) Modifier.clickable { onDescriptionClick() } else Modifier
+            modifier = Modifier
+                .width(150.dp),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -510,28 +508,25 @@ fun Profile(
     profileUrl: String,
     username: String,
     userDescription: String,
-    onImageClick: (() -> Unit)? = null,
-    onUsernameClick: (() -> Unit)? = null,
-    onDescriptionClick: (() -> Unit)? = null
+    onClick: (() -> Unit) = { },
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.padding(4.dp)
+        modifier = Modifier.padding(4.dp).clickable(onClick = onClick)
     ) {
-        ProfileImage(profileUrl = profileUrl, onClick = onImageClick)
-        ProfileText(username = username, userDescription = userDescription, onUsernameClick = onUsernameClick, onDescriptionClick = onDescriptionClick)
+        ProfileImage(profileUrl = profileUrl)
+        ProfileText(username = username, userDescription = userDescription)
     }
 }
 
 
 // Post Photos
 @Composable
-fun PostImage(imageUrl: String, onImageClick: () -> Unit) {
+fun PostImage(imageUrl: String? = null, onImageClick: () -> Unit) {
     Image(
-        painter = rememberImagePainter(
-            data = imageUrl,
-        ),
+        painter = (if(imageUrl!=null) rememberImagePainter(data = imageUrl,)
+            else painterResource(R.drawable.default_image)), //added default image
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier = Modifier

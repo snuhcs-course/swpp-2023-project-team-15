@@ -100,31 +100,33 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
-    suspend fun getMyFeed(onSuccess: (UserInfoDTO, List<PostDTO>) -> Unit) {
-        val authorization = "Token $token"
-        try {
-            val response = apiService.getMyFeed(authorization)
-            val myInfo = UserInfoDTO(response.id, response.username, response.description, response.avatar_url, response.follower_count, response.following_count)
-            val myPosts = response.posts
-            Log.d("get my feed", "success")
-            onSuccess(myInfo, myPosts)
-        } catch (e: Exception) {
-            Log.d("get my feed error", e.message ?: "Network error")
-            throw e // rethrow the exception to be caught in the calling function
-        }
-    }
 
-    suspend fun getUserProfile(userId: Int, onSuccess: (UserInfoDTO, List<PostDTO>) -> Unit) {
+    suspend fun getUserFeed(userId: Int? = null, onSuccess: (UserInfoDTO, List<PostDTO>) -> Unit) {
         val authorization = "Token $token"
         try {
-            val response = apiService.getUserProfile(authorization, userId)
-//            val response = apiService.getUserProfile( userId)
-            val myInfo = UserInfoDTO(response.id, response.username, response.description, response.avatar_url, response.follower_count, response.following_count)
-            val myPosts = response.posts
-            Log.d("getUserProfile", "success")
+            val response = (
+                if (userId != null) apiService.getUserFeed(authorization, userId)
+                 else apiService.getMyFeed(authorization)
+            )
+            // TODO: listOf() -> response.tags, response.is_following 구현 시 잘 되는지 확인
+            println("user feed response is")
+            println(response)
+            val myInfo = UserInfoDTO(
+                id = response.id,
+                username = response.username,
+                description = response.description,
+                avatar_url = response.avatar_url,
+                tags = response.tags,
+                is_followed = response.is_followed,
+                follower_count = response.follower_count,
+                following_count = response.following_count,
+            )
+            val myPosts = response.posts?: listOf() //posts가 null이라서 임시처리
+            println("get user feed success")
             onSuccess(myInfo, myPosts)
         } catch (e: Exception) {
-            Log.d("getUserProfile error", e.message ?: "Network error")
+            print("get user feed error")
+            println(e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function
         }
     }
@@ -141,11 +143,11 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
-    suspend fun getMyInfo(onSuccess: (UserDTO) -> Unit){
+    suspend fun getMyProfile(onSuccess: (UserDTO) -> Unit){
         val authorization = "Token $token"
         try {
             val response = apiService.getMyFeed(authorization)
-            val myInfo = UserDTO(response.id, response.username, response.description, response.avatar_url)
+            val myInfo = UserDTO(response.id, response.username, response.description, response.avatar_url, listOf())
             Log.d("getMyInfo", "success")
             onSuccess(myInfo)
         } catch (e: Exception) {
@@ -154,14 +156,28 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
-    suspend fun getFilteredUsers(username: String, onSuccess: (List<UserDTO>) -> Unit) {
+    suspend fun getFilteredUsersByName(username: String, onSuccess: (List<UserDTO>) -> Unit) {
         val authorization = "Token $token"
         try {
-            val response = apiService.getFilteredUsers(authorization, username)
+            val response = apiService.getFilteredUsersByName(authorization, username)
+            //print response
+            println(response)
             onSuccess(response)
-            Log.d("getFilteredUsers", "success")
+            Log.d("getFilteredUsersByName", "success")
         } catch (e: Exception) {
-            Log.d("getFilteredUsers error", e.message ?: "Network error")
+            Log.d("getFilteredUsersByName error", e.message ?: "Network error")
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
+    suspend fun getFilteredUsersByTag(tag: String, onSuccess: (List<UserDTO>) -> Unit) {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.getFilteredUsersByTag(authorization, tag)
+            onSuccess(response)
+            Log.d("getFilteredUsersByTag", "success")
+        } catch (e: Exception) {
+            Log.d("getFilteredUsersByTag error", e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function
         }
     }

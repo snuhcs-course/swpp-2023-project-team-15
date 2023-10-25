@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -77,7 +76,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                 loading = true
                 try {
                     if(searchText.text.startsWith("@")) { // If search starts with @
-                        viewModel.getFilteredUsers(
+                        viewModel.getFilteredUsersByName(
                             searchText.text.drop(1), // Remove @ from the search string
                             onSuccess = { users ->
                                 userLists = users // resulted user Lists
@@ -88,6 +87,14 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                     }
                     else if(searchText.text.startsWith("#")) {
                         //TODO: search by tags
+                        viewModel.getFilteredUsersByTag(
+                            searchText.text.drop(1), // Remove @ from the search string
+                            onSuccess = { users ->
+                                userLists = users // resulted user Lists
+                                loading = false
+                            }
+                        )
+                        postLists = emptyList() // Reset post lists
                     }
                     else {
                         viewModel.getFilteredByRestaurants(
@@ -126,28 +133,22 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                 state = rememberLazyListState(),
                 modifier = Modifier.fillMaxSize()
             ) {
-                if (searchText.text.startsWith("@")) {
+                if (searchText.text.startsWith("@") || searchText.text.startsWith("#")) {
                     items(userLists.size) { index ->
                         val user = userLists[index]
                         Profile(
                             profileUrl = user.avatar_url,
                             username = user.username,
                             userDescription = user.description,
-                            onImageClick = {
+                            onClick = {
                                 navController.navigate("Profile/${user.id}")
                             },
-                            onDescriptionClick = {
-                                navController.navigate("Profile/${user.id}")
-                            },
-                            onUsernameClick = {
-                                navController.navigate("Profile/${user.id}")
-                            }
                         )
                     }
                 } else {
                     items(postLists.size) { index ->
                         val post = postLists[index]
-                        HomePost(post, viewModel = viewModel, navHostController = navController, myInfo = post.user)
+                        HomePost(post, viewModel = viewModel, navHostController = navController, myProfile = post.user)
                     }
                 }
             }

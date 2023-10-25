@@ -72,7 +72,7 @@ import kotlinx.coroutines.launch
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
     var feedPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
     var loading by remember { mutableStateOf(true) }
-    var myInfo by remember { mutableStateOf(UserDTO(0, "", "", "")) }
+    var myProfile by remember { mutableStateOf(UserDTO(0, "", "", "", listOf())) }
 
     LaunchedEffect(loading) {
         try {
@@ -82,9 +82,10 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
                     println("feedPosts: ${feedPosts.size}")
                 },
             )
-            viewModel.getMyInfo (
-                onSuccess = { info ->
-                    myInfo = info
+            viewModel.getMyProfile (
+                onSuccess = { it ->
+                    myProfile = it
+                    println("myProfile: ${myProfile.username}")
                 }
             )
             loading = false
@@ -118,7 +119,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
             items(feedPosts) { post ->
-                HomePost(post, viewModel = viewModel, navHostController = navHostController,myInfo)
+                HomePost(post, viewModel = viewModel, navHostController = navHostController,myProfile)
             }
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
@@ -129,7 +130,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
 }
 
 @Composable
-fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController,myInfo: UserDTO) {
+fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController,myProfile: UserDTO) {
     val user = post.user
     val coroutinescope = rememberCoroutineScope()
 
@@ -138,24 +139,12 @@ fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHo
         user.avatar_url,
         user.username,
         user.description,
-        onImageClick = {
-            if(user.id == myInfo.id)
+        onClick = {
+            if(user.id == myProfile.id)
                 navigateToDestination(navHostController, "Profile")
             else
                 navigateToDestination(navHostController, "Profile/${user.id}")
         },
-        onDescriptionClick = {
-            if(user.id == myInfo.id)
-                navigateToDestination(navHostController, "Profile")
-            else
-        navigateToDestination(navHostController, "Profile/${user.id}")
-        },
-        onUsernameClick = {
-            if(user.id == myInfo.id)
-                navigateToDestination(navHostController, "Profile")
-            else
-                navigateToDestination(navHostController, "Profile/${user.id}")
-                          },
     );
     Spacer(modifier = Modifier.height(11.dp))
     Post(

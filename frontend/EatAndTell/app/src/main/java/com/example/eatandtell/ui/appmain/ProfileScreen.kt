@@ -63,7 +63,7 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun ProfileRow(userInfo: UserInfoDTO, onClick: () -> Unit,tags: List<String>, buttonText: String) {
+fun ProfileRow(userInfo: UserInfoDTO, onClick: () -> Unit, buttonText: String) {
     Column {
         //Profile and follow button
         Spacer(modifier = Modifier.height(8.dp))
@@ -112,7 +112,7 @@ fun ProfileRow(userInfo: UserInfoDTO, onClick: () -> Unit,tags: List<String>, bu
             mainAxisSpacing = 8.dp,
             crossAxisSpacing = 8.dp
         ) {
-            tags.forEach { tagName ->
+            userInfo.tags.forEach { tagName ->
                 Tag(tagName)
             }
         }
@@ -124,34 +124,25 @@ fun ProfileRow(userInfo: UserInfoDTO, onClick: () -> Unit,tags: List<String>, bu
 
 @Composable
 fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navController: NavHostController, userId: Int? = null ) {
-    var myPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
-    var myInfo by remember { mutableStateOf(UserInfoDTO(0, "", "", "", 0, 0)) }
+    var userPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
+    var userInfo by remember { mutableStateOf(UserInfoDTO(0, "", "", "", listOf(), false,0, 0)) }
     var loading by remember { mutableStateOf(true) }
     val coroutinescope = rememberCoroutineScope()
 
 
     LaunchedEffect(loading) {
         try {
-            if (userId != null) {
-                viewModel.getUserProfile(
-                    userId = userId,
-                    onSuccess = { info, posts ->
-                        myInfo = info
-                        myPosts = posts
-                    }
-                )
-            } else {
-                viewModel.getMyFeed(
-                    onSuccess = { info, posts ->
-                        myInfo = info
-                        myPosts = posts
-                    }
-                )
-            }
+            viewModel.getUserFeed(
+                userId = userId,
+                onSuccess = { info, posts ->
+                    userInfo = info
+                    userPosts = posts
+                }
+            )
             loading = false
         }
         catch (e: Exception) {
-            println("my feed load error")
+            println("feed load error")
             showToast(context, "피드 로딩에 실패하였습니다")
         }
 
@@ -178,15 +169,15 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
                 .padding(horizontal = 20.dp)) {
             val isCurrentUser = userId == null
             item {ProfileRow(
-                userInfo = myInfo,
+                userInfo = userInfo,
                 onClick = {
-                    navigateToDestination(navController, "EditProfile")
+                    if(isCurrentUser) navigateToDestination(navController, "EditProfile")
+                    //TODO: else, follow or unfollow
                 },
-                tags = listOf("#육식주의자", "#미식가", "#리뷰왕","#감성","#한식"),
-                buttonText = if (isCurrentUser) "프로필 편집" else "팔로우하기"  // New buttonText parameter
+                buttonText = if (isCurrentUser) "프로필 편집" else if (userInfo.is_followed!=null) "팔로잉" else "팔로우하기" //TODO: 나중에 색깔도 바꾸기
             )}
 
-            items(myPosts) { post ->
+            items(userPosts) { post ->
                 Post(post, onHeartClick = {
                     coroutinescope.launch {
                         viewModel.toggleLike(post.id)
@@ -208,9 +199,8 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
 fun ProfileRowPreview() {
     Surface{
         ProfileRow(
-            userInfo = UserInfoDTO(0, "joshua-i", "본인 프로필입니다~", "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8", 10, 20),
+            userInfo = UserInfoDTO(0, "joshua-i", "본인 프로필입니다~", "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8", tags = listOf("육식주의자"), false,10, 20),
             onClick = {},
-            tags = listOf("#육식주의자", "#미식가", "#리뷰왕","#감성","#한식"),
             buttonText = "팔로우하기"  // New buttonText parameter
         )
     }

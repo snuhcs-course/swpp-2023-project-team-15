@@ -14,6 +14,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -26,6 +27,7 @@ import androidx.navigation.NavHostController
 import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.UploadPostRequest
+import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.ui.DraggableStarRating
 import com.example.eatandtell.ui.ImageDialog
 import com.example.eatandtell.ui.MainButton
@@ -59,8 +61,6 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
 
     var myRating by rememberSaveable { mutableStateOf("0") }
 
-    val profileUrl = "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8"
-
     var photoPaths by remember { mutableStateOf(listOf<Uri>()) } //핸드폰 내의 파일 경로
 
     val galleryLauncher =
@@ -72,102 +72,145 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
 
 
 
-    val username = "Joshua-i"
-    val userDescription = "고독한 미식가"
+    var loading by remember { mutableStateOf(true) }
+    var myProfile by remember { mutableStateOf(UserDTO(0, "", "", "", listOf())) }
 
-    // Main content
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp)
-    ) {
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Profile Row
-        Profile(profileUrl, username, userDescription);
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Images Row
-        Row(
-            modifier = Modifier
-                .height(150.dp)
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-
-            for ((index, photoPath) in photoPaths.withIndex()) {
-                PostImage(photoPath.toString(), onImageClick = { clickedImageIndex = index }
-                )
-            }
+    LaunchedEffect(loading) {
+        try {
+            viewModel.getMyProfile (
+                onSuccess = { it ->
+                    myProfile = it
+                    println("myProfile: ${myProfile.username}")
+                }
+            )
+            loading = false
+        }
+        catch (e: Exception) {
+            println("home feed load error")
+            showToast(context, "피드 로딩에 실패하였습니다")
         }
 
-        // Medium White Button
-        Spacer(modifier = Modifier.height(16.dp))
-        MediumWhiteButton(onClick = { galleryLauncher.launch("image/*") }, text = "사진 추가하기")
+    }
 
-        // Restaurant Name Text Field and Rating
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row (
-            horizontalArrangement = Arrangement.SpaceBetween, //너비에 상관없이 양쪽 끝에 배치
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+    if(loading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
+            CircularProgressIndicator(
+                //로딩 화면
+                modifier = Modifier
+                    .size(70.dp)
+            )
+        }
+    }
+    else {
+        // Main content
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp)
+        ) {
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Profile Row
+            Profile(myProfile.avatar_url, myProfile.username, myProfile.description);
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Images Row
+            Row(
+                modifier = Modifier
+                    .height(150.dp)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                //if photoPath is empty, show default image
+                if (photoPaths.isEmpty()) {
+                    PostImage(
+                        onImageClick = { galleryLauncher.launch("image/*") } //can add photos
+                    )
+                }
+
+                for ((index, photoPath) in photoPaths.withIndex()) {
+                    PostImage(photoPath.toString(), onImageClick = { clickedImageIndex = index }
+                    )
+                }
+            }
+
+            // Medium White Button
+            Spacer(modifier = Modifier.height(16.dp))
+            MediumWhiteButton(onClick = { galleryLauncher.launch("image/*") }, text = "사진 선택하기")
+
+            // Restaurant Name Text Field and Rating
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween, //너비에 상관없이 양쪽 끝에 배치
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                WhiteTextField(
+                    value = restaurantName.text,
+                    onValueChange = { restaurantName = TextFieldValue(it) },
+                    placeholder = "맛집명",
+                    modifier = Modifier
+                        .border(
+                            width = 0.5.dp,
+                            color = Color(0xFFC5C5C5),
+                            shape = RoundedCornerShape(size = 4.dp)
+                        )
+                        .height(IntrinsicSize.Min)
+                        .width(160.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                DraggableStarRating(
+                    currentRating = myRating.toInt(),
+                    onRatingChanged = { myRating = it.toString() })
+            }
+
+            // Review Text Field
+            Spacer(modifier = Modifier.height(12.dp))
             WhiteTextField(
-                value = restaurantName.text,
-                onValueChange = { restaurantName = TextFieldValue(it) },
-                placeholder = "맛집명",
+                value = reviewDescription.text,
+                onValueChange = { reviewDescription = TextFieldValue(it) },
+                placeholder = "리뷰를 작성해 주세요",
                 modifier = Modifier
                     .border(
                         width = 0.5.dp,
                         color = Color(0xFFC5C5C5),
                         shape = RoundedCornerShape(size = 4.dp)
                     )
-                    .height(IntrinsicSize.Min)
-                    .width(160.dp)
+                    .fillMaxWidth()
+                    .weight(1f) // 남은 세로 길이 모두 리뷰 공간으로 할당,
+                ,
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            DraggableStarRating(currentRating = myRating.toInt(), onRatingChanged = {myRating = it.toString()} )
+
+            // Upload Button
+            Spacer(modifier = Modifier.height(16.dp))
+            UploadButton(
+                viewModel = viewModel,
+                restaurant = RestReqDTO(name = restaurantName.text),
+                photoPaths = photoPaths,
+                rating = myRating,
+                description = reviewDescription.text,
+                context = context,
+                onClick = {
+                    navigateToDestination(navController, "Home")
+                }
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
         }
 
-        // Review Text Field
-        Spacer(modifier = Modifier.height(12.dp))
-        WhiteTextField(value = reviewDescription.text,
-            onValueChange = { reviewDescription = TextFieldValue(it)},
-            placeholder = "리뷰를 작성해 주세요",
-            modifier = Modifier
-                .border(
-                    width = 0.5.dp,
-                    color = Color(0xFFC5C5C5),
-                    shape = RoundedCornerShape(size = 4.dp)
-                )
-                .fillMaxWidth()
-                .weight(1f) // 남은 세로 길이 모두 리뷰 공간으로 할당,
-            ,
-        )
-
-        // Upload Button
-        Spacer(modifier = Modifier.height(16.dp))
-        UploadButton(
-            viewModel = viewModel,
-            restaurant = RestReqDTO(name = restaurantName.text),
-            photoPaths = photoPaths ,
-            rating = myRating,
-            description = reviewDescription.text,
-            context = context,
-            onClick = {
-                navigateToDestination(navController, "Home")
-            }
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-    }
-
-    //If Image Clicked, show Image Dialog
-    if (clickedImageIndex != -1) {
-        ImageDialog(imageUrl = photoPaths[clickedImageIndex].toString(), onClick = { clickedImageIndex = -1 })
+        //If Image Clicked, show Image Dialog
+        if (clickedImageIndex != -1) {
+            ImageDialog(
+                imageUrl = photoPaths[clickedImageIndex].toString(),
+                onClick = { clickedImageIndex = -1 })
+        }
     }
 
 }
