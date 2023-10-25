@@ -60,7 +60,7 @@ class AppMainViewModel() : ViewModel() {
         } catch (e: Exception) {
             // Handle exceptions, e.g., from network calls, here
             Log.d("upload photos and post error", e.message ?: "Network error")
-            showToast(context, "포스트 업로드에 실패했습니다")
+//            showToast(context, "포스트 업로드에 실패했습니다") //TODO: 백엔드단 문제해결 중
         }
     }
 
@@ -110,7 +110,7 @@ class AppMainViewModel() : ViewModel() {
             )
             // TODO: listOf() -> response.tags, response.is_following 구현 시 잘 되는지 확인
             println("user feed response is")
-            println(response)
+            println(response.tags)
             val myInfo = UserInfoDTO(
                 id = response.id,
                 username = response.username,
@@ -148,13 +148,14 @@ class AppMainViewModel() : ViewModel() {
         try {
             val response = apiService.getMyFeed(authorization)
             val myInfo = UserDTO(response.id, response.username, response.description, response.avatar_url, listOf())
-            Log.d("getMyInfo", "success")
+            Log.d("getMyProfile", "success")
             onSuccess(myInfo)
         } catch (e: Exception) {
-            Log.d("getMyInfo error", e.message ?: "Network error")
+            Log.d("getMyProfile error", e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function
         }
     }
+
 
     suspend fun getFilteredUsersByName(username: String, onSuccess: (List<UserDTO>) -> Unit) {
         val authorization = "Token $token"
@@ -191,6 +192,21 @@ class AppMainViewModel() : ViewModel() {
         } catch (e: Exception) {
             Log.d("getFilteredByRestaurants error", e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
+    fun refreshTags(onSuccess: (List<String>) -> Unit, context: Context) {
+        val authorization = "Token $token"
+        viewModelScope.launch {
+            try {
+                val response = apiService.refreshTags(authorization)
+                onSuccess(response.user_tags)
+                Log.d("refresh tags", "success")
+                showToast(context, "태그가 업데이트되었습니다")
+            } catch (e: Exception) {
+                Log.d("refresh tags error", e.message ?: "Network error")
+                showToast(context, "태그 업데이트에 실패하였습니다")
+            }
         }
     }
 }

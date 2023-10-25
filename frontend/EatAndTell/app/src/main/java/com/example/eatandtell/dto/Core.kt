@@ -55,3 +55,7 @@ data class PostDTO(
     val like_count : Int,
     val tags: List<String>, //this tag is for posts, not users!!
 )
+
+data class TagsDTO(
+    val user_tags : List<String>
+)

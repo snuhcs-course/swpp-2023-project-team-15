@@ -1,6 +1,7 @@
 package com.example.eatandtell.ui.appmain
 import android.content.Intent
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,8 +20,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -48,6 +52,7 @@ import com.example.eatandtell.dto.UserInfoDTO
 import com.example.eatandtell.ui.HeartEmpty
 import com.example.eatandtell.ui.HeartFull
 import com.example.eatandtell.ui.MediumRedButton
+import com.example.eatandtell.ui.MediumWhiteButton
 import com.example.eatandtell.ui.Post
 import com.example.eatandtell.ui.PostImage
 import com.example.eatandtell.ui.Profile
@@ -64,7 +69,11 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun ProfileRow(userInfo: UserInfoDTO, onClick: () -> Unit, buttonText: String) {
+fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -> Unit, buttonText: String, itsMe : Boolean = false, context : ComponentActivity? = null) {
+    var tags by remember { mutableStateOf(userInfo.tags) }
+
+    println("itsMe : $itsMe")
+
     Column {
         //Profile and follow button
         Spacer(modifier = Modifier.height(8.dp))
@@ -75,7 +84,8 @@ fun ProfileRow(userInfo: UserInfoDTO, onClick: () -> Unit, buttonText: String) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Profile(userInfo.avatar_url, userInfo.username, userInfo.description)
-            MediumRedButton(onClick = onClick, text = buttonText)
+            if (itsMe) MediumRedButton(onClick = { onClick }, text = buttonText)
+            else MediumWhiteButton(onClick = { onClick }, text = buttonText)
         }
         Spacer(modifier = Modifier.height(11.dp))
 
@@ -107,16 +117,41 @@ fun ProfileRow(userInfo: UserInfoDTO, onClick: () -> Unit, buttonText: String) {
         Spacer(modifier = Modifier.height(11.dp))
 
         //Tags
-        FlowRow(
+        Row (
             modifier = Modifier
                 .fillMaxWidth(),
-            mainAxisSpacing = 8.dp,
-            crossAxisSpacing = 8.dp
         ) {
-            userInfo.tags.forEach { tagName ->
-                Tag(tagName)
+            FlowRow(
+                modifier = Modifier
+                    .weight(1f),
+                mainAxisSpacing = 8.dp,
+                crossAxisSpacing = 8.dp
+            ) {
+                println("tags: ${userInfo.tags}")
+                userInfo.tags.forEach { tagName ->
+                    Tag(tagName)
+                }
             }
+            //refresh button
+            if (itsMe) Icon(
+                imageVector = Icons.Default.Refresh,
+                contentDescription = "Refresh Icon",
+                tint = MainColor,
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable(onClick = {
+                        viewModel.refreshTags(
+                            onSuccess = { it ->
+                                tags = it
+                                println("refreshed tags: $tags")
+                            },
+                            context = context!!
+                        )
+                    })
+                    .align(Alignment.CenterVertically)
+            )
         }
+
         Spacer(modifier = Modifier.height(15.dp))
     }
 
@@ -173,12 +208,15 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
                 .padding(horizontal = 20.dp)) {
             val isCurrentUser = userId == null
             item {ProfileRow(
+                viewModel = viewModel,
                 userInfo = userInfo,
                 onClick = {
                     if(isCurrentUser) navigateToDestination(navController, "EditProfile")
                     //TODO: else, follow or unfollow
                 },
-                buttonText = if (isCurrentUser) "프로필 편집" else if (userInfo.is_followed!=null) "팔로잉" else "팔로우하기" //TODO: 나중에 색깔도 바꾸기
+                buttonText = if (isCurrentUser) "프로필 편집" else if (userInfo.is_followed) "팔로잉" else "팔로우하기", //TODO: 나중에 색깔도 바꾸기
+                itsMe = isCurrentUser,
+                context = context
             )}
 
             items(userPosts) { post ->
@@ -203,6 +241,7 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
 fun ProfileRowPreview() {
     Surface{
         ProfileRow(
+            viewModel = AppMainViewModel(),
             userInfo = UserInfoDTO(0, "joshua-i", "본인 프로필입니다~", "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8", tags = listOf("육식주의자"), false,10, 20),
             onClick = {},
             buttonText = "팔로우하기"  // New buttonText parameter

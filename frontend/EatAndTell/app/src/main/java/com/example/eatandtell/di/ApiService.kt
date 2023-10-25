@@ -53,4 +53,7 @@ interface ApiService {
     suspend fun toggleLike(@Header("Authorization") authorization: String,
                            @Path("post_id") post_id: Int): toggleLikeResponse
 
+    @POST("users/refresh-tags/")
+    suspend fun refreshTags(@Header("Authorization") authorization: String,): TagsDTO
+
 }
