@@ -7,6 +7,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from tags.models import Tag
 
 from .serializers import UserInfoSerializer, UserPostSerializer, UserSerializer
 
@@ -88,24 +89,33 @@ def filter_users(request):
 def refresh_user_tags(request):
     user = request.user
 
-    unique_tags = []
+    # Dictionary to store tag counts for each label type
+    tag_counts = {label: {} for label, _ in Tag.TAG_TYPES}
+
     user_with_posts = User.objects.prefetch_related('posts__tags').get(id=user.id)
 
-    # Now, you can access the user's posts and their tags
-    user_posts = user_with_posts.posts.all()
+    # Iterate through user's posts and tags
+    for post in user_with_posts.posts.all():
+        for tag in post.tags.all():
+            label = tag.ko_label  # Assuming ko_label is used as the label
+            tag_type = tag.type
 
-    for post in user_posts:
-        post_tags = post.tags.all()
-        # Do something with post_tags, such as printing their labels
-        for tag in post_tags:
-            if all(t.id != tag.id for t in unique_tags):
-                unique_tags.append(tag)
+            # Increment tag count for the specific type and label
+            tag_counts[tag_type][label] = tag_counts[tag_type].get(label, 0) + 1
 
-    # Now, you can iterate through unique_tags and do something with them
-    # for tag in unique_tags:
-    #     print(tag['ko_label'], tag['en_label'])
+    print("tag_counts", tag_counts)
+    # Dictionary to store the most frequently occurring tag for each type
+    most_frequent_tags = {}
 
-    # Update user's tags
-    user.tags.set(unique_tags)
+    # Iterate through tag counts for each type
+    for tag_type, label_counts in tag_counts.items():
+        if label_counts:
+            # Find the label with the maximum count
+            most_frequent_label = max(label_counts, key=label_counts.get)
+            most_frequent_tags[tag_type] = most_frequent_label
 
-    return Response({"user_tags": [i.ko_label for i in unique_tags]})
+    # Update user's tags with the most frequently occurring tags for each type
+    updated_tags = Tag.objects.filter(ko_label__in=most_frequent_tags.values())
+    user.tags.set(updated_tags)
+
+    return Response({"user_tags": [i.ko_label for i in updated_tags]})

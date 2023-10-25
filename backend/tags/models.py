@@ -15,8 +15,16 @@ tags = [
 
 
 class Tag(models.Model):
+    TAG_TYPES = [
+        ('country', 'country'),
+        ('ingredient', 'ingredient'),
+        ('atmosphere', 'atmosphere'),
+    ]
+
     ko_label = models.CharField(max_length=255)
     en_label = models.CharField(max_length=255)
+    type = models.CharField(max_length=20, choices=TAG_TYPES, default='country')
 
     def __str__(self):
         return self.ko_label
+
