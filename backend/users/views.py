@@ -118,4 +118,4 @@ def refresh_user_tags(request):
     updated_tags = Tag.objects.filter(ko_label__in=most_frequent_tags.values())
     user.tags.set(updated_tags)
 
-    return Response({"user_tags": most_frequent_tags})
+    return Response({"user_tags": [i.ko_label for i in updated_tags]})
