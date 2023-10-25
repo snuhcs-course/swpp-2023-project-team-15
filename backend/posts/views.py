@@ -16,11 +16,10 @@ def get_top_tags_after_translation(possible_tags, description):
     max_label = max(label_score_dict, key=label_score_dict.get)
     
     print(f'가장 높은 스코어를 가진 레이블: {max_label}. 스코어: {label_score_dict[max_label]}')
-    if label_score_dict[max_label] > 0.3 :
-        matching_tag = Tag.objects.get(en_label=max_label)
+    if label_score_dict[max_label] > 0.3:
+        matching_tag = Tag.objects.filter(en_label=max_label).first()
         return matching_tag
-    else:
-        return None
+    return None
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
