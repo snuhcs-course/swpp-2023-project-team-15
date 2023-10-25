@@ -63,6 +63,7 @@ import com.example.eatandtell.ui.StarRating
 import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.MainColor
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 //TODO: 이후 좋아요가 PostDTO에 추가되면 like를 PostDTO에서 가져오도록 수정
@@ -76,12 +77,14 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
 
     LaunchedEffect(loading) {
         try {
+            println("trying to load home feed")
             viewModel.getAllPosts(
                 onSuccess = { posts ->
                     feedPosts = posts
                     println("feedPosts: ${feedPosts.size}")
                 },
             )
+            println("getting posts is fine")
             viewModel.getMyProfile (
                 onSuccess = { it ->
                     myProfile = it
@@ -91,10 +94,12 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
             loading = false
         }
         catch (e: Exception) {
-            println("home feed load error")
-            showToast(context, "피드 로딩에 실패하였습니다")
+            if (e !is CancellationException) { // 유저가 너무 빨리 화면을 옮겨다니는 경우에는 CancellationException이 발생할 수 있지만, 서버 에러가 아니라서 패스
+                loading = false
+                Log.d("home feed load error", e.toString())
+                showToast(context, "홈 피드 로딩에 실패하였습니다")
+            }
         }
-
     }
 
     if(loading) {

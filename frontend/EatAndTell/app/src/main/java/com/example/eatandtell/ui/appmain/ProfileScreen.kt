@@ -59,6 +59,7 @@ import com.example.eatandtell.ui.theme.Inter
 import com.example.eatandtell.ui.theme.MainColor
 
 import com.google.accompanist.flowlayout.FlowRow
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 
@@ -142,8 +143,11 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
             loading = false
         }
         catch (e: Exception) {
-            println("feed load error")
-            showToast(context, "피드 로딩에 실패하였습니다")
+            if (e !is CancellationException) { // 유저가 너무 빨리 화면을 옮겨다니는 경우에는 CancellationException이 발생할 수 있지만, 서버 에러가 아니라서 패스
+                loading = false
+                println("feed load error $e")
+                showToast(context, "유저 피드 로딩에 실패하였습니다 $e")
+            }
         }
 
     }
