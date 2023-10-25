@@ -9,7 +9,7 @@ User= get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, style={
                                      'input_type': 'password'})
-    posts = PostSerializer(source='post_set', many=True, read_only=True)
+    posts = PostSerializer(many=True, read_only=True)
     email = models.EmailField(unique=True, blank=False)
     is_followed = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
