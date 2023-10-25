@@ -84,8 +84,8 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
             verticalAlignment = Alignment.CenterVertically
         ) {
             Profile(userInfo.avatar_url, userInfo.username, userInfo.description)
-            if (itsMe) MediumRedButton(onClick = { onClick }, text = buttonText)
-            else MediumWhiteButton(onClick = { onClick }, text = buttonText)
+            if (itsMe || buttonText == "팔로우하기") MediumRedButton(onClick = { onClick() }, text = buttonText)
+            else MediumWhiteButton(onClick = { onClick() }, text = buttonText)
         }
         Spacer(modifier = Modifier.height(11.dp))
 
@@ -207,12 +207,13 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
                 .fillMaxSize()
                 .padding(horizontal = 20.dp)) {
             val isCurrentUser = userId == null
+
             item {ProfileRow(
                 viewModel = viewModel,
                 userInfo = userInfo,
                 onClick = {
                     if(isCurrentUser) navigateToDestination(navController, "EditProfile")
-                    //TODO: else, follow or unfollow
+                    else { /* TODO: toggle follow */ }
                 },
                 buttonText = if (isCurrentUser) "프로필 편집" else if (userInfo.is_followed) "팔로잉" else "팔로우하기", //TODO: 나중에 색깔도 바꾸기
                 itsMe = isCurrentUser,

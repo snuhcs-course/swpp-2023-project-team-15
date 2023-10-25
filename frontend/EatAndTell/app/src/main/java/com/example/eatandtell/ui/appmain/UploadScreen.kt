@@ -93,7 +93,6 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                 showToast(context, "프로필 로딩에 실패하였습니다")
             }
         }
-
     }
 
     if(loading) {

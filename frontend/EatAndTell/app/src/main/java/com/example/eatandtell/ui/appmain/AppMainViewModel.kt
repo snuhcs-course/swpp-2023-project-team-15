@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eatandtell.di.ApiService
+import com.example.eatandtell.dto.EditProfileRequest
 import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.RegisterRequest
@@ -64,6 +65,39 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
+    suspend fun uploadPhotosAndEditProfile(photoPaths: List<Uri>,
+                                    username : String,
+                                    description: String,
+                                    context: Context
+    ) {
+
+        fun prepareFileData(photoPath: Uri): ByteArray? {
+            val contentResolver = context.contentResolver
+            contentResolver.openInputStream(photoPath)?.use { inputStream ->
+                return inputStream.readBytes()
+            }
+            return null
+        }
+
+        val photoUrls = mutableListOf<String>()
+        val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it) }
+        for(byteArray in photoByteArrays) {
+            val requestBody: RequestBody = byteArray.toRequestBody("image/*".toMediaTypeOrNull())
+            val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("image", "this_name_does_not_matter.jpg", requestBody)
+            val imageUrl = getImageURL(fileToUpload)
+            photoUrls.add(imageUrl)
+        }
+        try {
+            val profileData = EditProfileRequest(username = username, description = description, avatar_url = photoUrls[0])
+            this.editProfile(profileData)
+            showToast(context, "프로필이 편집되었습니다")
+        } catch (e: Exception) {
+            // Handle exceptions, e.g., from network calls, here
+            Log.d("edit profile error", e.message ?: "Network error")
+            showToast(context, "프로필 편집에 실패했습니다") //TODO: 백엔드단 문제해결 중
+        }
+    }
+
     private suspend fun uploadPost(postData: UploadPostRequest) {
         val authorization = "Token $token"
 
@@ -72,6 +106,18 @@ class AppMainViewModel() : ViewModel() {
         } catch (e: Exception) {
             val errorMessage = e.message ?: "Network error"
             Log.d("upload post error", errorMessage)
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
+    private suspend fun editProfile(profileData: EditProfileRequest) {
+        val authorization = "Token $token"
+
+        try {
+            apiService.editProfile(authorization, profileData)
+        } catch (e: Exception) {
+            val errorMessage = e.message ?: "Network error"
+            Log.d("edit profile error", errorMessage)
             throw e // rethrow the exception to be caught in the calling function
         }
     }

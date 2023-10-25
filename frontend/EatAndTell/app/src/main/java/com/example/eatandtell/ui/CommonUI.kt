@@ -112,7 +112,8 @@ fun CustomTextField(
     placeholder: String,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: (@Composable () -> Unit)? = null,
-    onTrailingIconClick: (() -> Unit)? = null
+    onTrailingIconClick: (() -> Unit)? = null,
+    maxLines : Int = 1,
 ) {
     TextField(
         value = value,
@@ -132,15 +133,15 @@ fun CustomTextField(
             .fillMaxWidth()
             .height(IntrinsicSize.Min),
         colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color(0xFFEEEEEE),
+            containerColor = White , //Color(0xFFEEEEEE),
             cursorColor = Color.Black,
-            focusedIndicatorColor = Color(0xFFA0A0A0),
+            focusedIndicatorColor = MainColor, //Color(0xFFA0A0A0),
             unfocusedIndicatorColor = Color.Transparent,
             ),
         placeholder = { Text(placeholder, style = MaterialTheme.typography.bodyMedium
         ) },
         textStyle = MaterialTheme.typography.bodyMedium,
-        maxLines = 1
+        maxLines = maxLines
     )
 }
 
@@ -446,6 +447,8 @@ fun DraggableStarRating(currentRating: Int, onRatingChanged: (Int) -> Unit) {
 fun ProfileImage(
     profileUrl: String,
     modifier: Modifier = Modifier,
+    onEditClick: () -> Unit = { },
+    size : Dp = 45.dp
 ) {
 
     Image(
@@ -463,12 +466,13 @@ fun ProfileImage(
                 shape = RoundedCornerShape(size = 100.dp)
             )
             .padding(2.dp)
-            .width(45.dp)
-            .height(45.dp)
+            .width(size)
+            .height(size)
             .background(
                 color = Color.White,
                 shape = RoundedCornerShape(size = 100.dp)
             )
+            .clickable(onClick = onEditClick)
     )
 }
 

@@ -8,6 +8,7 @@ import retrofit2.http.POST
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
@@ -23,6 +24,10 @@ interface ApiService {
     @POST("posts/") // The posts endpoint
     suspend fun uploadPost(@Header("Authorization") authorization: String,
                            @Body postData: UploadPostRequest): PostDTO
+
+    @POST("users/edit/") // The edit profile endpoint
+    suspend fun editProfile(@Header("Authorization") authorization: String,
+                           @Body profileData: EditProfileRequest): UserDTO
     @Multipart
     @POST("images/upload/") // The images endpoint
     suspend fun getImageURL(@Header("Authorization") authorization: String,
@@ -55,5 +60,7 @@ interface ApiService {
 
     @POST("users/refresh-tags/")
     suspend fun refreshTags(@Header("Authorization") authorization: String,): TagsDTO
+
+
 
 }
