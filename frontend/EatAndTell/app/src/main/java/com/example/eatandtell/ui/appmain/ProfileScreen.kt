@@ -215,7 +215,7 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
                     if(isCurrentUser) navigateToDestination(navController, "EditProfile")
                     else { /* TODO: toggle follow */ }
                 },
-                buttonText = if (isCurrentUser) "프로필 편집" else if (userInfo.is_followed) "팔로잉" else "팔로우하기", //TODO: 나중에 색깔도 바꾸기
+                buttonText = if (isCurrentUser) "프로필 편집" else if (userInfo.is_followed) "팔로잉" else "팔로우하기",
                 itsMe = isCurrentUser,
                 context = context
             )}

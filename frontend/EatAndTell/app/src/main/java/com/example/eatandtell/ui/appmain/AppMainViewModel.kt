@@ -154,7 +154,6 @@ class AppMainViewModel() : ViewModel() {
                 if (userId != null) apiService.getUserFeed(authorization, userId)
                  else apiService.getMyFeed(authorization)
             )
-            // TODO: listOf() -> response.tags, response.is_following 구현 시 잘 되는지 확인
             println("user feed response is")
             println(response.tags)
             val myInfo = UserInfoDTO(

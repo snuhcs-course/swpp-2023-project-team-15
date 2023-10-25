@@ -124,6 +124,7 @@ fun CustomTextField(
                 trailingIcon?.invoke()
             }
         },
+
         modifier = Modifier
             .border(
                 width = 0.5.dp,
@@ -141,7 +142,8 @@ fun CustomTextField(
         placeholder = { Text(placeholder, style = MaterialTheme.typography.bodyMedium
         ) },
         textStyle = MaterialTheme.typography.bodyMedium,
-        maxLines = maxLines
+        maxLines = maxLines,
+
     )
 }
 
@@ -447,6 +449,37 @@ fun DraggableStarRating(currentRating: Int, onRatingChanged: (Int) -> Unit) {
 fun ProfileImage(
     profileUrl: String,
     modifier: Modifier = Modifier,
+    size : Dp = 45.dp
+) {
+
+    Image(
+        painter = rememberImagePainter(
+            data = profileUrl,
+            builder = {
+                transformations(CircleCropTransformation())
+            }
+        ),
+        contentDescription = null,
+        modifier = modifier
+            .border(
+                width = 2.dp,
+                color = Color(0xFFF23F18),
+                shape = RoundedCornerShape(size = 100.dp)
+            )
+            .padding(2.dp)
+            .width(size)
+            .height(size)
+            .background(
+                color = Color.White,
+                shape = RoundedCornerShape(size = 100.dp)
+            )
+    )
+}
+
+@Composable
+fun EditProfileImage(
+    profileUrl: String,
+    modifier: Modifier = Modifier,
     onEditClick: () -> Unit = { },
     size : Dp = 45.dp
 ) {
@@ -517,7 +550,9 @@ fun Profile(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.padding(4.dp).clickable(onClick = onClick)
+        modifier = Modifier
+            .padding(4.dp)
+            .clickable(onClick = onClick)
     ) {
         ProfileImage(profileUrl = profileUrl)
         ProfileText(username = username, userDescription = userDescription)

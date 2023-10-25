@@ -56,6 +56,7 @@ import com.example.eatandtell.dto.RestaurantDTO
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
 import com.example.eatandtell.ui.CustomTextField
+import com.example.eatandtell.ui.EditProfileImage
 import com.example.eatandtell.ui.HeartEmpty
 import com.example.eatandtell.ui.HeartFull
 import com.example.eatandtell.ui.Logo
@@ -148,7 +149,7 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                     .padding(horizontal = 20.dp)
             ) {
 
-                ProfileImage(
+                EditProfileImage(
                     profileUrl = if (photoPaths.isEmpty()) myProfile.avatar_url else photoPaths[0].toString(),
                     onEditClick = { galleryLauncher.launch("image/*") }
                     , size = 100.dp)

@@ -66,9 +66,6 @@ import com.example.eatandtell.ui.theme.MainColor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
-//TODO: 이후 좋아요가 PostDTO에 추가되면 like를 PostDTO에서 가져오도록 수정
-
-
 @Composable
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
     var feedPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
