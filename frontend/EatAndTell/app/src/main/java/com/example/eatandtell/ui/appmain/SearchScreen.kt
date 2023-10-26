@@ -62,7 +62,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
         Spacer(modifier = Modifier.height(11.dp))
         SearchBar(
             value = searchText,
-            onValueChange = { searchText = it },
+            onValueChange = { searchText = it; triggerSearch = true },
             onSearchClick = { triggerSearch = true }
         )
         Spacer(modifier = Modifier.height(20.dp))
