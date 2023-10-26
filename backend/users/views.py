@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
@@ -79,10 +80,27 @@ def get_user_posts(request, pk):
 @api_view(['GET'])
 def filter_users(request):
     queryset = User.objects.all()
+   # Filter by username
     username = request.query_params.get('username')
     if username is not None:
         queryset = queryset.filter(username__icontains=username)
-    serializer = UserSerializer(queryset, many=True, context={'request': request})
+
+    # Filter by tags
+    tags_param = request.query_params.get('tags')
+    if tags_param:
+        # Split the tags and create a Q object for each tag
+        tags = tags_param.split(',')
+        tag_queries = [Q(tags__ko_label=tag) for tag in tags]
+
+        # Combine the Q objects using OR operation
+        combined_query = Q()
+        for tag_query in tag_queries:
+            combined_query |= tag_query
+
+        # Filter the queryset using the combined Q object
+        queryset = queryset.filter(combined_query)
+
+    serializer = UserInfoSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['POST'])

@@ -63,6 +63,13 @@ class UserPostSerializer(serializers.ModelSerializer):
         fields=('posts',)
 
 class UserInfoSerializer(serializers.ModelSerializer):
+    tags = serializers.SerializerMethodField()
+    
     class Meta:
         model=User
-        fields=('username', 'avatar_url', 'description')
+        fields=('username', 'avatar_url', 'description', 'tags')
+
+    
+    def get_tags(self, obj):
+        tags = obj.tags.all()
+        return [f"{tag.ko_label}" for tag in tags]
