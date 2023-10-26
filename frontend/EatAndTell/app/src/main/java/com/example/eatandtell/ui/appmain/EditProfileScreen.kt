@@ -91,6 +91,8 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
         var loading by remember { mutableStateOf(true) }
         var myProfile by remember { mutableStateOf(UserDTO(0, "", "", "", listOf())) }
 
+        var buttonEnable by remember { mutableStateOf(true) }
+
         LaunchedEffect(loading) {
             try {
                 viewModel.getMyProfile (
@@ -182,6 +184,7 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                 ) {
                     MediumRedButton(onClick = {
                                 try {
+                                    buttonEnable = false
                                     coroutineScope.launch {
                                         viewModel.uploadPhotosAndEditProfile(
                                             photoPaths = photoPaths,
@@ -189,13 +192,13 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                                             context = context,
                                             org_avatar_url = myProfile.avatar_url,
                                         )
+                                        navigateToDestination(navController, "Profile")
                                     }
-                                    navigateToDestination(navController, "Profile")
                                 } catch (e: Exception) {
                                     // Handle exceptions, e.g., from network calls, here
                                     println("An error occurred: ${e.message}")
                                 }
-                            }, text = "프로필 저장")
+                            }, text = "프로필 저장", enable = buttonEnable)
 
                     MediumRedButton(onClick = {
                         SharedPreferencesManager.clearPreferences(context)

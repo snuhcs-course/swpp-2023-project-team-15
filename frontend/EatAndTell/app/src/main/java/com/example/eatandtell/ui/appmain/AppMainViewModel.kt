@@ -81,6 +81,8 @@ class AppMainViewModel() : ViewModel() {
                                            org_avatar_url: String,
     ) {
 
+        Log.d("edit profile photoPaths: ", photoPaths.toString())
+
         fun prepareFileData(photoPath: Uri): ByteArray? {
             val contentResolver = context.contentResolver
             contentResolver.openInputStream(photoPath)?.use { inputStream ->
@@ -98,9 +100,11 @@ class AppMainViewModel() : ViewModel() {
             photoUrls.add(imageUrl)
         }
 
+
         try {
             Log.d("edit profile", description)
             Log.d("edit profile", photoUrls.toString())
+            Log.d("edit profile", org_avatar_url)
             val url = if (photoUrls.isEmpty()) org_avatar_url else photoUrls[0]
             val profileData = EditProfileRequest(description = description, avatar_url = url)
             Log.d("edit profile", profileData.toString())

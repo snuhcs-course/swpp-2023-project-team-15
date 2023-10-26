@@ -306,9 +306,9 @@ fun PreviewMediumWhiteButton() {
 }
 
 @Composable
-fun MediumRedButton(onClick: () -> Unit, text: String) {
+fun MediumRedButton(onClick: () -> Unit, text: String, enable: Boolean = true) {
     Button(
-        onClick = onClick,
+        onClick = {if (enable) onClick() else { /**/ }},
         colors = ButtonDefaults.buttonColors(
             containerColor = MainColor,
             contentColor = White
@@ -319,7 +319,7 @@ fun MediumRedButton(onClick: () -> Unit, text: String) {
             .height(36.dp),
         contentPadding = PaddingValues(0.dp)
     ) {
-        Text(text, color = White,
+        if (enable) Text(text, color = White,
             style = TextStyle(
                 fontFamily = Inter,
                 fontSize = 14.sp,
@@ -329,6 +329,13 @@ fun MediumRedButton(onClick: () -> Unit, text: String) {
                 .padding(0.dp)
                 .align(Alignment.CenterVertically) // Center the text vertically
         )
+        else //show loading
+            CircularProgressIndicator(
+                color = White,
+                modifier = Modifier
+                    .width(24.dp)
+                    .height(24.dp)
+            )
     }
 }
 @Preview
