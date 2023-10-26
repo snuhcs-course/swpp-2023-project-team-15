@@ -69,6 +69,8 @@ class AppMainViewModel() : ViewModel() {
             }
             else {
                 Log.d("upload photos and post error", "cancellation exception")
+                showToast(context, "포스트가 업로드되었습니다")
+                //TOOD: navigate을 해버리니까 cancellation 에러가 뜸. 그렇다고 navigate을 코루틴 내에서 화면이 너무 안 넘어가서 버튼을 연타하게 됨
             }
         }
     }
@@ -106,8 +108,15 @@ class AppMainViewModel() : ViewModel() {
             showToast(context, "프로필이 편집되었습니다")
         } catch (e: Exception) {
             // Handle exceptions, e.g., from network calls, here
-            Log.d("edit profile error", e.message ?: "Network error")
-            showToast(context, "프로필 편집에 실패했습니다")
+            if (e !is CancellationException) {
+                Log.d("edit profile error", e.message ?: "Network error")
+                showToast(context, "프로필 편집에 실패했습니다")
+            }
+            else {
+                Log.d("edit profile error", "cancellation exception")
+                showToast(context, "프로필이 편집되었습니다")
+                //TOOD: navigate을 해버리니까 cancellation 에러가 뜸. 그렇다고 navigate을 코루틴 내에서 화면이 너무 안 넘어가서 버튼을 연타하게 됨
+            }
         }
     }
 

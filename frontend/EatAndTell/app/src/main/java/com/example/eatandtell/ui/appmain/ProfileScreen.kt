@@ -121,17 +121,34 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            FlowRow(
-                modifier = Modifier
-                    .weight(1f),
-                mainAxisSpacing = 8.dp,
-                crossAxisSpacing = 8.dp
-            ) {
-                println("tags: ${userInfo.tags}")
-                userInfo.tags.forEach { tagName ->
-                    Tag(tagName)
+
+            if(tags.isEmpty()) {
+                //show Text to refresh tags
+                Text(text = "아직 태그가 없습니다",
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        lineHeight = 18.sp,
+                        fontFamily = Inter,
+                        fontWeight = FontWeight(500),
+                        color = Color.Gray,
+                    ), modifier = Modifier
+                        .weight(1f),
+                )
+            }
+            else {
+                FlowRow(
+                    modifier = Modifier
+                        .weight(1f),
+                    mainAxisSpacing = 8.dp,
+                    crossAxisSpacing = 8.dp
+                ) {
+                    println("tags: ${userInfo.tags}")
+                    userInfo.tags.forEach { tagName ->
+                        Tag(tagName)
+                    }
                 }
             }
+
             //refresh button
             if (itsMe) Icon(
                 imageVector = Icons.Default.Refresh,

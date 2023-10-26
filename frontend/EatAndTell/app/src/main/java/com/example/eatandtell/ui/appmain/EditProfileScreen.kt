@@ -183,7 +183,6 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                     MediumRedButton(onClick = {
                                 try {
                                     coroutineScope.launch {
-                                        //TODO: 백엔드에서 edit profile 구현되면 확인하기
                                         viewModel.uploadPhotosAndEditProfile(
                                             photoPaths = photoPaths,
                                             description = description.text,
@@ -194,7 +193,7 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                                     navigateToDestination(navController, "Profile")
                                 } catch (e: Exception) {
                                     // Handle exceptions, e.g., from network calls, here
-                                    showToast(context, "An error occurred: ${e.message}")
+                                    println("An error occurred: ${e.message}")
                                 }
                             }, text = "프로필 저장")
 
