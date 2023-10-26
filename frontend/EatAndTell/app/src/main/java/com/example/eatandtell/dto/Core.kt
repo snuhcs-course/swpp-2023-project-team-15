@@ -9,6 +9,7 @@ data class UserDTO(
     val username: String,
     val description: String,
     val avatar_url: String,
+    val tags: List<String>,
 )
 
 data class UserInfoDTO(
@@ -16,6 +17,8 @@ data class UserInfoDTO(
     val username : String,
     val description : String,
     val avatar_url : String,
+    val tags : List<String>,
+    val is_followed : Boolean,
     val follower_count : Int,
     val following_count : Int,
 )
@@ -50,4 +53,9 @@ data class PostDTO(
     val created_at : String?,
     val is_liked : Boolean,
     val like_count : Int,
+    val tags: List<String>, //this tag is for posts, not users!!
+)
+
+data class TagsDTO(
+    val user_tags : List<String>
 )

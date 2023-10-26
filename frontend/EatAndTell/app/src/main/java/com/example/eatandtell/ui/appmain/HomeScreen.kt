@@ -63,37 +63,40 @@ import com.example.eatandtell.ui.StarRating
 import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.MainColor
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
-
-//TODO: 이후 좋아요가 PostDTO에 추가되면 like를 PostDTO에서 가져오도록 수정
-
 
 @Composable
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
     var feedPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
     var loading by remember { mutableStateOf(true) }
-    var myInfo by remember { mutableStateOf(UserDTO(0, "", "", "")) }
+    var myProfile by remember { mutableStateOf(UserDTO(0, "", "", "", listOf())) }
 
     LaunchedEffect(loading) {
         try {
+            println("trying to load home feed")
             viewModel.getAllPosts(
                 onSuccess = { posts ->
                     feedPosts = posts
                     println("feedPosts: ${feedPosts.size}")
                 },
             )
-            viewModel.getMyInfo (
-                onSuccess = { info ->
-                    myInfo = info
+            println("getting posts is fine")
+            viewModel.getMyProfile (
+                onSuccess = { it ->
+                    myProfile = it
+                    println("myProfile: ${myProfile.username}")
                 }
             )
             loading = false
         }
         catch (e: Exception) {
-            println("home feed load error")
-            showToast(context, "피드 로딩에 실패하였습니다")
+            if (e !is CancellationException) { // 유저가 너무 빨리 화면을 옮겨다니는 경우에는 CancellationException이 발생할 수 있지만, 서버 에러가 아니라서 패스
+                loading = false
+                Log.d("home feed load error", e.toString())
+                showToast(context, "홈 피드 로딩에 실패하였습니다")
+            }
         }
-
     }
 
     if(loading) {
@@ -118,7 +121,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
             items(feedPosts) { post ->
-                HomePost(post, viewModel = viewModel, navHostController = navHostController,myInfo)
+                HomePost(post, viewModel = viewModel, navHostController = navHostController,myProfile)
             }
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
@@ -129,7 +132,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
 }
 
 @Composable
-fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController,myInfo: UserDTO) {
+fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController,myProfile: UserDTO) {
     val user = post.user
     val coroutinescope = rememberCoroutineScope()
 
@@ -138,24 +141,12 @@ fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHo
         user.avatar_url,
         user.username,
         user.description,
-        onImageClick = {
-            if(user.id == myInfo.id)
+        onClick = {
+            if(user.id == myProfile.id)
                 navigateToDestination(navHostController, "Profile")
             else
                 navigateToDestination(navHostController, "Profile/${user.id}")
         },
-        onDescriptionClick = {
-            if(user.id == myInfo.id)
-                navigateToDestination(navHostController, "Profile")
-            else
-        navigateToDestination(navHostController, "Profile/${user.id}")
-        },
-        onUsernameClick = {
-            if(user.id == myInfo.id)
-                navigateToDestination(navHostController, "Profile")
-            else
-                navigateToDestination(navHostController, "Profile/${user.id}")
-                          },
     );
     Spacer(modifier = Modifier.height(11.dp))
     Post(

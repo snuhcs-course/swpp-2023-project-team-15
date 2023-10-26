@@ -76,8 +76,8 @@ fun navigateToDestination(navController: NavHostController, destination: String)
         }
         // Avoid multiple copies of the same destination when re-selecting the same item
         launchSingleTop = true
-        // if 'upload', do not restoreState (리뷰, 맛집명이 남아있는 것 방지)
-        restoreState = (destination != "Upload")
+        // if 'upload' or 'editprofile', do not restoreState (리뷰, 맛집명, 수정한 내용이 남아있는 것 방지)
+        restoreState = (destination != "Upload" && destination != "EditProfile")
     }
 }
 

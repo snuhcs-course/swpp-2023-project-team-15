@@ -16,6 +16,8 @@ data class GetFeedResponse(
     val username : String,
     val description: String,
     val avatar_url: String,
+    val tags: List<String>,
+    val is_followed: Boolean,
     val follower_count: Int,
     val following_count: Int,
     val posts: List<PostDTO>
