@@ -15,6 +15,7 @@ import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
 import com.example.eatandtell.ui.showToast
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -57,18 +58,25 @@ class AppMainViewModel() : ViewModel() {
             val photos = photoUrls.map { PhotoReqDTO(it) }
             val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
             this.uploadPost(postData)
+            Log.d("upload photos and post",  "success")
             showToast(context, "포스트가 업로드되었습니다")
         } catch (e: Exception) {
             // Handle exceptions, e.g., from network calls, here
-            Log.d("upload photos and post error", e.message ?: "Network error")
-//            showToast(context, "포스트 업로드에 실패했습니다") //TODO: 백엔드단 문제해결 중
+            //except cancellation exception
+            if (e !is CancellationException) {
+                Log.d("upload photos and post error", e.message ?: "Network error")
+                showToast(context, "포스트 업로드에 실패했습니다")
+            }
+            else {
+                Log.d("upload photos and post error", "cancellation exception")
+            }
         }
     }
 
-    suspend fun uploadPhotosAndEditProfile(photoPaths: List<Uri>,
-                                    username : String,
+    suspend fun uploadPhotosAndEditProfile(photoPaths: List<Uri>, //실제로는 length 1짜리
                                     description: String,
-                                    context: Context
+                                    context: Context,
+                                           org_avatar_url: String,
     ) {
 
         fun prepareFileData(photoPath: Uri): ByteArray? {
@@ -87,14 +95,19 @@ class AppMainViewModel() : ViewModel() {
             val imageUrl = getImageURL(fileToUpload)
             photoUrls.add(imageUrl)
         }
+
         try {
-            val profileData = EditProfileRequest(username = username, description = description, avatar_url = photoUrls[0])
+            Log.d("edit profile", description)
+            Log.d("edit profile", photoUrls.toString())
+            val url = if (photoUrls.isEmpty()) org_avatar_url else photoUrls[0]
+            val profileData = EditProfileRequest(description = description, avatar_url = url)
+            Log.d("edit profile", profileData.toString())
             this.editProfile(profileData)
             showToast(context, "프로필이 편집되었습니다")
         } catch (e: Exception) {
             // Handle exceptions, e.g., from network calls, here
             Log.d("edit profile error", e.message ?: "Network error")
-            showToast(context, "프로필 편집에 실패했습니다") //TODO: 백엔드단 문제해결 중
+            showToast(context, "프로필 편집에 실패했습니다")
         }
     }
 

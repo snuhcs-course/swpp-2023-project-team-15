@@ -114,6 +114,7 @@ fun CustomTextField(
     trailingIcon: (@Composable () -> Unit)? = null,
     onTrailingIconClick: (() -> Unit)? = null,
     maxLines : Int = 1,
+    enable : Boolean = true,
 ) {
     TextField(
         value = value,
@@ -124,7 +125,7 @@ fun CustomTextField(
                 trailingIcon?.invoke()
             }
         },
-
+        enabled = enable,
         modifier = Modifier
             .border(
                 width = 0.5.dp,
@@ -240,7 +241,7 @@ fun BlackSmallText(text: String, modifier: Modifier?) {
 
 
 @Composable
-fun MainButton(onClick: () -> Unit, text: String) {
+fun MainButton(onClick: () -> Unit, text: String,) {
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(

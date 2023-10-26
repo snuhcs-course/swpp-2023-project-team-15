@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -126,15 +127,15 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
 
             var photoPaths by remember { mutableStateOf(listOf<Uri>()) } //핸드폰 내의 파일 경로
 
-
             val galleryLauncher =
                 rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) {
                     photoPaths = it
                 }
 
-            var username by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-                mutableStateOf(TextFieldValue(myProfile.username))
-            }
+//            var username by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+//                mutableStateOf(TextFieldValue(myProfile.username))
+//            }
+//
 
             var description by rememberSaveable(stateSaver = TextFieldValue.Saver) {
                 mutableStateOf(TextFieldValue(myProfile.description))
@@ -149,26 +150,30 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                     .padding(horizontal = 20.dp)
             ) {
 
+
                 EditProfileImage(
                     profileUrl = if (photoPaths.isEmpty()) myProfile.avatar_url else photoPaths[0].toString(),
                     onEditClick = { galleryLauncher.launch("image/*") }
                     , size = 100.dp)
-                Spacer(modifier = Modifier.height(17.dp))
+                Spacer(modifier = Modifier.height(25.dp))
 
-                CustomTextField(
-                    value = username.text,
-                    onValueChange = { username = TextFieldValue(it) },
+                NameText(text = "아이디")
+                CustomTextField( // username은 바꾸지 않고 보여주기만 한다.
+                    value = myProfile.username,
+                    onValueChange = { },
                     placeholder = "아이디를 입력하세요 (4~20자)",
+                    enable = false,
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(25.dp))
 
+                NameText(text = "자기소개")
                 CustomTextField(
                     value = description.text,
                     onValueChange = { description = TextFieldValue(it) },
                     placeholder = "자기소개를 입력하세요",
                     maxLines = 8,
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(25.dp))
 
                 Row(
                     modifier = Modifier
@@ -176,30 +181,22 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     MediumRedButton(onClick = {
-                        when {
-                            username.text.isBlank() -> showToast(context, "아이디를 입력하세요")
-                            (username.text.length) !in 4..20 -> showToast(context, "아이디가 올바르지 않습니다")
-
-                            else -> {
                                 try {
                                     coroutineScope.launch {
                                         //TODO: 백엔드에서 edit profile 구현되면 확인하기
-//                                viewModel.uploadPhotosAndEditProfile(
-//                                    photoPaths = photoPaths,
-//                                    username = username.text,
-//                                    description = description.text,
-//                                    context = context
-//                                )
-                                        navigateToDestination(navController, "Profile")
+                                        viewModel.uploadPhotosAndEditProfile(
+                                            photoPaths = photoPaths,
+                                            description = description.text,
+                                            context = context,
+                                            org_avatar_url = myProfile.avatar_url,
+                                        )
                                     }
+                                    navigateToDestination(navController, "Profile")
                                 } catch (e: Exception) {
                                     // Handle exceptions, e.g., from network calls, here
                                     showToast(context, "An error occurred: ${e.message}")
                                 }
-                            }
-
-                        }
-                    }, text = "프로필 저장")
+                            }, text = "프로필 저장")
 
                     MediumRedButton(onClick = {
                         SharedPreferencesManager.clearPreferences(context)
@@ -211,6 +208,25 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun NameText(text: String = "아이디") {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = text, style = TextStyle(
+            fontSize = 16.sp,
+            lineHeight = 21.sp,
+            fontWeight = FontWeight(500),
+            color = Black,
+        ), modifier = Modifier
+            .height(22.dp),
+        )
     }
 }
 

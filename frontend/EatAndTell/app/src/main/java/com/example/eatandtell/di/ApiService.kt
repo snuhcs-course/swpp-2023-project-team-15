@@ -25,7 +25,7 @@ interface ApiService {
     suspend fun uploadPost(@Header("Authorization") authorization: String,
                            @Body postData: UploadPostRequest): PostDTO
 
-    @POST("users/edit/") // The edit profile endpoint
+    @PATCH("users/edit/") // The edit profile endpoint
     suspend fun editProfile(@Header("Authorization") authorization: String,
                            @Body profileData: EditProfileRequest): UserDTO
     @Multipart

@@ -200,7 +200,7 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                 rating = myRating,
                 description = reviewDescription.text,
                 context = context,
-                onClick = {
+                onClickNav = {
                     navigateToDestination(navController, "Home")
                 }
             )
@@ -227,8 +227,9 @@ fun UploadButton(viewModel: AppMainViewModel,
                  rating: String,
                  description: String,
                  context: Context,
-                 onClick: () -> Unit) {
+                 onClickNav: () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
+
 
     val onClickReal: () -> Unit = {
         when {
@@ -246,8 +247,8 @@ fun UploadButton(viewModel: AppMainViewModel,
                             description = description,
                             context = context
                         )
-                        onClick()
                     }
+                    onClickNav()
                 } catch (e: Exception) {
                     // Handle exceptions, e.g., from network calls, here
                     showToast(context, "An error occurred: ${e.message}")
