@@ -229,6 +229,7 @@ fun UploadButton(viewModel: AppMainViewModel,
                  context: Context,
                  onClickNav: () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
+    var enable by remember { mutableStateOf(true) }
 
 
     val onClickReal: () -> Unit = {
@@ -240,6 +241,7 @@ fun UploadButton(viewModel: AppMainViewModel,
             else -> {
                 try {
                     coroutineScope.launch {
+                        enable = false
                         viewModel.uploadPhotosAndPost(
                             photoPaths = photoPaths,
                             restaurant = restaurant,
@@ -247,8 +249,8 @@ fun UploadButton(viewModel: AppMainViewModel,
                             description = description,
                             context = context
                         )
+                        onClickNav() //Navigation을 먼저 해버리니까
                     }
-                    onClickNav()
                 } catch (e: Exception) {
                     // Handle exceptions, e.g., from network calls, here
                     showToast(context, "An error occurred: ${e.message}")
@@ -258,5 +260,5 @@ fun UploadButton(viewModel: AppMainViewModel,
         }
     }
 
-    MainButton(onClickReal, "리뷰 작성")
+    MainButton(onClickReal, "리뷰 작성", enable = enable)
 }
