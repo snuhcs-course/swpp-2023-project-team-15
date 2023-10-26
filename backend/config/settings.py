@@ -180,3 +180,11 @@ REST_FRAMEWORK = {
 }
 
 AUTH_USER_MODEL = 'users.User'
+
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://aa8fab8c24a5a896fb4fb1cf97b82f9d@o4506115639672832.ingest.sentry.io/4506115670671360",
+    traces_sample_rate=1.0,
+    profiles_sample_rate=1.0,
+)
