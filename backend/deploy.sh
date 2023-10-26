@@ -16,6 +16,21 @@ if [ "$LOCAL_COMMIT" != "$REMOTE_COMMIT" ]; then
     exit 1
 fi
 
+# Compare .env files between local and remote
+LOCAL_ENV_COUNT=$(grep -c -E '^[^# ]+' .env)  # Count lines that aren't comments or blank. These should represent keys.
+
+# Execute command remotely to count keys in the remote .env file. This command counts only the lines that are not comments or blank.
+REMOTE_ENV_COUNT=$(ssh -o "IdentitiesOnly yes" -i "$KEY" "$USER_HOST" "grep -c -E '^[^# ]+' swpp-2023-project-team-15/backend/.env")
+
+# Check if local .env has more keys than remote .env
+if [ "$LOCAL_ENV_COUNT" -gt "$REMOTE_ENV_COUNT" ]; then
+    echo "Error: Local .env file has more keys ($LOCAL_ENV_COUNT) than remote .env file ($REMOTE_ENV_COUNT)."
+    # You can choose to abort deployment or continue with warnings
+    exit 1
+fi
+
+DEPLOYED_HASH=$(git rev-parse --short HEAD)
+
 # Use SSH to run commands on the remote server
 ssh -o "IdentitiesOnly yes" -i "$KEY" "$USER_HOST" <<ENDSSH
 set -e # stops on the first error
@@ -33,5 +48,6 @@ git pull
 poetry install
 sudo systemctl restart gunicorn
 
-echo "Deployed branch $CURRENT_BRANCH on $(date)" >> deploy.log
+# Log the branch, hash, and timestamp of the deployment
+echo "Deployed branch $CURRENT_BRANCH at revision $DEPLOYED_HASH on $(date)" >> deploy.log
 ENDSSH
