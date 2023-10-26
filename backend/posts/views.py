@@ -1,4 +1,5 @@
 from drf_yasg.utils import swagger_auto_schema
+from django.db.models import Q
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -56,9 +57,27 @@ class PostViewSet(viewsets.ModelViewSet):
         by filtering against a `username` query parameter in the URL.
         """
         queryset = Post.objects.all()
+        # Get restaurant_name from query parameters
         restaurant_name = self.request.query_params.get('restaurant_name')
-        if restaurant_name is not None:
+        if restaurant_name:
             queryset = queryset.filter(restaurant__name__icontains=restaurant_name)
+            return queryset
+
+        # Get tags from query parameters
+        tags_param = self.request.query_params.get('tags')
+        if tags_param:
+            # Split the tags and create a Q object for each tag
+            tags = tags_param.split(',')
+            tag_queries = [Q(tags__ko_label=tag) for tag in tags]
+
+            # Combine the Q objects using OR operation
+            combined_query = Q()
+            for tag_query in tag_queries:
+                combined_query |= tag_query
+
+            # Filter the queryset using the combined Q object
+            queryset = queryset.filter(combined_query)
+
         return queryset
 
     @swagger_auto_schema(
@@ -94,26 +113,4 @@ class PostViewSet(viewsets.ModelViewSet):
         })
         return context
     
-    def create_post_with_ml_tagging(user, restaurant, rating, description):
-        # ml_tagging 함수를 사용하여 description에 대한 태깅을 수행
-        possible_tags = [tag['en_label'] for tag in tags]  # tags는 위에서 정의한 리스트
-        label_score_dict = ml_tagging(description, possible_tags)
-
-        # label_score_dict에서 가장 높은 스코어를 가진 레이블 찾기
-        max_label = max(label_score_dict, key=label_score_dict.get)
-
-        # 해당 레이블에 대응하는 태그 찾기
-        matching_tag = Tag.objects.get(en_label=max_label)
-
-        # Post 생성 및 저장
-        post = Post.objects.create(
-            user=user,
-            restaurant=restaurant,
-            rating=rating,
-            description=description,
-        )
-
-        # 해당 태그를 Post의 tags 필드에 추가
-        post.tags.add(matching_tag)
-
-        return post
+    
