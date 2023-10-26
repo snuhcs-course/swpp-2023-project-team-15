@@ -27,6 +27,31 @@ Then navigate to backend root and run:
 - Use `poetry add <package-name>` instead of `pip install <package-name>`
 - After package is added by others, run `poetry install` to install the new package
 
+# Testing
+
+To run test and get coverage, do following:
+- `poetry install`
+- `poetry shell`
+- `python3 -m coverage run manage.py test`
+- `python3 -m coverage report`
+
+The result would be something like:
+```
+❯ python3 -m coverage report
+Name                    Stmts   Miss  Cover
+-------------------------------------------
+<...omitted>
+users/__init__.py           0      0   100%
+users/admin.py              7      0   100%
+users/apps.py               4      0   100%
+users/models.py             8      0   100%
+users/serializers.py       46     12    74%
+users/urls.py               4      0   100%
+users/views.py             95     60    37%
+-------------------------------------------
+TOTAL                     476    176    63%
+```
+
 # Environment Variable
 Get your environment variable from https://www.notion.so/Environment-Variable-22dcf6d95d294957a6e9b518005cc4ca?pvs=4
 
