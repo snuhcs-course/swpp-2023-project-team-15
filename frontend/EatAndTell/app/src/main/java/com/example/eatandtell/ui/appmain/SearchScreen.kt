@@ -151,7 +151,11 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                         HomePost(post, viewModel = viewModel, navHostController = navController, myProfile = post.user)
                     }
                 }
+
+                // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
+                item { Spacer(modifier = Modifier.height(70.dp)) }
             }
+
         }
     }
 

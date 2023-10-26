@@ -49,7 +49,7 @@ interface ApiService {
     suspend fun getFilteredUsersByName(@Header("Authorization") authorization: String,@Query("username") username: String): List<UserDTO>
 
     @GET("users/filter")
-    suspend fun getFilteredUsersByTag(@Header("Authorization") authorization: String,@Query("tag") username: String): List<UserDTO>
+    suspend fun getFilteredUsersByTag(@Header("Authorization") authorization: String,@Query("tags") username: String): List<UserDTO>
 
     @GET("posts/")
     suspend fun getFilteredByRestaurants(@Header("Authorization") authorization: String,@Query("restaurant_name") restaurantName: String): GetAllPostsResponse
