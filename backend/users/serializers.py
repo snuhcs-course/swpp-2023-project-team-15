@@ -9,7 +9,7 @@ User= get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, style={
                                      'input_type': 'password'})
-    posts = PostSerializer(source='post_set', many=True, read_only=True)
+    posts = PostSerializer(many=True, read_only=True)
     email = models.EmailField(unique=True, blank=False)
     is_followed = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
@@ -63,6 +63,13 @@ class UserPostSerializer(serializers.ModelSerializer):
         fields=('posts',)
 
 class UserInfoSerializer(serializers.ModelSerializer):
+    tags = serializers.SerializerMethodField()
+    
     class Meta:
         model=User
-        fields=('username', 'avatar_url', 'description')
+        fields=('username', 'avatar_url', 'description', 'tags')
+
+    
+    def get_tags(self, obj):
+        tags = obj.tags.all()
+        return [f"{tag.ko_label}" for tag in tags]
