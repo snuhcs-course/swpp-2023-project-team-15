@@ -8,7 +8,7 @@ plugins {
     id("io.github.gmazzo.test.aggregation.results") version "2.1.1"
     /*
     to get report:
-    - run `./gradlew jacocoAggregateReport`
+    - run `./gradlew jacocoAggregatedReport`
     - open `build/reports/jacoco/jacocoAggregatedReport/html/index.html` in brower
       - (On Mac, run `open build/reports/jacoco/jacocoAggregatedReport/html/index.html`)
      */
