@@ -31,28 +31,27 @@ class StartViewModel : ViewModel() {
         } catch (e: Exception) {
             val errorMessage = e.message ?: "Network error"
             Log.d("login", "error: $errorMessage")
-            showToast(context, "로그인에 실패하였습니다")
+            //showToast(context, "로그인에 실패하였습니다")
             null // In case of an error, return null or you could throw an exception
         }
     }
 
 
-    fun registerUser(username: String, password: String, email: String, context: Context, onSuccess: (String?) -> Unit) {
+    suspend fun registerUser(username: String, password: String, email: String, context: Context): String? {
         val registrationData = RegisterRequest(username, password, email)
-
-        viewModelScope.launch {
-            try {
-                val response = apiService.registerUser(registrationData)
-                val token = response?.token
-                Log.d("sign up", "success")
-                if(token!=null) SharedPreferencesManager.setToken(context, token)
-                onSuccess(token)
-            } catch (e: Exception) {
-                val errorMessage = e.message ?: "Network error"
-                Log.d("sign up", "error$errorMessage")
-                showToast(context, "회원가입에 실패하였습니다")
-            }
+        return try {
+            val response = apiService.registerUser(registrationData)
+            val token = response.token
+            Log.d("sign up", "success")
+            SharedPreferencesManager.setToken(context, token)
+            token
+        } catch (e: Exception) {
+            val errorMessage = e.message ?: "Network error"
+            Log.d("sign up", "error: $errorMessage")
+            //showToast(context, "회원가입에 실패하였습니다")
+            null
         }
+
     }
 
 

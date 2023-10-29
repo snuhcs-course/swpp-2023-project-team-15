@@ -21,6 +21,8 @@ import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.appmain.AppMainActivity
 import com.example.eatandtell.ui.showToast
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignupScreen(navController: NavController, context: ComponentActivity, viewModel: StartViewModel) {
@@ -47,7 +49,9 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)
     ) {
         Logo()
         Spacer(modifier = Modifier.height(17.dp))
@@ -145,28 +149,41 @@ fun SignupButton (
     confirmPassword: String,
     context: Context
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val emailRegex = Regex("^\\S+@\\S+\\.\\S+\$")
 
     fun isEmailValid(email: String): Boolean {
         return emailRegex.matches(email)
     }
 
-    val onClickReal = {
-        when {
-            email.isBlank() -> showToast(context, "이메일을 입력하세요")
-            !isEmailValid(email) -> showToast(context, "이메일 주소가 올바르지 않습니다")
-            username.isBlank() -> showToast(context, "아이디를 입력하세요")
-            username.length !in 4..20 -> showToast(context, "아이디가 올바르지 않습니다")
-            password.isBlank() -> showToast(context, "비밀번호를 입력하세요")
-            password.length !in 4..20 -> showToast(context, "비밀번호가 올바르지 않습니다")
-            confirmPassword.isBlank() -> showToast(context, "비밀번호 확인을 입력하세요")
-            password != confirmPassword -> showToast(context, "비밀번호 확인이 틀립니다")
-            else -> {
-                viewModel.registerUser(username, password, email, context, onSuccess = onClick)
-            }
-        }
+    MainButton(text = "회원가입",
+        onClick={
+            val token= when {
+                email.isBlank() -> "이메일을 입력하세요"
+                !isEmailValid(email) -> "이메일 주소가 올바르지 않습니다"
+                username.isBlank() -> "아이디를 입력하세요"
+                username.length !in 4..20 -> "아이디가 올바르지 않습니다"
+                password.isBlank() ->  "비밀번호를 입력하세요"
+                password.length !in 4..20 ->"비밀번호가 올바르지 않습니다"
+                confirmPassword.isBlank() -> "비밀번호 확인을 입력하세요"
+                password != confirmPassword ->  "비밀번호 확인이 틀립니다"
+                /*email.isBlank() -> showToast(context, "이메일을 입력하세요")
+                !isEmailValid(email) -> showToast(context, "이메일 주소가 올바르지 않습니다")
+                username.isBlank() -> showToast(context, "아이디를 입력하세요")
+                username.length !in 4..20 -> showToast(context, "아이디가 올바르지 않습니다")
+                password.isBlank() -> showToast(context, "비밀번호를 입력하세요")
+                password.length !in 4..20 -> showToast(context, "비밀번호가 올바르지 않습니다")
+                confirmPassword.isBlank() -> showToast(context, "비밀번호 확인을 입력하세요")
+                password != confirmPassword -> showToast(context, "비밀번호 확인이 틀립니다")
+                */else -> {
+                    coroutineScope.launch{
+                        viewModel.registerUser(username, password, email, context)
+                    }
+                }
+            } as String
 
-    }
-
-    MainButton(onClick = onClickReal, text = "회원가입")
+            if (token !=null)
+                onClick(token)
+            println(token)
+        })
 }
