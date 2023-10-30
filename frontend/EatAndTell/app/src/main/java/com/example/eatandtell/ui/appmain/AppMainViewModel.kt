@@ -25,8 +25,13 @@ import okhttp3.RequestBody.Companion.toRequestBody
 class AppMainViewModel() : ViewModel() {
 
     private var token: String? = null
+    var myProfile = UserDTO(0, "", "", "", listOf())
+
     fun initialize(token: String?) {
         this.token = token
+        viewModelScope.launch {
+            getMyProfile()
+        }
     }
 
     private val apiService = RetrofitClient.retro.create(ApiService::class.java)
@@ -110,6 +115,7 @@ class AppMainViewModel() : ViewModel() {
             Log.d("edit profile", profileData.toString())
             this.editProfile(profileData)
             showToast(context, "프로필이 편집되었습니다")
+            myProfile = UserDTO(myProfile.id, myProfile.username, description, url, myProfile.tags) //프로필 편집 후 myProfile 업데이트
         } catch (e: Exception) {
             // Handle exceptions, e.g., from network calls, here
             if (e !is CancellationException) {
@@ -216,13 +222,13 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
-    suspend fun getMyProfile(onSuccess: (UserDTO) -> Unit){
+    private suspend fun getMyProfile(){
         val authorization = "Token $token"
         try {
             val response = apiService.getMyFeed(authorization)
             val myInfo = UserDTO(response.id, response.username, response.description, response.avatar_url, listOf())
             Log.d("getMyProfile", "success")
-            onSuccess(myInfo)
+            myProfile = myInfo
         } catch (e: Exception) {
             Log.d("getMyProfile error", e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function

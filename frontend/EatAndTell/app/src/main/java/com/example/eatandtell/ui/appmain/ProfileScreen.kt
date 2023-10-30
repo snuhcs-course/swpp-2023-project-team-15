@@ -187,6 +187,7 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
     var loading by remember { mutableStateOf(true) }
     val coroutinescope = rememberCoroutineScope()
 
+    println("profileScreen userId: $userId")
 
     LaunchedEffect(loading) {
         try {

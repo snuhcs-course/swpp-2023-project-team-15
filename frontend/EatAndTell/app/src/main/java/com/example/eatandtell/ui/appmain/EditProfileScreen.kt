@@ -88,29 +88,29 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
 
         val coroutineScope = rememberCoroutineScope()
 
-        var loading by remember { mutableStateOf(true) }
-        var myProfile by remember { mutableStateOf(UserDTO(0, "", "", "", listOf())) }
+        var loading by remember { mutableStateOf(false) }
+        var myProfile = viewModel.myProfile
 
         var buttonEnable by remember { mutableStateOf(true) }
 
-        LaunchedEffect(loading) {
-            try {
-                viewModel.getMyProfile (
-                    onSuccess = { it ->
-                        myProfile = it
-                        println("myProfile: ${myProfile.username}")
-                    }
-                )
-                loading = false
-            }
-            catch (e: Exception) {
-                if (e !is CancellationException) { // 유저가 너무 빨리 화면을 옮겨다니는 경우에는 CancellationException이 발생할 수 있지만, 서버 에러가 아니라서 패스
-                    loading = false
-                    println("get my profile load error")
-                    showToast(context, "프로필 로딩에 실패하였습니다")
-                }
-            }
-        }
+//        LaunchedEffect(loading) {
+//            try {
+//                viewModel.getMyProfile (
+//                    onSuccess = { it ->
+//                        myProfile = it
+//                        println("myProfile: ${myProfile.username}")
+//                    }
+//                )
+//                loading = false
+//            }
+//            catch (e: Exception) {
+//                if (e !is CancellationException) { // 유저가 너무 빨리 화면을 옮겨다니는 경우에는 CancellationException이 발생할 수 있지만, 서버 에러가 아니라서 패스
+//                    loading = false
+//                    println("get my profile load error")
+//                    showToast(context, "프로필 로딩에 실패하였습니다")
+//                }
+//            }
+//        }
 
         if (loading) {
             Box(
