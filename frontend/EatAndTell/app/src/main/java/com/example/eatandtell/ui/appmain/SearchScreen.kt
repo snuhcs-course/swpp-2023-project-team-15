@@ -62,7 +62,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
         Spacer(modifier = Modifier.height(11.dp))
         SearchBar(
             value = searchText,
-            onValueChange = { searchText = it; triggerSearch = true },
+            onValueChange = { searchText = it; triggerSearch = true},
             onSearchClick = { triggerSearch = true }
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -74,9 +74,11 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
         LaunchedEffect(triggerSearch) {
             if (triggerSearch) {
                 loading = true
+                postLists = emptyList() // Reset post lists
+                userLists = emptyList() // Reset user lists
                 try {
                     if(searchText.text.startsWith("@")) { // If search starts with @
-                        viewModel.getFilteredUsersByName(
+                        if (searchText.text.length>=2) viewModel.getFilteredUsersByName( // 실질 searchtext가 존재하는 경우만 검색
                             searchText.text.drop(1), // Remove @ from the search string
                             onSuccess = { users ->
                                 userLists = users // resulted user Lists
@@ -87,7 +89,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                     }
                     else if(searchText.text.startsWith("#")) {
                         //TODO: search by tags
-                        viewModel.getFilteredUsersByTag(
+                        if (searchText.text.length>=2) viewModel.getFilteredUsersByTag(
                             searchText.text.drop(1), // Remove @ from the search string
                             onSuccess = { users ->
                                 userLists = users // resulted user Lists
@@ -97,7 +99,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                         postLists = emptyList() // Reset post lists
                     }
                     else {
-                        viewModel.getFilteredByRestaurants(
+                        if (searchText.text.length>=1) viewModel.getFilteredByRestaurants(
                             searchText.text,
                             onSuccess = { posts ->
                                 postLists = posts // resulted post Lists

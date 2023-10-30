@@ -65,7 +65,7 @@ class AppMainViewModel() : ViewModel() {
             //except cancellation exception
             if (e !is CancellationException) {
                 Log.d("upload photos and post error", e.message ?: "Network error")
-                showToast(context, "포스트 업로드에 실패했습니다")
+                showToast(context, "포스트 업로드에 실패했습니다") //TODO: timeout 문제 (10초 제한)
             }
             else {
                 Log.d("upload photos and post error", "cancellation exception")
@@ -176,6 +176,8 @@ class AppMainViewModel() : ViewModel() {
     suspend fun getUserFeed(userId: Int? = null, onSuccess: (UserInfoDTO, List<PostDTO>) -> Unit) {
         val authorization = "Token $token"
         try {
+            println("feed token $authorization")
+            println("feed userId $userId")
             val response = (
                 if (userId != null) apiService.getUserFeed(authorization, userId)
                  else apiService.getMyFeed(authorization)
