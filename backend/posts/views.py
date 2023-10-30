@@ -11,8 +11,7 @@ from .models import Post
 from .serializers import PostSerializer, data_list
 
 
-def get_top_tags_after_translation(possible_tags, description):
-    translated_description = deepl_translate_ko_to_en(description)
+def get_top_tags_after_translation(possible_tags, translated_description):
     label_score_dict = ml_tagging(translated_description, possible_tags)
     max_label = max(label_score_dict, key=label_score_dict.get)
     
@@ -42,9 +41,10 @@ class PostViewSet(viewsets.ModelViewSet):
         # Post 생성 및 저장
         post = serializer.save(user=self.request.user)
         
+        translated_description = deepl_translate_ko_to_en(serializer.validated_data['description'])
         for possible_tags_queryset in [tags_first_ten, tags_second_ten, tags_third_ten]:
             possible_tags = [tag['en_label'] for tag in possible_tags_queryset]
-            matching_tag = get_top_tags_after_translation(possible_tags, serializer.validated_data['description'])
+            matching_tag = get_top_tags_after_translation(possible_tags, translated_description)
             if matching_tag is not None:
                 post.tags.add(matching_tag)            
                 
