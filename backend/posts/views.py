@@ -17,7 +17,6 @@ def get_top_tags_after_translation(possible_tags, translated_description):
     label_score_dict = ml_tagging(translated_description, possible_tags)
     max_label = max(label_score_dict, key=label_score_dict.get)
     
-    print(f'가장 높은 스코어를 가진 레이블: {max_label}. 스코어: {label_score_dict[max_label]}')
     if label_score_dict[max_label] > 0.3:
         matching_tag = Tag.objects.filter(en_label=max_label).first()
         return matching_tag
@@ -55,7 +54,7 @@ class PostViewSet(viewsets.ModelViewSet):
         # Post 생성 및 저장
         post = serializer.save(user=self.request.user)
         
-        thread = threading.Thread(target=create_tags_on_thread, args=(post,))
+        thread = threading.Thread(target=create_tags_on_thread, args=(post,), daemon=True)
         thread.start()
                 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
