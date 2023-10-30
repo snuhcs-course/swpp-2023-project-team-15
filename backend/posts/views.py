@@ -1,5 +1,7 @@
-from drf_yasg.utils import swagger_auto_schema
+import threading
+
 from django.db.models import Q
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -21,6 +23,24 @@ def get_top_tags_after_translation(possible_tags, translated_description):
         return matching_tag
     return None
 
+
+def create_tags_on_thread(post):
+    print("Thread started")
+    translated_description = deepl_translate_ko_to_en(post.description)
+    tags_first_ten = Tag.objects.values('en_label')[:10]
+    tags_second_ten = Tag.objects.values('en_label')[10:20]
+    tags_third_ten = Tag.objects.values('en_label')[20:30]
+    
+    for possible_tags_queryset in [tags_first_ten, tags_second_ten, tags_third_ten]:
+        possible_tags = [tag['en_label'] for tag in possible_tags_queryset]
+        matching_tag = get_top_tags_after_translation(possible_tags, translated_description)
+        print('fount tag', matching_tag)
+        if matching_tag is not None:
+            post.tags.add(matching_tag)
+    
+    print("Thread finished")
+
+
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
@@ -31,25 +51,15 @@ class PostViewSet(viewsets.ModelViewSet):
     
     def create(self, request):
         serializer = PostSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        # ml_tagging 함수를 사용하여 description에 대한 태깅을 수행 
-        tags_first_ten = Tag.objects.values('en_label')[:10]
-        tags_second_ten = Tag.objects.values('en_label')[10:20]
-        tags_third_ten = Tag.objects.values('en_label')[20:30]
-        
+        serializer.is_valid(raise_exception=True)        
         # Post 생성 및 저장
         post = serializer.save(user=self.request.user)
         
-        translated_description = deepl_translate_ko_to_en(serializer.validated_data['description'])
-        for possible_tags_queryset in [tags_first_ten, tags_second_ten, tags_third_ten]:
-            possible_tags = [tag['en_label'] for tag in possible_tags_queryset]
-            matching_tag = get_top_tags_after_translation(possible_tags, translated_description)
-            if matching_tag is not None:
-                post.tags.add(matching_tag)            
+        thread = threading.Thread(target=create_tags_on_thread, args=(post,))
+        thread.start()
                 
-        print(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         
     def get_queryset(self):
         """
