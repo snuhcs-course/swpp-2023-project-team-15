@@ -268,18 +268,16 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
-    fun refreshTags(onSuccess: (List<String>) -> Unit, context: Context) {
+    suspend fun refreshTags(onSuccess: (List<String>) -> Unit, context: Context) {
         val authorization = "Token $token"
-        viewModelScope.launch {
-            try {
-                val response = apiService.refreshTags(authorization)
-                onSuccess(response.user_tags)
-                Log.d("refresh tags", "success")
-                showToast(context, "태그가 업데이트되었습니다")
-            } catch (e: Exception) {
-                Log.d("refresh tags error", e.message ?: "Network error")
-                showToast(context, "태그 업데이트에 실패하였습니다")
-            }
+        try {
+            val response = apiService.refreshTags(authorization)
+            onSuccess(response.user_tags)
+            Log.d("refresh tags", "success")
+            showToast(context, "태그가 업데이트되었습니다")
+        } catch (e: Exception) {
+            Log.d("refresh tags error", e.message ?: "Network error")
+            showToast(context, "태그 업데이트에 실패하였습니다")
         }
     }
 }

@@ -34,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,7 +71,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -> Unit, buttonText: String, itsMe : Boolean = false, context : ComponentActivity? = null) {
-    var tags by remember { mutableStateOf(userInfo.tags) }
+    var tags by remember { mutableStateOf(userInfo.tags) } //TODO: tags만 업데이트하지 말고 userInfo를 다시 불러와야 할까?
+    val coroutinescope = rememberCoroutineScope()
 
     println("itsMe : $itsMe")
 
@@ -142,8 +144,7 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                     mainAxisSpacing = 8.dp,
                     crossAxisSpacing = 8.dp
                 ) {
-                    println("tags: ${userInfo.tags}")
-                    userInfo.tags.forEach { tagName ->
+                    tags.forEach { tagName ->
                         Tag(tagName)
                     }
                 }
@@ -157,13 +158,17 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                 modifier = Modifier
                     .size(24.dp)
                     .clickable(onClick = {
-                        viewModel.refreshTags(
-                            onSuccess = { it ->
-                                tags = it
-                                println("refreshed tags: $tags")
-                            },
-                            context = context!!
-                        )
+                        coroutinescope.launch {
+                            viewModel.refreshTags(
+                                onSuccess = { it ->
+                                    tags = it
+                                    println("refreshed tags: $tags")
+                                },
+                                context = context!!
+                            )
+
+                        }
+
                     })
                     .align(Alignment.CenterVertically)
             )
@@ -234,7 +239,7 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
                 },
                 buttonText = if (isCurrentUser) "프로필 편집" else if (userInfo.is_followed) "팔로잉" else "팔로우하기",
                 itsMe = isCurrentUser,
-                context = context
+                context = context,
             )}
 
             items(userPosts) { post ->
