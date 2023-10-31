@@ -1,13 +1,10 @@
 package com.example.eatandtell.ui.start
 
 import android.util.Log
-import com.example.eatandtell.ui.showToast
 import io.mockk.MockKAnnotations
-import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import kotlinx.coroutines.Dispatchers
@@ -70,7 +67,7 @@ class StartViewModelTest {
 
     @Test
     fun registerUser_meme_returnsTrue()= runTest {
-        val gotToken = viewModel.registerUser("meme3", "meme3", "meme3@gmail.com", context)
+        val gotToken = viewModel.registerUser("meme5", "meme5", "meme5@gmail.com", context)
         println("gotToken: $gotToken")
         assertNotNull(gotToken)
     }
