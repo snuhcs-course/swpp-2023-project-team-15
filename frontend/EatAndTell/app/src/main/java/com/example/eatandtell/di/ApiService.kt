@@ -41,7 +41,7 @@ interface ApiService {
     suspend fun getMyFeed(@Header("Authorization") authorization: String,
     ): GetFeedResponse
 
-    @GET("users/{id}/") // The users endpoint
+    @GET("users/{id}") // The users endpoint
     suspend fun getUserFeed(@Header("Authorization") authorization: String,
                             @Path("id") id: Int): GetFeedResponse
 

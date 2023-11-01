@@ -25,8 +25,13 @@ import okhttp3.RequestBody.Companion.toRequestBody
 class AppMainViewModel() : ViewModel() {
 
     private var token: String? = null
+    var myProfile = UserDTO(0, "", "", "", listOf())
+
     fun initialize(token: String?) {
         this.token = token
+        viewModelScope.launch {
+            getMyProfile()
+        }
     }
 
     private val apiService = RetrofitClient.retro.create(ApiService::class.java)
@@ -65,7 +70,7 @@ class AppMainViewModel() : ViewModel() {
             //except cancellation exception
             if (e !is CancellationException) {
                 Log.d("upload photos and post error", e.message ?: "Network error")
-                showToast(context, "포스트 업로드에 실패했습니다")
+                showToast(context, "포스트 업로드에 실패했습니다") //TODO: timeout 문제 (10초 제한)
             }
             else {
                 Log.d("upload photos and post error", "cancellation exception")
@@ -110,6 +115,7 @@ class AppMainViewModel() : ViewModel() {
             Log.d("edit profile", profileData.toString())
             this.editProfile(profileData)
             showToast(context, "프로필이 편집되었습니다")
+            myProfile = UserDTO(myProfile.id, myProfile.username, description, url, myProfile.tags) //프로필 편집 후 myProfile 업데이트
         } catch (e: Exception) {
             // Handle exceptions, e.g., from network calls, here
             if (e !is CancellationException) {
@@ -176,6 +182,8 @@ class AppMainViewModel() : ViewModel() {
     suspend fun getUserFeed(userId: Int? = null, onSuccess: (UserInfoDTO, List<PostDTO>) -> Unit) {
         val authorization = "Token $token"
         try {
+            println("feed token $authorization")
+            println("feed userId $userId")
             val response = (
                 if (userId != null) apiService.getUserFeed(authorization, userId)
                  else apiService.getMyFeed(authorization)
@@ -214,13 +222,13 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
-    suspend fun getMyProfile(onSuccess: (UserDTO) -> Unit){
+    private suspend fun getMyProfile(){
         val authorization = "Token $token"
         try {
             val response = apiService.getMyFeed(authorization)
             val myInfo = UserDTO(response.id, response.username, response.description, response.avatar_url, listOf())
             Log.d("getMyProfile", "success")
-            onSuccess(myInfo)
+            myProfile = myInfo
         } catch (e: Exception) {
             Log.d("getMyProfile error", e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function
@@ -266,18 +274,16 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
-    fun refreshTags(onSuccess: (List<String>) -> Unit, context: Context) {
+    suspend fun refreshTags(onSuccess: (List<String>) -> Unit, context: Context) {
         val authorization = "Token $token"
-        viewModelScope.launch {
-            try {
-                val response = apiService.refreshTags(authorization)
-                onSuccess(response.user_tags)
-                Log.d("refresh tags", "success")
-                showToast(context, "태그가 업데이트되었습니다")
-            } catch (e: Exception) {
-                Log.d("refresh tags error", e.message ?: "Network error")
-                showToast(context, "태그 업데이트에 실패하였습니다")
-            }
+        try {
+            val response = apiService.refreshTags(authorization)
+            onSuccess(response.user_tags)
+            Log.d("refresh tags", "success")
+            showToast(context, "태그가 업데이트되었습니다")
+        } catch (e: Exception) {
+            Log.d("refresh tags error", e.message ?: "Network error")
+            showToast(context, "태그 업데이트에 실패하였습니다")
         }
     }
 }
