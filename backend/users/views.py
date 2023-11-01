@@ -107,8 +107,12 @@ def filter_users(request):
 def refresh_user_tags(request):
     user = request.user
 
+    # Define the mapping of ratings to weights with a 0.5 interval
+    rating_weights = {1: 0.5, 1.5: 1.0, 2: 1.5, 2.5: 2.0, 3: 2.5, 3.5: 3.0, 4: 3.5, 4.5: 4.0, 5: 4.5}
+
+
     # Dictionary to store tag counts for each label type
-    tag_counts = {label: {} for label, _ in Tag.TAG_TYPES}
+    tag_weighted_sums = {label: {} for label, _ in Tag.TAG_TYPES}
 
     user_with_posts = User.objects.prefetch_related('posts__tags').get(id=user.id)
 
@@ -117,16 +121,17 @@ def refresh_user_tags(request):
         for tag in post.tags.all():
             label = tag.ko_label  # Assuming ko_label is used as the label
             tag_type = tag.type
+            rating = post.rating
 
             # Increment tag count for the specific type and label
-            tag_counts[tag_type][label] = tag_counts[tag_type].get(label, 0) + 1
+            tag_weighted_sums[tag_type][label] = tag_weighted_sums[tag_type].get(label, 0) + rating_weights[rating]
 
-    print("tag_counts", tag_counts)
+    print("tag_counts", tag_weighted_sums)
     # Dictionary to store the most frequently occurring tag for each type
     most_frequent_tags = {}
 
     # Iterate through tag counts for each type
-    for tag_type, label_counts in tag_counts.items():
+    for tag_type, label_counts in tag_weighted_sums.items():
         if label_counts:
             # Find the label with the maximum count
             most_frequent_label = max(label_counts, key=label_counts.get)

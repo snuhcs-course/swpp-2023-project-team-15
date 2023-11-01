@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'password', 'email','description', 
-                  'avatar_url', 'follower_count', 'following_count','posts', 'is_followed', 'tags')
+                  'avatar_url', 'follower_count', 'following_count', 'is_followed', 'tags', 'posts')
         error_messages={
             'username':{'error': 'Username is already taken'},
             'email':{'error': 'Email is already in use'}
@@ -67,7 +67,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
     
     class Meta:
         model=User
-        fields=('username', 'avatar_url', 'description', 'tags')
+        fields=('id', 'username', 'avatar_url', 'description', 'tags')
 
     
     def get_tags(self, obj):
