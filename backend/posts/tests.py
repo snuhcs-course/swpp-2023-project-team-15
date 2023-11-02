@@ -59,7 +59,11 @@ class PostCreateTestCase(APITestCase):
         self.assertEqual(photo_instance.photo_url, self.post_data['photos'][0]['photo_url'])
         self.assertEqual(photo_instance.post, post)
 
-        # Verify tag association logic if applicable (omitted for brevity)
+        # Verify Restaurant instance creation
+        self.assertEqual(Restaurant.objects.count(), 1)
+        restaurant_instance = Restaurant.objects.first()
+        self.assertEqual(restaurant_instance.name, self.post_data['restaurant']['name'])
+        self.assertEqual(post.restaurant, restaurant_instance)
         
     def tearDown(self):
         # Clean up any objects created
