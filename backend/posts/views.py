@@ -1,9 +1,12 @@
 import threading
 
+import requests
+from decouple import config
 from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, permissions, status, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from tags.models import Tag
@@ -122,4 +125,19 @@ class PostViewSet(viewsets.ModelViewSet):
         })
         return context
     
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def restaurant_search(request):
+    url = "https://dapi.kakao.com/v2/local/search/keyword.json"
     
+    query = request.query_params.get('query')
+
+    querystring = {"category_group_code":"FD6,CE7","query":query}
+
+    headers = {"Authorization": f"KakaoAK {config('KAKAO_ACCESS_KEY')}"}
+
+    response = requests.get(url, headers=headers, params=querystring)
+
+    use_keys = ['id', 'place_name', 'road_address_name', 'category_name', ]
+    parsed_response = [{k: item[k] for k in use_keys} for item in response.json()['documents']]
+    return Response({"data": parsed_response}, status=status.HTTP_200_OK)
