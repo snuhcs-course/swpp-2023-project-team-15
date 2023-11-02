@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from tags.models import Tag
 
 from .serializers import UserInfoSerializer, UserPostSerializer, UserSerializer
+from posts.serializers import PostSerializer
 
 User= get_user_model()
 
@@ -65,10 +66,19 @@ def get_my_profile(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_my_liked_posts(request):
+    user = request.user
+    liked_posts = user.liked_posts.all()
+    serializer = PostSerializer(liked_posts, many=True, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
 def get_user_profile(request, pk):
     user = get_object_or_404(User, pk=pk)
     serializer = UserSerializer(user, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 @api_view(['GET'])
 def get_user_posts(request, pk):
@@ -142,3 +152,4 @@ def refresh_user_tags(request):
     user.tags.set(updated_tags)
 
     return Response({"user_tags": [i.ko_label for i in updated_tags]})
+
