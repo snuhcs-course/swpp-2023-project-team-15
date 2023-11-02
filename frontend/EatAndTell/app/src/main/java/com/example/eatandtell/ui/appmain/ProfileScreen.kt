@@ -1,12 +1,10 @@
 package com.example.eatandtell.ui.appmain
-import android.content.Intent
+
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,18 +12,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,31 +31,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.eatandtell.dto.PostDTO
-import com.example.eatandtell.dto.RestaurantDTO
-import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
-import com.example.eatandtell.ui.HeartEmpty
-import com.example.eatandtell.ui.HeartFull
 import com.example.eatandtell.ui.MediumRedButton
 import com.example.eatandtell.ui.MediumWhiteButton
 import com.example.eatandtell.ui.Post
-import com.example.eatandtell.ui.PostImage
 import com.example.eatandtell.ui.Profile
-import com.example.eatandtell.ui.StarRating
 import com.example.eatandtell.ui.Tag
 import com.example.eatandtell.ui.showToast
-import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.Inter
 import com.example.eatandtell.ui.theme.MainColor
-
 import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -79,7 +64,8 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .testTag("profile"),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {

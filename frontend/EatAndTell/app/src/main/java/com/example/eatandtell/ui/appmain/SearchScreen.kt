@@ -37,7 +37,6 @@ import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.Tag
 import com.example.eatandtell.ui.showToast
 import com.google.accompanist.flowlayout.FlowRow
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun SearchScreen(navController: NavHostController, context: ComponentActivity, viewModel: AppMainViewModel) {

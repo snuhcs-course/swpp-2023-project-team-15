@@ -9,7 +9,6 @@ import com.example.eatandtell.di.ApiService
 import com.example.eatandtell.dto.EditProfileRequest
 import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.PostDTO
-import com.example.eatandtell.dto.RegisterRequest
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
@@ -31,22 +30,26 @@ class AppMainViewModel() : ViewModel() {
 
     private val apiService = RetrofitClient.retro.create(ApiService::class.java)
 
+    fun prepareFileData(photoPath: Uri,context:Context): ByteArray? {
+        val contentResolver = context.contentResolver
+        contentResolver.openInputStream(photoPath)?.use { inputStream ->
+            return inputStream.readBytes()
+        }
+        return null
+    }
+
     suspend fun uploadPhotosAndPost(photoPaths: List<Uri>,
                                     restaurant : RestReqDTO,
                                     rating: String,
                                     description: String,
                                     context: Context
                                     ) {
-        fun prepareFileData(photoPath: Uri): ByteArray? {
-            val contentResolver = context.contentResolver
-            contentResolver.openInputStream(photoPath)?.use { inputStream ->
-                return inputStream.readBytes()
-            }
-            return null
-        }
+
+
+
 
         val photoUrls = mutableListOf<String>()
-        val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it) }
+        val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it,context) }
         for(byteArray in photoByteArrays) {
             val requestBody: RequestBody = byteArray.toRequestBody("image/*".toMediaTypeOrNull())
             val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("image", "this_name_does_not_matter.jpg", requestBody)
@@ -70,7 +73,7 @@ class AppMainViewModel() : ViewModel() {
             else {
                 Log.d("upload photos and post error", "cancellation exception")
                 showToast(context, "포스트가 업로드되었습니다")
-                //TOOD: navigate을 해버리니까 cancellation 에러가 뜸. 그렇다고 navigate을 코루틴 내에서 화면이 너무 안 넘어가서 버튼을 연타하게 됨
+                //TODO: navigate을 해버리니까 cancellation 에러가 뜸. 그렇다고 navigate을 코루틴 내에서 화면이 너무 안 넘어가서 버튼을 연타하게 됨
             }
         }
     }

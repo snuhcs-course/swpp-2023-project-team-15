@@ -7,6 +7,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -14,6 +15,7 @@ import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
@@ -67,8 +69,12 @@ class StartViewModelTest {
 
     @Test
     fun registerUser_meme_returnsTrue()= runTest {
-        val gotToken = viewModel.registerUser("meme5", "meme5", "meme5@gmail.com", context)
+        val gotToken = viewModel.registerUser("test_account", "test_account", "test_account@gmail.com", context)
         println("gotToken: $gotToken")
         assertNotNull(gotToken)
+    }
+    @After
+    fun tearDown() {
+        unmockkStatic(Log::class)
     }
 }
