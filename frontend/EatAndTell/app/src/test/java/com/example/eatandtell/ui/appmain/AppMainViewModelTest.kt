@@ -10,7 +10,9 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.jetbrains.annotations.ApiStatus.Experimental
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -18,6 +20,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito.mock
+import java.io.ByteArrayInputStream
 import java.io.InputStream
 
 //class MainCoroutineRule:MainCoroutineRule
@@ -25,6 +28,8 @@ import java.io.InputStream
 class AppMainViewModelTest {
     @MockK
     private val context: AppMainActivity = mockk(relaxed = true)
+
+    @ExperimentalCoroutinesApi
     @get:Rule
     val mainRule = MainCoroutineRule()
     private lateinit var viewModel: AppMainViewModel
@@ -40,27 +45,33 @@ class AppMainViewModelTest {
     }
 
     @Test
-    fun prepareFileData_returnsBytes()= runTest {
-        val mockUri1: Uri = mockk<Uri>()
-        val photoPath= listOf(mockUri1)
+    fun prepareFileData_returnsBytes() = runTest {
+        val mockUri: Uri = mockk()
         val mockContentResolver = mockk<ContentResolver>()
-        val mockInputStream = mockk<InputStream>()
-        every { mockContentResolver.openInputStream(any()) } returns mockInputStream
-        every{mockInputStream.readBytes()} returns "unit_test".toByteArray()
-        val Bytes= viewModel.prepareFileData(mockUri1,context)
-        assertNotNull(Bytes)
+        val byteArray = "unit_test".toByteArray()
+        val mockInputStream = ByteArrayInputStream(byteArray)
+
+        every { context.contentResolver } returns mockContentResolver
+        every { mockContentResolver.openInputStream(mockUri) } returns mockInputStream
+
+        val bytes = viewModel.prepareFileData(mockUri, context)
+
+        // Now you can assert that the bytes are not null and have the expected content
+        assertNotNull(bytes)
+        assertArrayEquals(byteArray, bytes)
     }
     // use RunTest to test suspend functions. See https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-test/
     @Test
     fun uploadPhotosAndPost_returnsNotNull() = runTest {
-        val mockUri1: Uri = mockk<Uri>()
+        val mockUri: Uri = mockk()
         val mockContentResolver = mockk<ContentResolver>()
-        val mockInputStream = mockk<InputStream>()
-        every { mockContentResolver.openInputStream(any()) } returns mockInputStream
-        every{mockInputStream.readBytes()} returns "unit_test".toByteArray()
-        Log.d("Err_msg", "here")
+        val byteArray = "unit_test".toByteArray()
+        val mockInputStream = ByteArrayInputStream(byteArray)
 
-        val photoPath= listOf(mockUri1)
+        every { context.contentResolver } returns mockContentResolver
+        every { mockContentResolver.openInputStream(mockUri) } returns mockInputStream
+
+        val photoPath= listOf(mockUri)
         val rating ="3.0"
         val restaurant=RestReqDTO("example_rest")
         val description= "test"
