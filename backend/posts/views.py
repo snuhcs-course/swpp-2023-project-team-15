@@ -131,13 +131,25 @@ def restaurant_search(request):
     url = "https://dapi.kakao.com/v2/local/search/keyword.json"
     
     query = request.query_params.get('query')
+    x = request.query_params.get('x')
+    y = request.query_params.get('y')
+    
+    if not x or not y:
+        x = "126.938024740159"
+        y = "37.4697520000202"        
 
-    querystring = {"category_group_code":"FD6,CE7","query":query}
+    querystring = {
+        "category_group_code": "FD6,CE7",
+        "query": query,
+        "x": x,
+        "y": y,
+        "sort": "distance",
+    }
 
     headers = {"Authorization": f"KakaoAK {config('KAKAO_ACCESS_KEY')}"}
 
     response = requests.get(url, headers=headers, params=querystring)
 
-    use_keys = ['id', 'place_name', 'road_address_name', 'category_name', ]
+    use_keys = ['id', 'place_name', 'road_address_name', 'category_name', 'x', 'y']
     parsed_response = [{k: item[k] for k in use_keys} for item in response.json()['documents']]
     return Response({"data": parsed_response}, status=status.HTTP_200_OK)
