@@ -29,6 +29,7 @@ def get_top_tags_after_translation(possible_tags, translated_description):
 def create_tags_on_thread(post):
     print("Thread started")
     translated_description = deepl_translate_ko_to_en(post.description)
+    print('translated description', translated_description)
     tags_first_ten = Tag.objects.values('en_label')[:10]
     tags_second_ten = Tag.objects.values('en_label')[10:20]
     tags_third_ten = Tag.objects.values('en_label')[20:30]
@@ -131,6 +132,9 @@ def restaurant_search(request):
     url = "https://dapi.kakao.com/v2/local/search/keyword.json"
     
     query = request.query_params.get('query')
+    
+    if not query:
+        return Response({"message": "`query` parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
     x = request.query_params.get('x')
     y = request.query_params.get('y')
     
