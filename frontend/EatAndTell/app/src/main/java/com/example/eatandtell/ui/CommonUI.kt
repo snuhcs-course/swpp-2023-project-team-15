@@ -102,7 +102,8 @@ fun CustomTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: (@Composable () -> Unit)? = null,
     onTrailingIconClick: (() -> Unit)? = null,
-
+    maxLines : Int = 1,
+    enable : Boolean = true,
 ) {
     TextField(
         value = value,
@@ -113,6 +114,7 @@ fun CustomTextField(
                 trailingIcon?.invoke()
             }
         },
+        enabled = enable,
         modifier = Modifier
             .border(
                 width = 0.5.dp,
@@ -122,15 +124,16 @@ fun CustomTextField(
             .fillMaxWidth()
             .height(IntrinsicSize.Min),
         colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color(0xFFEEEEEE),
+            containerColor = White , //Color(0xFFEEEEEE),
             cursorColor = Color.Black,
-            focusedIndicatorColor = Color(0xFFA0A0A0),
+            focusedIndicatorColor = MainColor, //Color(0xFFA0A0A0),
             unfocusedIndicatorColor = Color.Transparent,
             ),
         placeholder = { Text(placeholder, style = MaterialTheme.typography.bodyMedium
         ) },
         textStyle = MaterialTheme.typography.bodyMedium,
-        maxLines = 1
+        maxLines = maxLines,
+
     )
 }
 
@@ -227,9 +230,9 @@ fun BlackSmallText(text: String, modifier: Modifier?) {
 
 
 @Composable
-fun MainButton(onClick: () -> Unit, text: String) {
+fun MainButton(onClick: () -> Unit, text: String, enable : Boolean = true) {
     Button(
-        onClick = onClick,
+        onClick = {if (enable) onClick() else { /**/ }},
         colors = ButtonDefaults.buttonColors(
             containerColor = MainColor,
             contentColor = White
@@ -239,8 +242,17 @@ fun MainButton(onClick: () -> Unit, text: String) {
             .fillMaxWidth()
             .height(48.dp),
     ) {
-        Text(text, color = White,
+
+
+        if (enable) Text(text, color = White,
         )
+        else //show loading
+            CircularProgressIndicator(
+                color = White,
+                modifier = Modifier
+                    .width(24.dp)
+                    .height(24.dp)
+            )
     }
 }
 
@@ -283,9 +295,9 @@ fun PreviewMediumWhiteButton() {
 }
 
 @Composable
-fun MediumRedButton(onClick: () -> Unit, text: String) {
+fun MediumRedButton(onClick: () -> Unit, text: String, enable: Boolean = true) {
     Button(
-        onClick = onClick,
+        onClick = {if (enable) onClick() else { /**/ }},
         colors = ButtonDefaults.buttonColors(
             containerColor = MainColor,
             contentColor = White
@@ -296,7 +308,7 @@ fun MediumRedButton(onClick: () -> Unit, text: String) {
             .height(36.dp),
         contentPadding = PaddingValues(0.dp)
     ) {
-        Text(text, color = White,
+        if (enable) Text(text, color = White,
             style = TextStyle(
                 fontFamily = Inter,
                 fontSize = 14.sp,
@@ -306,6 +318,13 @@ fun MediumRedButton(onClick: () -> Unit, text: String) {
                 .padding(0.dp)
                 .align(Alignment.CenterVertically) // Center the text vertically
         )
+        else //show loading
+            CircularProgressIndicator(
+                color = White,
+                modifier = Modifier
+                    .width(24.dp)
+                    .height(24.dp)
+            )
     }
 }
 @Preview
@@ -436,9 +455,8 @@ fun DraggableStarRating(currentRating: Int, onRatingChanged: (Int) -> Unit) {
 fun ProfileImage(
     profileUrl: String,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
+    size : Dp = 45.dp
 ) {
-    val clickModifier = if (onClick != null) modifier.clickable(onClick = onClick) else modifier
 
     Image(
         painter = rememberImagePainter(
@@ -448,15 +466,15 @@ fun ProfileImage(
             }
         ),
         contentDescription = null,
-        modifier = clickModifier
+        modifier = modifier
             .border(
                 width = 2.dp,
                 color = Color(0xFFF23F18),
                 shape = RoundedCornerShape(size = 100.dp)
             )
             .padding(2.dp)
-            .width(45.dp)
-            .height(45.dp)
+            .width(size)
+            .height(size)
             .background(
                 color = Color.White,
                 shape = RoundedCornerShape(size = 100.dp)
@@ -465,11 +483,42 @@ fun ProfileImage(
 }
 
 @Composable
+fun EditProfileImage(
+    profileUrl: String,
+    modifier: Modifier = Modifier,
+    onEditClick: () -> Unit = { },
+    size : Dp = 45.dp
+) {
+
+    Image(
+        painter = rememberImagePainter(
+            data = profileUrl,
+            builder = {
+                transformations(CircleCropTransformation())
+            }
+        ),
+        contentDescription = null,
+        modifier = modifier
+            .border(
+                width = 2.dp,
+                color = Color(0xFFF23F18),
+                shape = RoundedCornerShape(size = 100.dp)
+            )
+            .padding(2.dp)
+            .width(size)
+            .height(size)
+            .background(
+                color = Color.White,
+                shape = RoundedCornerShape(size = 100.dp)
+            )
+            .clickable(onClick = onEditClick)
+    )
+}
+
+@Composable
 fun ProfileText(
     username: String,
     userDescription: String,
-    onUsernameClick: (() -> Unit)? = null,
-    onDescriptionClick: (() -> Unit)? = null
 ) {
     Column {
         Text(
@@ -480,7 +529,6 @@ fun ProfileText(
                 fontWeight = FontWeight(500),
                 color = Color(0xFF262626)
             ),
-            modifier = if (onUsernameClick != null) Modifier.clickable { onUsernameClick() } else Modifier
         )
         Text(
             text = userDescription,
@@ -490,7 +538,10 @@ fun ProfileText(
                 fontWeight = FontWeight(500),
                 color = Color(0xFF848484)
             ),
-            modifier = if (onDescriptionClick != null) Modifier.clickable { onDescriptionClick() } else Modifier
+            modifier = Modifier
+                .width(150.dp),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -500,28 +551,27 @@ fun Profile(
     profileUrl: String,
     username: String,
     userDescription: String,
-    onImageClick: (() -> Unit)? = null,
-    onUsernameClick: (() -> Unit)? = null,
-    onDescriptionClick: (() -> Unit)? = null
+    onClick: (() -> Unit) = { },
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.padding(4.dp)
+        modifier = Modifier
+            .padding(4.dp)
+            .clickable(onClick = onClick)
     ) {
-        ProfileImage(profileUrl = profileUrl, onClick = onImageClick)
-        ProfileText(username = username, userDescription = userDescription, onUsernameClick = onUsernameClick, onDescriptionClick = onDescriptionClick)
+        ProfileImage(profileUrl = profileUrl)
+        ProfileText(username = username, userDescription = userDescription)
     }
 }
 
 
 // Post Photos
 @Composable
-fun PostImage(imageUrl: String, onImageClick: () -> Unit) {
+fun PostImage(imageUrl: String? = null, onImageClick: () -> Unit) {
     Image(
-        painter = rememberImagePainter(
-            data = imageUrl,
-        ),
+        painter = (if(imageUrl!=null) rememberImagePainter(data = imageUrl,)
+            else painterResource(R.drawable.default_image)), //added default image
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier = Modifier

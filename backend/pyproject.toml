@@ -15,6 +15,9 @@ gunicorn = "^21.2.0"
 boto3 = "^1.28.62"
 drf-yasg = "^1.21.7"
 pillow = "^10.0.1"
+requests = "^2.31.0"
+coverage = "^7.3.2"
+sentry-sdk = {extras = ["django"], version = "^1.32.0"}
 
 
 [build-system]

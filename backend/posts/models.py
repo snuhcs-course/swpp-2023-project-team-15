@@ -11,7 +11,7 @@ class Restaurant(models.Model):
 
 
 class Post(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts')
     restaurant = models.ForeignKey(
         Restaurant,
         on_delete=models.CASCADE,
@@ -24,6 +24,9 @@ class Post(models.Model):
     likes = models.ManyToManyField(get_user_model(), related_name='liked_posts', blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    tags = models.ManyToManyField('tags.Tag', related_name='posts', blank=True)
+
     
     class Meta:
         ordering = ['-created_at']

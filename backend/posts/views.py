@@ -1,10 +1,43 @@
+import threading
+
+from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from tags.models import Tag
+from tags.utils import deepl_translate_ko_to_en, ml_tagging
+
 from .models import Post
 from .serializers import PostSerializer, data_list
+
+
+def get_top_tags_after_translation(possible_tags, translated_description):
+    label_score_dict = ml_tagging(translated_description, possible_tags)
+    max_label = max(label_score_dict, key=label_score_dict.get)
+    
+    if label_score_dict[max_label] > 0.3:
+        matching_tag = Tag.objects.filter(en_label=max_label).first()
+        return matching_tag
+    return None
+
+
+def create_tags_on_thread(post):
+    print("Thread started")
+    translated_description = deepl_translate_ko_to_en(post.description)
+    tags_first_ten = Tag.objects.values('en_label')[:10]
+    tags_second_ten = Tag.objects.values('en_label')[10:20]
+    tags_third_ten = Tag.objects.values('en_label')[20:30]
+    
+    for possible_tags_queryset in [tags_first_ten, tags_second_ten, tags_third_ten]:
+        possible_tags = [tag['en_label'] for tag in possible_tags_queryset]
+        matching_tag = get_top_tags_after_translation(possible_tags, translated_description)
+        print('fount tag', matching_tag)
+        if matching_tag is not None:
+            post.tags.add(matching_tag)
+    
+    print("Thread finished")
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -14,9 +47,18 @@ class PostViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+    
+    def create(self, request):
+        serializer = PostSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)        
+        # Post 생성 및 저장
+        post = serializer.save(user=self.request.user)
+        
+        thread = threading.Thread(target=create_tags_on_thread, args=(post,), daemon=True)
+        thread.start()
+                
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
         
     def get_queryset(self):
         """
@@ -24,9 +66,27 @@ class PostViewSet(viewsets.ModelViewSet):
         by filtering against a `username` query parameter in the URL.
         """
         queryset = Post.objects.all()
+        # Get restaurant_name from query parameters
         restaurant_name = self.request.query_params.get('restaurant_name')
-        if restaurant_name is not None:
+        if restaurant_name:
             queryset = queryset.filter(restaurant__name__icontains=restaurant_name)
+            return queryset
+
+        # Get tags from query parameters
+        tags_param = self.request.query_params.get('tags')
+        if tags_param:
+            # Split the tags and create a Q object for each tag
+            tags = tags_param.split(',')
+            tag_queries = [Q(tags__ko_label=tag) for tag in tags]
+
+            # Combine the Q objects using OR operation
+            combined_query = Q()
+            for tag_query in tag_queries:
+                combined_query |= tag_query
+
+            # Filter the queryset using the combined Q object
+            queryset = queryset.filter(combined_query)
+
         return queryset
 
     @swagger_auto_schema(
@@ -61,3 +121,5 @@ class PostViewSet(viewsets.ModelViewSet):
             "request": self.request
         })
         return context
+    
+    

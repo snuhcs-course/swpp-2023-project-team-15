@@ -8,6 +8,7 @@ import retrofit2.http.POST
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
@@ -23,6 +24,10 @@ interface ApiService {
     @POST("posts/") // The posts endpoint
     suspend fun uploadPost(@Header("Authorization") authorization: String,
                            @Body postData: UploadPostRequest): PostDTO
+
+    @PATCH("users/edit/") // The edit profile endpoint
+    suspend fun editProfile(@Header("Authorization") authorization: String,
+                           @Body profileData: EditProfileRequest): UserDTO
     @Multipart
     @POST("images/upload/") // The images endpoint
     suspend fun getImageURL(@Header("Authorization") authorization: String,
@@ -32,16 +37,19 @@ interface ApiService {
     suspend fun getAllPosts(@Header("Authorization") authorization: String,
                            ): GetAllPostsResponse
 
-    @GET("users/me/") // The posts endpoint //TODO: change to getMyPosts
+    @GET("users/me/") // The posts endpoint
     suspend fun getMyFeed(@Header("Authorization") authorization: String,
     ): GetFeedResponse
 
     @GET("users/{id}/") // The users endpoint
-    suspend fun getUserProfile(@Header("Authorization") authorization: String,
+    suspend fun getUserFeed(@Header("Authorization") authorization: String,
                             @Path("id") id: Int): GetFeedResponse
 
     @GET("users/filter")
-    suspend fun getFilteredUsers(@Header("Authorization") authorization: String,@Query("username") username: String): List<UserDTO>
+    suspend fun getFilteredUsersByName(@Header("Authorization") authorization: String,@Query("username") username: String): List<UserDTO>
+
+    @GET("users/filter")
+    suspend fun getFilteredUsersByTag(@Header("Authorization") authorization: String,@Query("tags") username: String): List<UserDTO>
 
     @GET("posts/")
     suspend fun getFilteredByRestaurants(@Header("Authorization") authorization: String,@Query("restaurant_name") restaurantName: String): GetAllPostsResponse
@@ -49,5 +57,10 @@ interface ApiService {
     @PUT("posts/{post_id}/likes/") // The posts endpoint
     suspend fun toggleLike(@Header("Authorization") authorization: String,
                            @Path("post_id") post_id: Int): toggleLikeResponse
+
+    @POST("users/refresh-tags/")
+    suspend fun refreshTags(@Header("Authorization") authorization: String,): TagsDTO
+
+
 
 }

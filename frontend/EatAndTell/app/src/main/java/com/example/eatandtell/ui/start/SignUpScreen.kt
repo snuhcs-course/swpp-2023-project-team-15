@@ -70,7 +70,7 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
         CustomTextField(
             value = email.text,
             onValueChange = { email = TextFieldValue(it) },
-            placeholder = "이메일을 입력하세요 (예: name@example.com)",
+            placeholder = "이메일을 입력하세요",
         )
         Spacer(modifier = Modifier.height(12.dp))
 

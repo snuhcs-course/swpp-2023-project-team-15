@@ -106,7 +106,7 @@ fun AppMainNavigate(navController: NavHostController, modifier: Modifier, contex
             ProfileScreen(context, viewModel, navController)
         }
         composable(route = "EditProfile") {
-            EditProfileScreen(context, viewModel)
+            EditProfileScreen(context, viewModel, navController)
         }
 
         composable(
