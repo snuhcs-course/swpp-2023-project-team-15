@@ -8,7 +8,7 @@ User= get_user_model()
 class RestaurantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restaurant
-        fields = '__all__'
+        fields = ('name', 'search_id')
 
 class PostPhotoSerializer(serializers.ModelSerializer):
     class Meta:
