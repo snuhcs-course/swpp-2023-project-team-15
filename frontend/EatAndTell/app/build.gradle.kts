@@ -1,6 +1,8 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    kotlin("kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -97,6 +99,16 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
+    implementation("com.google.dagger:hilt-android:2.44")
+    kapt("com.google.dagger:hilt-android-compiler:2.44")
+    implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
+
     runtimeOnly("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     runtimeOnly("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
+}
+
+
+// Allow references to generated code
+kapt {
+    correctErrorTypes = true
 }

@@ -1,25 +1,16 @@
 package com.example.eatandtell.ui.start
-import RetrofitClient
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.eatandtell.SharedPreferencesManager
 import com.example.eatandtell.di.ApiService
 import com.example.eatandtell.dto.LoginRequest
-import com.example.eatandtell.dto.LoginResponse
 import com.example.eatandtell.dto.RegisterRequest
-import com.example.eatandtell.dto.RegisterResponse
 import com.example.eatandtell.ui.showToast
-import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.await
 
-class StartViewModel : ViewModel() {
+class StartViewModel(private val apiService: ApiService) : ViewModel() {
 
-    private val apiService = RetrofitClient.retro.create(ApiService::class.java)
+    //private val apiService = RetrofitClient.retro.create(ApiService::class.java)
     suspend fun loginUser(username: String, password: String, context: Context): String? {
         val loginData = LoginRequest(username, password)
         return try {
@@ -42,13 +33,14 @@ class StartViewModel : ViewModel() {
         return try {
             val response = apiService.registerUser(registrationData)
             val token = response.token
-            Log.d("sign up", "success")
+            //Log.d("sign up", "success")
             SharedPreferencesManager.setToken(context, token)
             token
         } catch (e: Exception) {
             val errorMessage = e.message ?: "Network error"
             Log.d("sign up", "error: $errorMessage")
-            //showToast(context, "회원가입에 실패하였습니다")
+            showToast(context, "회원가입에 실패하였습니다")
+
             null
         }
 

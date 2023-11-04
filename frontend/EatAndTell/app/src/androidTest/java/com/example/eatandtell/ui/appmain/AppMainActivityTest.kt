@@ -19,13 +19,16 @@ class AppMainActivityTest {
     lateinit var mockViewModel: AppMainViewModel
 
     @Test
-    fun test_StartActivity_InitialDestination_IsLogin() {
-        composeTestRule.onNodeWithTag("go_to_signup").assertIsDisplayed()
+    fun test_AppMainNavigate_InitialDestination_Is_Home() {
+        composeTestRule.onNodeWithTag("feed").assertIsDisplayed()
     }
 
     @Test
-    fun test_StartActivity_NavigatetoHomeScreen() {
-        composeTestRule.onNodeWithTag("go_to_signup").performClick()
-        composeTestRule.onNodeWithTag("go_to_login").assertIsDisplayed()
+    fun test_StartActivity_Navigate_to_ProfileScreen_back_to_HomeScreen() {
+        composeTestRule.onNodeWithTag("go_to_profile").performClick()
+        composeTestRule.onNodeWithTag("profile").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("go_to_home").performClick()
+        composeTestRule.onNodeWithTag("feed").assertIsDisplayed()
     }
+
 }

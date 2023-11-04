@@ -1,3 +1,4 @@
+
 import com.example.eatandtell.di.ApiService
 import com.squareup.moshi.Moshi
 import retrofit2.Retrofit
@@ -15,4 +16,7 @@ object RetrofitClient {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
 
+    val apiService:ApiService by lazy{
+        retro.create(ApiService::class.java)
+    }
 }
