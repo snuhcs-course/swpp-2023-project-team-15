@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -23,6 +24,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.eatandtell.dto.SearchedRestDTO
 import com.example.eatandtell.ui.start.StartViewModel
 
 //import com.example.eatandtell.ui.AppNavigation
@@ -77,7 +79,7 @@ fun AppMain(
                 BottomNavBar(
                     onHomeClick = { navigateToDestination(navController, "Home")},
                     onSearchClick = { navigateToDestination(navController, "Search") },
-                    onPlusClick = { navigateToDestination(navController, "Upload") },
+                    onPlusClick = { navigateToDestination(navController, "SearchRest") },
                     onProfileClick = { navigateToDestination(navController, "Profile")},
                 )
         }
@@ -98,9 +100,34 @@ fun AppMainNavigate(navController: NavHostController, modifier: Modifier, contex
         composable(route = "Search") {
             SearchScreen(navController,context, viewModel)
         }
-        composable(route = "Upload") {
-            UploadScreen(navController, context, viewModel)
+//        composable(route = "Upload") {
+//            UploadScreen(navController, context, viewModel)
+//        }
+        composable(
+            route = "Upload/{search_id}/{place_name}/{category_name}",
+            arguments = listOf(
+                navArgument("search_id") {
+                    defaultValue = -1
+                    type = NavType.IntType
+                },
+                navArgument("place_name") {
+                    defaultValue = ""
+                    type = NavType.StringType
+                },
+                navArgument("category_name") {
+                    defaultValue = ""
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            val searchId = backStackEntry.arguments?.getInt("search_id")
+            val placeName = backStackEntry.arguments?.getString("place_name")
+            val categoryName = backStackEntry.arguments?.getString("category_name")
+            UploadScreen(navController, context, viewModel, searchId, placeName, categoryName)
+        }
 
+        composable(route = "SearchRest") {
+            SearchRestScreen(navController, context, viewModel)
         }
         composable(route = "Profile") {
             ProfileScreen(context, viewModel, navController)

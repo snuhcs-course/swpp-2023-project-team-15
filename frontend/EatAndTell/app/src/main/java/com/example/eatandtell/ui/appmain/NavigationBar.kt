@@ -100,11 +100,24 @@ fun PreviewNavigationBar() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(currentScreenName: String, navigateToHome: () -> Unit) {
+
+    val nameText = (
+        when (currentScreenName) {
+            "Home" -> "홈"
+            "Search" -> "검색"
+            "SearchRest" -> "맛집 검색"
+            "Upload" -> "리뷰 작성"
+            "Profile" -> "프로필"
+            "EditProfile" -> "프로필 편집"
+            else -> "Eat & Tell"
+        }
+    )
+
     CenterAlignedTopAppBar(
         title = { Text(
-            text = currentScreenName,
+            text = nameText,
                     style = TextStyle(
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Black,
                     ),
