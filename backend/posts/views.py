@@ -28,6 +28,9 @@ def get_top_tags_after_translation(possible_tags, translated_description):
 
 def create_tags_on_thread(post):
     print("Thread started")
+    if len(post.description) < 5:
+        print(f'create tag skipped: description too short: {post.description}.')
+        return
     translated_description = deepl_translate_ko_to_en(post.description)
     print('translated description', translated_description)
     tags_first_ten = Tag.objects.values('en_label')[:10]
