@@ -41,8 +41,9 @@ class PostSerializer(serializers.ModelSerializer):
         # Create or get a restaurant based on the name
         restaurant = Restaurant.objects.filter(name=restaurant_data['name']).first()
         if restaurant:
-            restaurant.search_id = restaurant_data['search_id']
-            restaurant.save()
+            if 'search_id' in restaurant_data and restaurant_data['search_id'] is not None:
+                restaurant.search_id = restaurant_data['search_id']
+                restaurant.save()
         else:
             restaurant, created = Restaurant.objects.get_or_create(**restaurant_data)
         

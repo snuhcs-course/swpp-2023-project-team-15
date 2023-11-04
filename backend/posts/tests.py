@@ -153,6 +153,47 @@ class PostCreateTestCase(APITestCase):
         self.assertEqual(restaurant_instance.search_id, post_data['restaurant']['search_id'])
         self.assertEqual(post.restaurant, restaurant_instance)
         
+    @patch('threading.Thread')
+    def test_create_post_with_duplicate_restaurant_2(self, mock_thread):
+        # Arrange
+        mock_thread_instance = MagicMock()
+        mock_thread.return_value = mock_thread_instance
+        post_data = {
+            "restaurant": {
+                "name": "301동 학식",
+                "search_id": "123",
+            },
+            "rating": "3.5",
+            "description": "test",
+            "photos": [
+                {
+                    "photo_url": "https://image.ohou.se/i/bucketplace-v2-development/uploads/cards/snapshots/168666382159905764.jpeg?gif=1&w=480&h=480&c=c&q=80&webp=1"
+                }
+            ]
+        }
+
+        # Perform API call to create a post
+        url = reverse('post-list')  # 'post-list' should correspond to your url conf for creating posts
+        self.client.post(url, post_data, format='json')
+        
+        del post_data['restaurant']['search_id']
+        
+        response = self.client.post(url, post_data, format='json')
+        
+        # Verify response
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn('id', response.data)
+        self.assertIn('photos', response.data)
+
+        
+        # Verify Restaurant instance creation
+        post = Post.objects.first()
+        self.assertEqual(Restaurant.objects.count(), 1)
+        restaurant_instance = Restaurant.objects.first()
+        self.assertEqual(restaurant_instance.name, post_data['restaurant']['name'])
+        self.assertEqual(restaurant_instance.search_id, "123")
+        self.assertEqual(post.restaurant, restaurant_instance)
+        
     def tearDown(self):
         # Clean up any objects created
         self.client.logout()
