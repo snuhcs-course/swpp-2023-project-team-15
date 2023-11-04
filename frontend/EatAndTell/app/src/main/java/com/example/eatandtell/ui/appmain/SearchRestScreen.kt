@@ -1,9 +1,11 @@
 // SignUpScreen.kt
 package com.example.eatandtell.ui.appmain
 
+import android.Manifest
 import android.R.attr.path
 import android.content.ContentResolver
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -36,6 +38,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.eatandtell.dto.GetSearchedRestResponse
@@ -56,6 +60,8 @@ import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.Gray
 import com.example.eatandtell.ui.theme.Inter
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -70,17 +76,19 @@ import java.io.InputStream
 
 
 @Composable
-fun SearchRestScreen(navController: NavHostController, context: ComponentActivity, viewModel: AppMainViewModel) {
+fun SearchRestScreen(navController: NavHostController, context: AppMainActivity, viewModel: AppMainViewModel) {
+
+    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
     var searchQuery by remember { mutableStateOf("") }
     var selectedResult by remember { mutableStateOf<SearchedRestDTO?>(null) }
 
     var searchResults by remember { mutableStateOf(listOf<SearchedRestDTO>()) }
-    var scrollState = rememberScrollState()
+    var scrollState = rememberScrollState(0)
 
     LaunchedEffect(searchQuery) {
         if (searchQuery.isNotBlank()) {
-            val res = viewModel.getSearchedRest(searchQuery)
+            val res = viewModel.getSearchedRest(searchQuery, context.positionX, context.positionY)
             searchResults = res
         }
     }
@@ -121,7 +129,7 @@ fun SearchRestScreen(navController: NavHostController, context: ComponentActivit
         // Search Results
         if (searchQuery == "") {
             Text(
-                text = "검색어가 없습니다",
+                text = if(context.positionX=="") "검색어가 없습니다.\n위치 권한이 꺼져있어 관악구 중심으로 검색됩니다." else "검색어가 없습니다.\n현재 위치를 기반으로 검색됩니다.",
                 modifier = Modifier
                     .padding(8.dp)
                     .align(Alignment.CenterHorizontally)
