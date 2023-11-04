@@ -39,7 +39,12 @@ class PostSerializer(serializers.ModelSerializer):
         restaurant_data = validated_data.pop('restaurant')
         photos_data = validated_data.pop('photos', [])
         # Create or get a restaurant based on the name
-        restaurant, created = Restaurant.objects.get_or_create(**restaurant_data)
+        restaurant = Restaurant.objects.filter(name=restaurant_data['name']).first()
+        if restaurant:
+            restaurant.search_id = restaurant_data['search_id']
+            restaurant.save()
+        else:
+            restaurant, created = Restaurant.objects.get_or_create(**restaurant_data)
         
         post = Post.objects.create(restaurant=restaurant, **validated_data)
 
