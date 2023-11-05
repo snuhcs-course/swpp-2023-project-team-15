@@ -65,6 +65,7 @@ import com.example.eatandtell.ui.PostImage
 import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.StarRating
 import com.example.eatandtell.ui.Tag
+import com.example.eatandtell.ui.UpButton
 import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.Gray
@@ -198,6 +199,9 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
     var userPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
     var userInfo by remember { mutableStateOf(UserInfoDTO(0, "", "", "", listOf(), false,0, 0)) }
     var loading by remember { mutableStateOf(true) } //이때는 유저 프로필까지 가져와야 한다.
+    var lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
 
     LaunchedEffect(loading) {
         try {
@@ -236,7 +240,7 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
 
     else {
         LazyColumn(
-            state = rememberLazyListState(),
+            state = lazyListState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 20.dp)) {
@@ -261,6 +265,12 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
             item {Spacer(modifier = Modifier.height(70.dp))}
         }
+
+        UpButton {
+            coroutineScope.launch {
+                lazyListState.animateScrollToItem(0)
+            }
+        }
     }
 }
 
@@ -270,6 +280,13 @@ fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, nav
     var myInfo = viewModel.myInfo
     var selectedTab by remember { mutableStateOf("MY") }
     var loading by remember { mutableStateOf(true) } //이때는 프로필은 고정이고, 하위 feed만 로딩하면 된다
+
+
+    var lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    Log.d("navigateToDestination", "lazylist in MyProfile: ${lazyListState}")
+
 
     LaunchedEffect(selectedTab) {
         loading = true
@@ -298,7 +315,7 @@ fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, nav
     }
 
     LazyColumn(
-        state = rememberLazyListState(),
+        state = lazyListState,
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp)) {
@@ -370,9 +387,13 @@ fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, nav
         // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
         item { Spacer(modifier = Modifier.height(70.dp)) }
     }
+
+    UpButton {
+        coroutineScope.launch {
+            lazyListState.animateScrollToItem(0)
+        }
+    }
 }
-
-
 
 
 

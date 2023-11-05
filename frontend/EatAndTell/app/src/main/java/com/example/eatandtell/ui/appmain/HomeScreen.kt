@@ -63,6 +63,7 @@ import com.example.eatandtell.ui.Post
 import com.example.eatandtell.ui.PostImage
 import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.StarRating
+import com.example.eatandtell.ui.UpButton
 import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.MainColor
@@ -73,6 +74,11 @@ import kotlinx.coroutines.launch
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
     var feedPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
     var loading by remember { mutableStateOf(true) }
+    var lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    Log.d("navigateToDestination", "lazylist in Home: ${lazyListState}")
+
 
     LaunchedEffect(loading) {
         try {
@@ -110,7 +116,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
     }
     else {
         LazyColumn(
-            state = rememberLazyListState(),
+            state = lazyListState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 20.dp),
@@ -124,6 +130,11 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
             item { Spacer(modifier = Modifier.height(70.dp)) }
         }
 
+        UpButton {
+            coroutineScope.launch {
+                lazyListState.animateScrollToItem(0)
+            }
+        }
     }
 }
 

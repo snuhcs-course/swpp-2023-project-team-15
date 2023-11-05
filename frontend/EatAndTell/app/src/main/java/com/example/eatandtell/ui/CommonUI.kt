@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Close
@@ -871,5 +872,28 @@ fun MyIcon(onClick: () -> Unit) {
             .clickable(onClick = onClick),
         contentDescription = "my_home",
         tint = Black
+    )
+}
+
+
+@Preview
+@Composable
+fun UpButton(onClick: () -> Unit = {}) {
+    SmallFloatingActionButton(
+        onClick = onClick,
+        containerColor = MainColor,
+        contentColor = White,
+        content = {
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowUp,
+                contentDescription = "Scroll to Top"
+            )
+        },
+        //shape is circle
+        shape = RoundedCornerShape(50),
+        modifier = Modifier
+            .padding(bottom = 70.dp, end = 20.dp)
+            .fillMaxSize()
+            .wrapContentSize(Alignment.BottomEnd)
     )
 }
