@@ -33,7 +33,7 @@ data class RestaurantDTO(
 data class RestReqDTO(
     val name: String,
     val search_id : Int?,
-    val category_name : String? = null, //TODO
+    val category_name : String? = null,
 )
 
 
