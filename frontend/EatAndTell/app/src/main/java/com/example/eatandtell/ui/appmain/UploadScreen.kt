@@ -26,6 +26,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -73,7 +75,8 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
 
     var clickedImageIndex by remember { mutableStateOf(-1) }
 
-
+    val context = LocalContext.current
+    val uploadMessage by viewModel.messageToDisplay.observeAsState()
 
     var loading by remember { mutableStateOf(true) }
     var myProfile by remember { mutableStateOf(UserDTO(0, "", "", "", listOf())) }
@@ -94,6 +97,11 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                 println("get my profile load error")
                 showToast(context, "프로필 로딩에 실패하였습니다")
             }
+        }
+    }
+    LaunchedEffect(key1 = uploadMessage){
+        uploadMessage?.let{
+            showToast(context,it)
         }
     }
 

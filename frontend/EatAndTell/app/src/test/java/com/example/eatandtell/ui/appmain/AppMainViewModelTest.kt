@@ -2,6 +2,7 @@ package com.example.eatandtell.ui.appmain
 import android.content.ContentResolver
 import android.net.Uri
 import android.util.Log
+import com.example.eatandtell.di.ApiService
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.ui.start.MainCoroutineRule
 import io.mockk.every
@@ -12,23 +13,20 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.jetbrains.annotations.ApiStatus.Experimental
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mockito.mock
 import java.io.ByteArrayInputStream
-import java.io.InputStream
 
 //class MainCoroutineRule:MainCoroutineRule
 @ExtendWith(MockKExtension::class)
 class AppMainViewModelTest {
     @MockK
     private val context: AppMainActivity = mockk(relaxed = true)
-
+    val mockApiService = mockk<ApiService>()
     @ExperimentalCoroutinesApi
     @get:Rule
     val mainRule = MainCoroutineRule()
@@ -37,7 +35,7 @@ class AppMainViewModelTest {
     @Before
     fun setUp() {
         //MockKAnnotations.init(this)
-        viewModel= AppMainViewModel()
+        viewModel= AppMainViewModel(mockApiService)
         mockkStatic(Log::class)
         every { Log.d(any(), any()) } returns 0
         //mockkStatic(::showToast)

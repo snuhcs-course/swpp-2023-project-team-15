@@ -7,10 +7,11 @@ import com.example.eatandtell.di.ApiService
 import com.example.eatandtell.dto.LoginRequest
 import com.example.eatandtell.dto.RegisterRequest
 import com.example.eatandtell.ui.showToast
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class StartViewModel(private val apiService: ApiService) : ViewModel() {
-
-    //private val apiService = RetrofitClient.retro.create(ApiService::class.java)
+@HiltViewModel
+class StartViewModel @Inject constructor(private val apiService: ApiService) : ViewModel() {
     suspend fun loginUser(username: String, password: String, context: Context): String? {
         val loginData = LoginRequest(username, password)
         return try {

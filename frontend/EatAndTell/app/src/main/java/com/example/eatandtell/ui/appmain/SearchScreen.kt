@@ -26,10 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.ui.CustomTextField
@@ -196,12 +194,12 @@ fun DefaultTagView(userLists: List<UserDTO>, postLists: List<PostDTO>, triggerSe
         Spacer(modifier = Modifier.height(11.dp))
     }
 }
-
+/*
 @Preview
 @Composable
 fun SearchScreenPreview() {
-    SearchScreen(navController = rememberNavController(), context = ComponentActivity(), viewModel = AppMainViewModel())
-}
+    SearchScreen(navController = rememberNavController(), context = ComponentActivity(), viewModel = AppMainViewModel(null))
+}*/
 
 
 

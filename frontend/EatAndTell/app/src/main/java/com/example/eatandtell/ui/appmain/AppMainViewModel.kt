@@ -1,8 +1,8 @@
 package com.example.eatandtell.ui.appmain
-import RetrofitClient
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eatandtell.di.ApiService
@@ -14,21 +14,26 @@ import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
 import com.example.eatandtell.ui.showToast
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import javax.inject.Inject
 
-class AppMainViewModel() : ViewModel() {
+@HiltViewModel
+class AppMainViewModel@Inject constructor(private val apiService: ApiService) : ViewModel()  {
 
     private var token: String? = null
     fun initialize(token: String?) {
         this.token = token
     }
+    val messageToDisplay = MutableLiveData<String>()
 
-    private val apiService = RetrofitClient.retro.create(ApiService::class.java)
+
+    //private val apiService = RetrofitClient.retro.create(ApiService::class.java)
 
     fun prepareFileData(photoPath: Uri,context:Context): ByteArray? {
         val contentResolver = context.contentResolver
@@ -45,9 +50,6 @@ class AppMainViewModel() : ViewModel() {
                                     context: Context
                                     ) {
 
-
-
-
         val photoUrls = mutableListOf<String>()
         val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it,context) }
         for(byteArray in photoByteArrays) {
@@ -62,17 +64,20 @@ class AppMainViewModel() : ViewModel() {
             val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
             this.uploadPost(postData)
             Log.d("upload photos and post",  "success")
+            //messageToDisplay.postValue("포스트가 업로드되었습니다")
             showToast(context, "포스트가 업로드되었습니다")
         } catch (e: Exception) {
             // Handle exceptions, e.g., from network calls, here
             //except cancellation exception
             if (e !is CancellationException) {
                 Log.d("upload photos and post error", e.message ?: "Network error")
+                messageToDisplay.postValue("포스트 업로드에 실패했습니다")
                 showToast(context, "포스트 업로드에 실패했습니다")
             }
             else {
                 Log.d("upload photos and post error", "cancellation exception")
-                showToast(context, "포스트가 업로드되었습니다")
+                //showToast(context, "포스트가 업로드되었습니다")
+                messageToDisplay.postValue("포스트가 업로드되었습니다")
                 //TODO: navigate을 해버리니까 cancellation 에러가 뜸. 그렇다고 navigate을 코루틴 내에서 화면이 너무 안 넘어가서 버튼을 연타하게 됨
             }
         }
@@ -85,17 +90,8 @@ class AppMainViewModel() : ViewModel() {
     ) {
 
         Log.d("edit profile photoPaths: ", photoPaths.toString())
-
-        fun prepareFileData(photoPath: Uri): ByteArray? {
-            val contentResolver = context.contentResolver
-            contentResolver.openInputStream(photoPath)?.use { inputStream ->
-                return inputStream.readBytes()
-            }
-            return null
-        }
-
         val photoUrls = mutableListOf<String>()
-        val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it) }
+        val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it, context) }
         for(byteArray in photoByteArrays) {
             val requestBody: RequestBody = byteArray.toRequestBody("image/*".toMediaTypeOrNull())
             val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("image", "this_name_does_not_matter.jpg", requestBody)
@@ -284,3 +280,18 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 }
+// Event wrapper to handle one-time events
+class Event<out T>(private val content: T) {
+    var hasBeenHandled = false
+        private set
+
+    fun getContentIfNotHandled(): T? {
+        return if (!hasBeenHandled) {
+            hasBeenHandled = true
+            content
+        } else null
+    }
+    fun peekContent(): T = content
+}
+
+
