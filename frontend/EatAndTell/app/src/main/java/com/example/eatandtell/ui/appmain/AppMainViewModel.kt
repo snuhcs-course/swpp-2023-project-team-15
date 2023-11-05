@@ -223,6 +223,16 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
+    suspend fun deletePost(post_id: Int) {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.deletePost(authorization, post_id)
+            Log.d("delete post", "success")
+        } catch (e: Exception) {
+            Log.d("delete post error", e.message ?: "Network error")
+        }
+    }
+
     private suspend fun getMyProfile(){
         val authorization = "Token $token"
         try {

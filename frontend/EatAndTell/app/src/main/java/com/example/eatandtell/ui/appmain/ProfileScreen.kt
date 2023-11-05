@@ -1,5 +1,6 @@
 package com.example.eatandtell.ui.appmain
 import android.content.Intent
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -243,10 +244,23 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
                 context = context,
             )}
 
+
             items(userPosts) { post ->
+                println("printing post: $post")
                 Post(post, onHeartClick = {
                     coroutinescope.launch {
                         viewModel.toggleLike(post.id)
+                        userPosts = userPosts.map {
+                            if (it.id == post.id) {
+                                it.copy(is_liked = !it.is_liked, like_count = if (it.is_liked) it.like_count - 1 else it.like_count + 1)
+                            } else it //TODO: 문제점 - post 지워질 때 위의 좋아요 정보가 그대로 내려옴
+                        }
+                    }
+                },  canDelete = isCurrentUser, onDelete = {
+                    coroutinescope.launch {
+                        viewModel.deletePost(post.id)
+                        userPosts = userPosts.filter { it.id != post.id }
+                        println(userPosts)
                     }
                 })
             }

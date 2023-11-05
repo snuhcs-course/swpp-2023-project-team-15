@@ -4,6 +4,7 @@ import com.example.eatandtell.dto.*
 import okhttp3.MultipartBody
 
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.POST
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -36,6 +37,10 @@ interface ApiService {
     @PUT("posts/{post_id}/likes/") // The posts endpoint
     suspend fun toggleLike(@Header("Authorization") authorization: String,
                            @Path("post_id") post_id: Int): toggleLikeResponse
+
+    @DELETE("posts/{post_id}/") // The posts endpoint
+    suspend fun deletePost(@Header("Authorization") authorization: String,
+                           @Path("post_id") post_id: Int): PostDTO
 
     @POST("posts/") // The posts endpoint
     suspend fun uploadPost(@Header("Authorization") authorization: String,
