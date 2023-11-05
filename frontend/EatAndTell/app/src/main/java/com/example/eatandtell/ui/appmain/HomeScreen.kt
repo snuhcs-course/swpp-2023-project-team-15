@@ -2,6 +2,9 @@ package com.example.eatandtell.ui.appmain
 
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -128,28 +131,44 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
 fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController) {
     val user = post.user
     val coroutinescope = rememberCoroutineScope()
+    var deleted by remember { mutableStateOf(false) }
 
 
-    Profile(
-        user.avatar_url,
-        user.username,
-        user.description,
-        onClick = {
-            if(user.id == viewModel.myProfile.id)
-                navigateToDestination(navHostController, "Profile")
-            else
-                navigateToDestination(navHostController, "Profile/${user.id}")
-        },
-    );
-    Spacer(modifier = Modifier.height(11.dp))
-    Post(
-        post = post,
-        onHeartClick = {
-            coroutinescope.launch {
-                viewModel.toggleLike(post.id)
-            }
-        },
-    )
+    AnimatedVisibility(
+        visible = !deleted, // Show only when not deleted
+        enter = fadeIn(), // Fade in animation
+        exit = fadeOut() // Fade out animation when deleted
+    ) {
+        Column() {
+            Profile(
+                user.avatar_url,
+                user.username,
+                user.description,
+                onClick = {
+                    if (user.id == viewModel.myProfile.id)
+                        navigateToDestination(navHostController, "Profile")
+                    else
+                        navigateToDestination(navHostController, "Profile/${user.id}")
+                },
+            );
+            Spacer(modifier = Modifier.height(11.dp))
+            Post(
+                post = post,
+                onHeartClick = {
+                    coroutinescope.launch {
+                        viewModel.toggleLike(post.id)
+                    }
+                },
+                canDelete = (user.id == viewModel.myProfile.id),
+                onDelete = {
+                    coroutinescope.launch {
+                        viewModel.deletePost(post.id)
+                        deleted = true
+                    }
+                }
+            )
+        }
+    }
 }
 
 
