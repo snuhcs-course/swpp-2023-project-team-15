@@ -74,6 +74,7 @@ class PostCreateTestCase(APITestCase):
             "restaurant": {
                 "name": "301동 학식",
                 "search_id": "123",
+                "category_name": "한식",
             },
             "rating": "3.5",
             "description": "test",
@@ -111,6 +112,7 @@ class PostCreateTestCase(APITestCase):
         restaurant_instance = Restaurant.objects.first()
         self.assertEqual(restaurant_instance.name, post_data['restaurant']['name'])
         self.assertEqual(restaurant_instance.search_id, post_data['restaurant']['search_id'])
+        self.assertEqual(restaurant_instance.category_name, post_data['restaurant']['category_name'])
         self.assertEqual(post.restaurant, restaurant_instance)
         
     @patch('threading.Thread')

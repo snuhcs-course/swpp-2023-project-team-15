@@ -8,7 +8,7 @@ User= get_user_model()
 class RestaurantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restaurant
-        fields = ('name', 'search_id')
+        fields = ('name', 'search_id', 'category_name')
 
 class PostPhotoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -43,7 +43,11 @@ class PostSerializer(serializers.ModelSerializer):
         if restaurant:
             if 'search_id' in restaurant_data and restaurant_data['search_id'] is not None:
                 restaurant.search_id = restaurant_data['search_id']
-                restaurant.save()
+            
+            if 'category_name' in restaurant_data and restaurant_data['category_name'] is not None:
+                restaurant.category_name = restaurant_data['category_name']
+
+            restaurant.save()
         else:
             restaurant, created = Restaurant.objects.get_or_create(**restaurant_data)
         

@@ -6,6 +6,8 @@ from django.db import models
 class Restaurant(models.Model):
     name = models.CharField(max_length=255)
     search_id = models.CharField(max_length=255, null=True)
+    category_name = models.CharField(max_length=255, null=True)
+    
 
 
 
