@@ -128,7 +128,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
 }
 
 @Composable
-fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController) {
+fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController, isLikedPost : Boolean = false) {
     val user = post.user
     val coroutinescope = rememberCoroutineScope()
     var deleted by remember { mutableStateOf(false) }
@@ -157,6 +157,9 @@ fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHo
                 onHeartClick = {
                     coroutinescope.launch {
                         viewModel.toggleLike(post.id)
+                        if (isLikedPost) {
+                            deleted = true
+                        }
                     }
                 },
                 canDelete = (user.id == viewModel.myProfile.id),

@@ -27,6 +27,7 @@ class AppMainViewModel() : ViewModel() {
 
     private var token: String? = null
     var myProfile = UserDTO(0, "", "", "", listOf())
+    var myInfo = UserInfoDTO(0, "", "", "", listOf(), false, 0, 0)
 
     fun initialize(token: String?) {
         this.token = token
@@ -179,6 +180,16 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
+    suspend fun getLikedFeed(onSuccess: (List<PostDTO>) -> Unit) {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.getLikedFeed(authorization)
+            onSuccess(response)
+        } catch (e: Exception) {
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
 
     suspend fun getUserFeed(userId: Int? = null, onSuccess: (UserInfoDTO, List<PostDTO>) -> Unit) {
         val authorization = "Token $token"
@@ -237,9 +248,20 @@ class AppMainViewModel() : ViewModel() {
         val authorization = "Token $token"
         try {
             val response = apiService.getMyFeed(authorization)
-            val myInfo = UserDTO(response.id, response.username, response.description, response.avatar_url, listOf())
+            val myProf = UserDTO(response.id, response.username, response.description, response.avatar_url, listOf())
+            val myInf = UserInfoDTO(
+                id = response.id,
+                username = response.username,
+                description = response.description,
+                avatar_url = response.avatar_url,
+                tags = response.tags,
+                is_followed = response.is_followed,
+                follower_count = response.follower_count,
+                following_count = response.following_count,
+            )
             Log.d("getMyProfile", "success")
-            myProfile = myInfo
+            myProfile = myProf
+            myInfo = myInf
         } catch (e: Exception) {
             Log.d("getMyProfile error", e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function

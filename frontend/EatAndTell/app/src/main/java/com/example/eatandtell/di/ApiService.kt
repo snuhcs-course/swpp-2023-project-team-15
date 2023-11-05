@@ -52,9 +52,13 @@ interface ApiService {
                             @Part images: MultipartBody.Part?): ImageURLResponse
 
     //feed
-    @GET("users/me/") // The posts endpoint
+    @GET("users/me/")
     suspend fun getMyFeed(@Header("Authorization") authorization: String,
     ): GetFeedResponse
+
+    @GET("users/me/liked-posts")
+    suspend fun getLikedFeed(@Header("Authorization") authorization: String,
+    ): List<PostDTO>
 
     @GET("posts/") // The posts endpoint
     suspend fun getAllPosts(@Header("Authorization") authorization: String,

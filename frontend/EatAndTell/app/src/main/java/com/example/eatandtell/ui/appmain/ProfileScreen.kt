@@ -31,6 +31,8 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -65,6 +67,7 @@ import com.example.eatandtell.ui.StarRating
 import com.example.eatandtell.ui.Tag
 import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.theme.Black
+import com.example.eatandtell.ui.theme.Gray
 import com.example.eatandtell.ui.theme.Inter
 import com.example.eatandtell.ui.theme.MainColor
 
@@ -78,7 +81,6 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
     var tags by remember { mutableStateOf(userInfo.tags) } //TODO: tags만 업데이트하지 말고 userInfo를 다시 불러와야 할까?
     val coroutinescope = rememberCoroutineScope()
 
-    println("itsMe : $itsMe")
 
     Column {
         //Profile and follow button
@@ -186,12 +188,16 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
 
 @Composable
 fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navController: NavHostController, userId: Int? = null ) {
+    if (userId == null) MyProfileScreen(context, viewModel, navController)
+    else UserProfileScreen(context, viewModel, navController, userId)
+}
+
+
+@Composable
+fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navController: NavHostController, userId: Int? = null) {
     var userPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
     var userInfo by remember { mutableStateOf(UserInfoDTO(0, "", "", "", listOf(), false,0, 0)) }
-    var loading by remember { mutableStateOf(true) }
-    val coroutinescope = rememberCoroutineScope()
-
-    println("profileScreen userId: $userId")
+    var loading by remember { mutableStateOf(true) } //이때는 유저 프로필까지 가져와야 한다.
 
     LaunchedEffect(loading) {
         try {
@@ -211,8 +217,8 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
                 showToast(context, "유저 피드 로딩에 실패하였습니다 $e")
             }
         }
-
     }
+
 
     if(loading) {
         Box(
@@ -227,39 +233,148 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
             )
         }
     }
+
     else {
         LazyColumn(
             state = rememberLazyListState(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 20.dp)) {
-            val isCurrentUser = userId == null
 
             item {ProfileRow(
                 viewModel = viewModel,
                 userInfo = userInfo,
                 onClick = {
-                    if(isCurrentUser) navigateToDestination(navController, "EditProfile")
-                    else { /* TODO: toggle follow */ }
+                    /* TODO: toggle follow */
                 },
-                buttonText = if (isCurrentUser) "프로필 편집" else if (userInfo.is_followed) "팔로잉" else "팔로우하기",
-                itsMe = isCurrentUser,
+                buttonText = if (userInfo.is_followed) "팔로잉" else "팔로우하기",
+                itsMe = false,
                 context = context,
             )}
 
+            item {Spacer(modifier = Modifier.height(16.dp))}
 
             items(userPosts) { post ->
-                println("printing post: ${post.restaurant.name} ${post.like_count} ${post.is_liked}")
-                ProfilePost(post = post, viewModel = viewModel)
+                ProfilePost(post = post, viewModel = viewModel, isCurrentUser = false)
             }
+
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
             item {Spacer(modifier = Modifier.height(70.dp))}
         }
     }
-
-
-
 }
+
+@Composable
+fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navController: NavHostController, userId: Int? = null) {
+    var userPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
+    var myInfo = viewModel.myInfo
+    var selectedTab by remember { mutableStateOf("MY") }
+    var loading by remember { mutableStateOf(true) } //이때는 프로필은 고정이고, 하위 feed만 로딩하면 된다
+
+    LaunchedEffect(selectedTab) {
+        loading = true
+        try {
+            if(selectedTab == "MY") viewModel.getUserFeed(
+                userId = userId,
+                onSuccess = { info, posts ->
+                    userPosts = posts
+                }
+            )
+
+            else viewModel.getLikedFeed (
+                onSuccess = { posts ->
+                    userPosts = posts
+                }
+            )
+            loading = false
+        }
+        catch (e: Exception) {
+            if (e !is CancellationException) { // 유저가 너무 빨리 화면을 옮겨다니는 경우에는 CancellationException이 발생할 수 있지만, 서버 에러가 아니라서 패스
+                loading = false
+                println("feed load error $e")
+                showToast(context, "유저 피드 로딩에 실패하였습니다 $e")
+            }
+        }
+    }
+
+    LazyColumn(
+        state = rememberLazyListState(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)) {
+
+        item {
+            ProfileRow(
+                viewModel = viewModel,
+                userInfo = myInfo,
+                onClick = {
+                   navigateToDestination(navController, "EditProfile")
+                },
+                buttonText = "프로필 편집",
+                itsMe = true,
+                context = context,
+            )
+        }
+
+        item {
+            TabRow(
+                selectedTabIndex = if (selectedTab == "MY") 0 else 1,
+                containerColor = Color.White,
+                contentColor = Color.Black,
+            ) {
+                Tab(
+                    text = { Text("MY") },
+                    selected = selectedTab == "MY",
+                    onClick = { selectedTab = "MY"; loading = true },
+                    selectedContentColor = MainColor,
+                    unselectedContentColor = Gray,
+                )
+                Tab(
+                    text = { Text("LIKED") },
+                    selected = selectedTab == "LIKED",
+                    onClick = { selectedTab = "LIKED"; loading = true },
+                    selectedContentColor = MainColor,
+                    unselectedContentColor = Gray,
+                )
+            }
+        }
+
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+
+        if(loading) {
+            item { Spacer(modifier = Modifier.height(30.dp))}
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        //로딩 화면
+                        modifier = Modifier
+                            .size(70.dp)
+                    )
+                }
+            }
+        }
+
+        else {
+            if (selectedTab == "MY") items(userPosts) { post -> //내가 쓴 리뷰들
+                ProfilePost(post = post, viewModel = viewModel, isCurrentUser = true)
+            }
+            else items(userPosts) { post -> //좋아요한 리뷰들 -> 이 경우에만 toggleLike하면 delete되어야 하므로 isLikedPost = true
+                HomePost(post = post, viewModel = viewModel, navHostController = navController, isLikedPost = true)
+            }
+        }
+
+        // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
+        item { Spacer(modifier = Modifier.height(70.dp)) }
+    }
+}
+
+
+
+
 
 
 @Preview
@@ -277,8 +392,7 @@ fun ProfileRowPreview() {
 
 
 @Composable
-fun ProfilePost(post: PostDTO, viewModel: AppMainViewModel) {
-    val user = post.user
+fun ProfilePost(post: PostDTO, viewModel: AppMainViewModel, isCurrentUser: Boolean) {
     val coroutinescope = rememberCoroutineScope()
     var deleted by remember { mutableStateOf(false) }
 
@@ -296,7 +410,7 @@ fun ProfilePost(post: PostDTO, viewModel: AppMainViewModel) {
                         viewModel.toggleLike(post.id)
                     }
                 },
-                canDelete = (user.id == viewModel.myProfile.id),
+                canDelete = isCurrentUser,
                 onDelete = {
                     coroutinescope.launch {
                         viewModel.deletePost(post.id)
