@@ -76,9 +76,7 @@ fun navigateToDestination(navController: NavHostController, destination: String)
         }
         // Avoid multiple copies of the same destination when re-selecting the same item
         launchSingleTop = true
-        // if 'upload' or 'editprofile', do not restoreState (리뷰, 맛집명, 수정한 내용이 남아있는 것 방지)
-        /*restoreState = (destination != "Upload" && destination != "EditProfile")*/
-        restoreState = false
+        restoreState = (destination == "Home") // TODO: 이유는 모르겠지만 MyProfile에서는 lazyliststate 복원이 안 돼서 Home에서만 함
     }
 }
 

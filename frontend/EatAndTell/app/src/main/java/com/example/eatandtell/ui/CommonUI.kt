@@ -19,10 +19,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -650,7 +654,9 @@ fun ImageDialogPreview() {
 @Composable
 fun Post(
     post : PostDTO,
-    onHeartClick: (Int) -> Unit = { }
+    onHeartClick: (Int) -> Unit = { },
+    canDelete: Boolean = false,
+    onDelete : (Int) -> Unit = { },
 ) {
     val post_id = post.id
     val restaurantName = post.restaurant.name
@@ -661,6 +667,7 @@ fun Post(
     var clickedImageIndex by remember { mutableStateOf(-1) }
     var isLiked by remember { mutableStateOf(post.is_liked) }
     var likes by remember { mutableStateOf(post.like_count) }
+
 
     Column(
         modifier = Modifier
@@ -727,33 +734,48 @@ fun Post(
             overflow = TextOverflow.Ellipsis)
 
         Row(
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(top = 8.dp),
         ) {
-            Text(
-                text = likes.toString(),
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    lineHeight = 16.5.sp,
-                    fontWeight = FontWeight(500),
-                    color = MainColor,
-                ),
+            if (canDelete) {
+                //show delete button
+                MenuWithDropDown(modifier =
+                    Modifier.
+                    align(Alignment.CenterVertically),
+                    onClick = { onDelete(post_id) }
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .width(16.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            if(isLiked) HeartFull(onClick = {
-                onHeartClick(post_id)
-                isLiked = !isLiked
-                likes = likes -1
-            }, post_id = post_id)
-            else HeartEmpty(onClick = {
-                onHeartClick(post_id)
-                isLiked = !isLiked
-                likes = likes +1
-            }, post_id = post_id)
+                    .weight(1f),
+            ) {
+                Text(
+                    text = likes.toString(),
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        lineHeight = 16.5.sp,
+                        fontWeight = FontWeight(500),
+                        color = MainColor,
+                    ),
+                    modifier = Modifier
+                        .width(16.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                if (isLiked) HeartFull(onClick = {
+                    onHeartClick(post_id)
+                    isLiked = !isLiked
+                    likes = likes - 1
+                }, post_id = post_id)
+                else HeartEmpty(onClick = {
+                    onHeartClick(post_id)
+                    isLiked = !isLiked
+                    likes = likes + 1
+                }, post_id = post_id)
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -764,6 +786,37 @@ fun Post(
         ImageDialog(imageUrl = imageUrls[clickedImageIndex] , onClick = { clickedImageIndex = -1 })
     }
 }
+
+@Composable
+fun MenuWithDropDown(modifier: Modifier, onClick: () -> Unit = { /**/ }) {
+    var isDropDownExpanded by remember { mutableStateOf(false) }
+    Icon (
+        imageVector = Icons.Default.Delete,
+        contentDescription = "delete",
+        tint = Gray,
+        modifier = modifier
+            .height(18.dp)
+            .clickable(onClick = {
+                isDropDownExpanded = !isDropDownExpanded
+                })
+    )
+
+    DropdownMenu(
+        expanded = isDropDownExpanded,
+        onDismissRequest = { isDropDownExpanded = false },
+        modifier = Modifier
+            .width(IntrinsicSize.Min)
+            .height(IntrinsicSize.Min)
+            .padding(0.dp)
+    ) {
+        DropdownMenuItem(
+            text = { Text("삭제") },
+            onClick = { onClick(); isDropDownExpanded = false }
+        )
+    }
+
+}
+
 
 
 @Composable
@@ -819,5 +872,28 @@ fun MyIcon(onClick: () -> Unit) {
             .clickable(onClick = onClick),
         contentDescription = "my_home",
         tint = Black
+    )
+}
+
+
+@Preview
+@Composable
+fun UpButton(onClick: () -> Unit = {}) {
+    SmallFloatingActionButton(
+        onClick = onClick,
+        containerColor = MainColor,
+        contentColor = White,
+        content = {
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowUp,
+                contentDescription = "Scroll to Top"
+            )
+        },
+        //shape is circle
+        shape = RoundedCornerShape(50),
+        modifier = Modifier
+            .padding(bottom = 70.dp, end = 20.dp)
+            .fillMaxSize()
+            .wrapContentSize(Alignment.BottomEnd)
     )
 }
