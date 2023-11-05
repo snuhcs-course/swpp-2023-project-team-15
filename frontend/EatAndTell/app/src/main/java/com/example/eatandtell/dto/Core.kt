@@ -23,19 +23,24 @@ data class UserInfoDTO(
     val following_count : Int,
 )
 
+//우리 서버에 저장되는 형태
 data class RestaurantDTO(
     val id: Int?,
     val name: String,
 )
 
+//restaurant 요청 시, id 모를 때
+data class RestReqDTO(
+    val name: String,
+    val search_id : Int?,
+    val category_name : String? = null,
+)
+
+
 data class PhotoDTO(
     val id : Int?,
     val photo_url : String,
     val post : Int?
-)
-
-data class RestReqDTO(
-    val name: String,
 )
 
 data class PhotoReqDTO(

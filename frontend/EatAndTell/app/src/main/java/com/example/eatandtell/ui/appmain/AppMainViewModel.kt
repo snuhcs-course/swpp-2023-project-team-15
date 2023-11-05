@@ -11,6 +11,7 @@ import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.RegisterRequest
 import com.example.eatandtell.dto.RestReqDTO
+import com.example.eatandtell.dto.SearchedRestDTO
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
@@ -271,6 +272,19 @@ class AppMainViewModel() : ViewModel() {
         } catch (e: Exception) {
             Log.d("getFilteredByRestaurants error", e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
+    suspend fun getSearchedRest(restaurantName: String, x: String?=null, y: String?=null) : List<SearchedRestDTO> {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.getSearchedRest(authorization, restaurantName, x, y)
+            Log.d("search rest", "success")
+            return response.data
+        } catch (e: Exception) {
+            Log.d("search rest error", e.message ?: "Network error")
+            return listOf()
+            //throw e // rethrow the exception to be caught in the calling function
         }
     }
 

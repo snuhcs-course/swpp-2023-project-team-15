@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation.weight
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -241,9 +242,9 @@ fun BlackSmallText(text: String, modifier: Modifier?) {
 
 
 @Composable
-fun MainButton(onClick: () -> Unit, text: String, enable : Boolean = true) {
+fun MainButton(onClick: () -> Unit, text: String, notLoading : Boolean = true, enabled : Boolean = true) {
     Button(
-        onClick = {if (enable) onClick() else { /**/ }},
+        onClick = {if (notLoading) onClick() else { /**/ }},
         colors = ButtonDefaults.buttonColors(
             containerColor = MainColor,
             contentColor = White
@@ -252,10 +253,11 @@ fun MainButton(onClick: () -> Unit, text: String, enable : Boolean = true) {
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp),
+        enabled = enabled,
     ) {
 
 
-        if (enable) Text(text, color = White,
+        if (notLoading) Text(text, color = White,
         )
         else //show loading
             CircularProgressIndicator(
