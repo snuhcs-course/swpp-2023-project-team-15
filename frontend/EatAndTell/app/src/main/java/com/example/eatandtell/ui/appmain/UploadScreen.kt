@@ -203,7 +203,7 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
             Spacer(modifier = Modifier.height(16.dp))
             UploadButton(
                 viewModel = viewModel,
-                restaurant = RestReqDTO(name = restaurantName.text, search_id = searchId),
+                restaurant = RestReqDTO(name = restaurantName.text, search_id = searchId, category_name = categoryName),
                 photoPaths = photoPaths,
                 rating = myRating,
                 description = reviewDescription.text,
