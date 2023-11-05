@@ -667,8 +667,10 @@ fun Post(
     var isLiked by remember { mutableStateOf(post.is_liked) }
     var likes by remember { mutableStateOf(post.like_count) }
 
+    var deleted by remember { mutableStateOf(false) }
 
-    Column(
+
+    if(!deleted) Column(
         modifier = Modifier
             .fillMaxWidth()
     ) {
@@ -742,7 +744,7 @@ fun Post(
                 MenuWithDropDown(modifier =
                     Modifier.
                     align(Alignment.CenterVertically),
-                    onClick = { onDelete(post_id) }
+                    onClick = { onDelete(post_id) ; deleted = true }
                 )
             }
 

@@ -246,22 +246,23 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
 
 
             items(userPosts) { post ->
-                println("printing post: $post")
+                println("printing post: ${post.restaurant.name} ${post.like_count} ${post.is_liked}")
                 Post(post, onHeartClick = {
                     coroutinescope.launch {
                         viewModel.toggleLike(post.id)
-                        userPosts = userPosts.map {
-                            if (it.id == post.id) {
-                                it.copy(is_liked = !it.is_liked, like_count = if (it.is_liked) it.like_count - 1 else it.like_count + 1)
-                            } else it //TODO: 문제점 - post 지워질 때 위의 좋아요 정보가 그대로 내려옴
-                        }
                     }
-                },  canDelete = isCurrentUser, onDelete = {
+                    userPosts = userPosts.map {
+                        if (it.id == post.id) {
+                            it.copy(is_liked = !it.is_liked, like_count = if (it.is_liked) it.like_count - 1 else it.like_count + 1)
+                        } else it
+                    }
+                },  canDelete = isCurrentUser,
+                    onDelete = { //TODO: 문제점 - post 지워질 때 위의 좋아요 정보가 그대로 내려옴 -> 스크롤을 내렸다가 올리면 잘 반영되는데..
                     coroutinescope.launch {
                         viewModel.deletePost(post.id)
-                        userPosts = userPosts.filter { it.id != post.id }
                         println(userPosts)
                     }
+                    userPosts = userPosts.filter { it.id != post.id }
                 })
             }
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
