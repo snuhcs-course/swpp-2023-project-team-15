@@ -75,6 +75,7 @@ def get_my_liked_posts(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_user_profile(request, pk):
     user = get_object_or_404(User, pk=pk)
     serializer = UserSerializer(user, context={'request': request})
@@ -82,6 +83,7 @@ def get_user_profile(request, pk):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_user_posts(request, pk):
     user = get_object_or_404(User, pk=pk)
     serializer = UserPostSerializer(user, context={'request': request})
@@ -89,6 +91,7 @@ def get_user_posts(request, pk):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def filter_users(request):
     queryset = User.objects.all()
    # Filter by username
@@ -115,6 +118,7 @@ def filter_users(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def refresh_user_tags(request):
     user = request.user
 
