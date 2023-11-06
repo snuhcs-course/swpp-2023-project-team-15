@@ -10,7 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from tags.models import Tag
-from tags.utils import deepl_translate_ko_to_en, ml_tagging
+from tags.utils import (category_name_to_tags, deepl_translate_ko_to_en,
+                        ml_tagging)
 
 from .models import Post
 from .serializers import PostSerializer, data_list
@@ -28,21 +29,27 @@ def get_top_tags_after_translation(possible_tags, translated_description):
 
 def create_tags_on_thread(post):
     print("Thread started")
+    # calculate category tags
+    category_name = post.restaurant.category_name
+    if category_name is not None:
+        category_tags = category_name_to_tags(category_name)
+        for tag in category_tags:
+            tag_obj, _ = Tag.objects.get_or_create(type='from_category', ko_label=tag, en_label='')
+            post.tags.add(tag_obj)
+    
+    
+    # calculate atmosphere tags
     if len(post.description) < 5:
         print(f'create tag skipped: description too short: {post.description}.')
         return
     translated_description = deepl_translate_ko_to_en(post.description)
     print('translated description', translated_description)
-    tags_first_ten = Tag.objects.values('en_label')[:10]
-    tags_second_ten = Tag.objects.values('en_label')[10:20]
-    tags_third_ten = Tag.objects.values('en_label')[20:30]
-    
-    for possible_tags_queryset in [tags_first_ten, tags_second_ten, tags_third_ten]:
-        possible_tags = [tag['en_label'] for tag in possible_tags_queryset]
-        matching_tag = get_top_tags_after_translation(possible_tags, translated_description)
-        print('fount tag', matching_tag)
-        if matching_tag is not None:
-            post.tags.add(matching_tag)
+    tags_atmosphere = Tag.objects.filter(type='atmosphere').values('en_label')
+    possible_tags = [tag['en_label'] for tag in tags_atmosphere]
+    matching_tag = get_top_tags_after_translation(possible_tags, translated_description)
+    print('fount tag', matching_tag)
+    if matching_tag is not None:
+        post.tags.add(matching_tag)
     
     print("Thread finished")
 
