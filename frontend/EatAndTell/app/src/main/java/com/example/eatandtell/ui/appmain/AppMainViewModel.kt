@@ -28,11 +28,9 @@ class AppMainViewModel() : ViewModel() {
     private var token: String? = null
     var myProfile = UserDTO(0, "", "", "", listOf())
 
-    fun initialize(token: String?) {
+    suspend fun initialize(token: String?) {
         this.token = token
-        viewModelScope.launch {
-            getMyProfile()
-        }
+        getMyProfile() // Since it's a suspend function, you can call it directly without launch
     }
 
     private val apiService = RetrofitClient.retro.create(ApiService::class.java)
