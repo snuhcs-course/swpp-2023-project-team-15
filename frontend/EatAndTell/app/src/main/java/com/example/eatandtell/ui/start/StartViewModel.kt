@@ -20,25 +20,22 @@ import retrofit2.await
 class StartViewModel : ViewModel() {
 
     private val apiService = RetrofitClient.retro.create(ApiService::class.java)
-    fun loginUser(username: String, password: String, context: Context, onSuccess: (String?) -> Unit) {
+    suspend fun loginUser(username: String, password: String, context: Context): String? {
         val loginData = LoginRequest(username, password)
-
-        viewModelScope.launch {
-            try {
-                val response = apiService.loginUser(loginData)
-                val token = response?.token
-                Log.d("login", "success")
-                if(token!=null) {
-                    SharedPreferencesManager.setToken(context, token)
-                }
-                onSuccess(token)
-            } catch (e: Exception) {
-                val errorMessage = e.message ?: "Network error"
-                Log.d("login", "error$errorMessage")
-                showToast(context, "로그인에 실패하였습니다")
-            }
+        return try {
+            val response = apiService.loginUser(loginData)
+            val token = response.token
+            Log.d("login", "success")
+            SharedPreferencesManager.setToken(context, token)
+            token // This will be the return value of the function
+        } catch (e: Exception) {
+            val errorMessage = e.message ?: "Network error"
+            Log.d("login", "error: $errorMessage")
+            showToast(context, "로그인에 실패하였습니다")
+            null // In case of an error, return null or you could throw an exception
         }
     }
+
 
     fun registerUser(username: String, password: String, email: String, context: Context, onSuccess: (String?) -> Unit) {
         val registrationData = RegisterRequest(username, password, email)

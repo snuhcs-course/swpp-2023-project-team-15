@@ -1,7 +1,9 @@
-import com.example.eatandtell.di.ApiService
 import com.squareup.moshi.Moshi
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.util.concurrent.TimeUnit
+
 
 object RetrofitClient {
 
@@ -9,10 +11,18 @@ object RetrofitClient {
 
     private val moshi = Moshi.Builder().build()
 
+    // timeout setting 해주기
+    var okHttpClient = OkHttpClient().newBuilder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
+
     val retro =
         Retrofit.Builder()
             .baseUrl(BaseURL) // actual backend URL
             .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .client(okHttpClient)
             .build()
 
 }

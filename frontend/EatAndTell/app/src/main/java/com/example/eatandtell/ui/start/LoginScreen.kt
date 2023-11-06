@@ -27,6 +27,7 @@ import com.example.eatandtell.ui.GraySmallText
 import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.showToast
+import kotlinx.coroutines.launch
 
 @Composable
 fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
@@ -57,7 +58,9 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)
     ) {
         Logo()
         Spacer(modifier = Modifier.height(18.dp))
@@ -136,9 +139,17 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
 
 @Composable
 fun LoginButton(viewModel: StartViewModel, id: String, password: String, context: Context, onClick: (String?) -> Unit) {
-    val onClickReal = {
-        viewModel.loginUser(id, password, context, onClick)
-    }
-    MainButton(onClickReal, "로그인")
+    val coroutineScope = rememberCoroutineScope()
+
+    MainButton(
+        text = "로그인",
+        onClick = {
+            coroutineScope.launch {
+                val token = viewModel.loginUser(id, password, context)
+                if (token != null)
+                    onClick(token)
+            }
+        }
+    )
 }
 

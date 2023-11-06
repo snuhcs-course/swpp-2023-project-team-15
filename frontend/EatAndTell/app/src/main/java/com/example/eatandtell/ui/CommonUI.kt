@@ -19,10 +19,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,6 +39,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation.weight
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -112,7 +117,9 @@ fun CustomTextField(
     placeholder: String,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: (@Composable () -> Unit)? = null,
-    onTrailingIconClick: (() -> Unit)? = null
+    onTrailingIconClick: (() -> Unit)? = null,
+    maxLines : Int = 1,
+    enable : Boolean = true,
 ) {
     TextField(
         value = value,
@@ -123,6 +130,7 @@ fun CustomTextField(
                 trailingIcon?.invoke()
             }
         },
+        enabled = enable,
         modifier = Modifier
             .border(
                 width = 0.5.dp,
@@ -132,15 +140,16 @@ fun CustomTextField(
             .fillMaxWidth()
             .height(IntrinsicSize.Min),
         colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color(0xFFEEEEEE),
+            containerColor = White , //Color(0xFFEEEEEE),
             cursorColor = Color.Black,
-            focusedIndicatorColor = Color(0xFFA0A0A0),
+            focusedIndicatorColor = MainColor, //Color(0xFFA0A0A0),
             unfocusedIndicatorColor = Color.Transparent,
             ),
         placeholder = { Text(placeholder, style = MaterialTheme.typography.bodyMedium
         ) },
         textStyle = MaterialTheme.typography.bodyMedium,
-        maxLines = 1
+        maxLines = maxLines,
+
     )
 }
 
@@ -237,9 +246,9 @@ fun BlackSmallText(text: String, modifier: Modifier?) {
 
 
 @Composable
-fun MainButton(onClick: () -> Unit, text: String) {
+fun MainButton(onClick: () -> Unit, text: String, notLoading : Boolean = true, enabled : Boolean = true) {
     Button(
-        onClick = onClick,
+        onClick = {if (notLoading) onClick() else { /**/ }},
         colors = ButtonDefaults.buttonColors(
             containerColor = MainColor,
             contentColor = White
@@ -248,9 +257,19 @@ fun MainButton(onClick: () -> Unit, text: String) {
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp),
+        enabled = enabled,
     ) {
-        Text(text, color = White,
+
+
+        if (notLoading) Text(text, color = White,
         )
+        else //show loading
+            CircularProgressIndicator(
+                color = White,
+                modifier = Modifier
+                    .width(24.dp)
+                    .height(24.dp)
+            )
     }
 }
 
@@ -293,9 +312,9 @@ fun PreviewMediumWhiteButton() {
 }
 
 @Composable
-fun MediumRedButton(onClick: () -> Unit, text: String) {
+fun MediumRedButton(onClick: () -> Unit, text: String, enable: Boolean = true) {
     Button(
-        onClick = onClick,
+        onClick = {if (enable) onClick() else { /**/ }},
         colors = ButtonDefaults.buttonColors(
             containerColor = MainColor,
             contentColor = White
@@ -306,7 +325,7 @@ fun MediumRedButton(onClick: () -> Unit, text: String) {
             .height(36.dp),
         contentPadding = PaddingValues(0.dp)
     ) {
-        Text(text, color = White,
+        if (enable) Text(text, color = White,
             style = TextStyle(
                 fontFamily = Inter,
                 fontSize = 14.sp,
@@ -316,6 +335,13 @@ fun MediumRedButton(onClick: () -> Unit, text: String) {
                 .padding(0.dp)
                 .align(Alignment.CenterVertically) // Center the text vertically
         )
+        else //show loading
+            CircularProgressIndicator(
+                color = White,
+                modifier = Modifier
+                    .width(24.dp)
+                    .height(24.dp)
+            )
     }
 }
 @Preview
@@ -446,9 +472,8 @@ fun DraggableStarRating(currentRating: Int, onRatingChanged: (Int) -> Unit) {
 fun ProfileImage(
     profileUrl: String,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
+    size : Dp = 45.dp
 ) {
-    val clickModifier = if (onClick != null) modifier.clickable(onClick = onClick) else modifier
 
     Image(
         painter = rememberImagePainter(
@@ -458,15 +483,15 @@ fun ProfileImage(
             }
         ),
         contentDescription = null,
-        modifier = clickModifier
+        modifier = modifier
             .border(
                 width = 2.dp,
                 color = Color(0xFFF23F18),
                 shape = RoundedCornerShape(size = 100.dp)
             )
             .padding(2.dp)
-            .width(45.dp)
-            .height(45.dp)
+            .width(size)
+            .height(size)
             .background(
                 color = Color.White,
                 shape = RoundedCornerShape(size = 100.dp)
@@ -475,11 +500,42 @@ fun ProfileImage(
 }
 
 @Composable
+fun EditProfileImage(
+    profileUrl: String,
+    modifier: Modifier = Modifier,
+    onEditClick: () -> Unit = { },
+    size : Dp = 45.dp
+) {
+
+    Image(
+        painter = rememberImagePainter(
+            data = profileUrl,
+            builder = {
+                transformations(CircleCropTransformation())
+            }
+        ),
+        contentDescription = null,
+        modifier = modifier
+            .border(
+                width = 2.dp,
+                color = Color(0xFFF23F18),
+                shape = RoundedCornerShape(size = 100.dp)
+            )
+            .padding(2.dp)
+            .width(size)
+            .height(size)
+            .background(
+                color = Color.White,
+                shape = RoundedCornerShape(size = 100.dp)
+            )
+            .clickable(onClick = onEditClick)
+    )
+}
+
+@Composable
 fun ProfileText(
     username: String,
     userDescription: String,
-    onUsernameClick: (() -> Unit)? = null,
-    onDescriptionClick: (() -> Unit)? = null
 ) {
     Column {
         Text(
@@ -490,7 +546,6 @@ fun ProfileText(
                 fontWeight = FontWeight(500),
                 color = Color(0xFF262626)
             ),
-            modifier = if (onUsernameClick != null) Modifier.clickable { onUsernameClick() } else Modifier
         )
         Text(
             text = userDescription,
@@ -500,7 +555,10 @@ fun ProfileText(
                 fontWeight = FontWeight(500),
                 color = Color(0xFF848484)
             ),
-            modifier = if (onDescriptionClick != null) Modifier.clickable { onDescriptionClick() } else Modifier
+            modifier = Modifier
+                .width(150.dp),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -510,28 +568,27 @@ fun Profile(
     profileUrl: String,
     username: String,
     userDescription: String,
-    onImageClick: (() -> Unit)? = null,
-    onUsernameClick: (() -> Unit)? = null,
-    onDescriptionClick: (() -> Unit)? = null
+    onClick: (() -> Unit) = { },
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.padding(4.dp)
+        modifier = Modifier
+            .padding(4.dp)
+            .clickable(onClick = onClick)
     ) {
-        ProfileImage(profileUrl = profileUrl, onClick = onImageClick)
-        ProfileText(username = username, userDescription = userDescription, onUsernameClick = onUsernameClick, onDescriptionClick = onDescriptionClick)
+        ProfileImage(profileUrl = profileUrl)
+        ProfileText(username = username, userDescription = userDescription)
     }
 }
 
 
 // Post Photos
 @Composable
-fun PostImage(imageUrl: String, onImageClick: () -> Unit) {
+fun PostImage(imageUrl: String? = null, onImageClick: () -> Unit) {
     Image(
-        painter = rememberImagePainter(
-            data = imageUrl,
-        ),
+        painter = (if(imageUrl!=null) rememberImagePainter(data = imageUrl,)
+            else painterResource(R.drawable.default_image)), //added default image
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier = Modifier
@@ -597,7 +654,9 @@ fun ImageDialogPreview() {
 @Composable
 fun Post(
     post : PostDTO,
-    onHeartClick: (Int) -> Unit = { }
+    onHeartClick: (Int) -> Unit = { },
+    canDelete: Boolean = false,
+    onDelete : (Int) -> Unit = { },
 ) {
     val post_id = post.id
     val restaurantName = post.restaurant.name
@@ -608,6 +667,7 @@ fun Post(
     var clickedImageIndex by remember { mutableStateOf(-1) }
     var isLiked by remember { mutableStateOf(post.is_liked) }
     var likes by remember { mutableStateOf(post.like_count) }
+
 
     Column(
         modifier = Modifier
@@ -674,33 +734,48 @@ fun Post(
             overflow = TextOverflow.Ellipsis)
 
         Row(
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(top = 8.dp),
         ) {
-            Text(
-                text = likes.toString(),
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    lineHeight = 16.5.sp,
-                    fontWeight = FontWeight(500),
-                    color = MainColor,
-                ),
+            if (canDelete) {
+                //show delete button
+                MenuWithDropDown(modifier =
+                    Modifier.
+                    align(Alignment.CenterVertically),
+                    onClick = { onDelete(post_id) }
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .width(16.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            if(isLiked) HeartFull(onClick = {
-                onHeartClick(post_id)
-                isLiked = !isLiked
-                likes = likes -1
-            }, post_id = post_id)
-            else HeartEmpty(onClick = {
-                onHeartClick(post_id)
-                isLiked = !isLiked
-                likes = likes +1
-            }, post_id = post_id)
+                    .weight(1f),
+            ) {
+                Text(
+                    text = likes.toString(),
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        lineHeight = 16.5.sp,
+                        fontWeight = FontWeight(500),
+                        color = MainColor,
+                    ),
+                    modifier = Modifier
+                        .width(16.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                if (isLiked) HeartFull(onClick = {
+                    onHeartClick(post_id)
+                    isLiked = !isLiked
+                    likes = likes - 1
+                }, post_id = post_id)
+                else HeartEmpty(onClick = {
+                    onHeartClick(post_id)
+                    isLiked = !isLiked
+                    likes = likes + 1
+                }, post_id = post_id)
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -711,6 +786,37 @@ fun Post(
         ImageDialog(imageUrl = imageUrls[clickedImageIndex] , onClick = { clickedImageIndex = -1 })
     }
 }
+
+@Composable
+fun MenuWithDropDown(modifier: Modifier, onClick: () -> Unit = { /**/ }) {
+    var isDropDownExpanded by remember { mutableStateOf(false) }
+    Icon (
+        imageVector = Icons.Default.Delete,
+        contentDescription = "delete",
+        tint = Gray,
+        modifier = modifier
+            .height(18.dp)
+            .clickable(onClick = {
+                isDropDownExpanded = !isDropDownExpanded
+                })
+    )
+
+    DropdownMenu(
+        expanded = isDropDownExpanded,
+        onDismissRequest = { isDropDownExpanded = false },
+        modifier = Modifier
+            .width(IntrinsicSize.Min)
+            .height(IntrinsicSize.Min)
+            .padding(0.dp)
+    ) {
+        DropdownMenuItem(
+            text = { Text("삭제") },
+            onClick = { onClick(); isDropDownExpanded = false }
+        )
+    }
+
+}
+
 
 
 @Composable
@@ -766,5 +872,28 @@ fun MyIcon(onClick: () -> Unit) {
             .clickable(onClick = onClick),
         contentDescription = "my_home",
         tint = Black
+    )
+}
+
+
+@Preview
+@Composable
+fun UpButton(onClick: () -> Unit = {}) {
+    SmallFloatingActionButton(
+        onClick = onClick,
+        containerColor = MainColor,
+        contentColor = White,
+        content = {
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowUp,
+                contentDescription = "Scroll to Top"
+            )
+        },
+        //shape is circle
+        shape = RoundedCornerShape(50),
+        modifier = Modifier
+            .padding(bottom = 70.dp, end = 20.dp)
+            .fillMaxSize()
+            .wrapContentSize(Alignment.BottomEnd)
     )
 }

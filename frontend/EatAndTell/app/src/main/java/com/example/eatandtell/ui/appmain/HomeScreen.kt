@@ -2,6 +2,9 @@ package com.example.eatandtell.ui.appmain
 
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,40 +63,42 @@ import com.example.eatandtell.ui.Post
 import com.example.eatandtell.ui.PostImage
 import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.StarRating
+import com.example.eatandtell.ui.UpButton
 import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.MainColor
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
-
-//TODO: 이후 좋아요가 PostDTO에 추가되면 like를 PostDTO에서 가져오도록 수정
-
 
 @Composable
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
     var feedPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
     var loading by remember { mutableStateOf(true) }
-    var myInfo by remember { mutableStateOf(UserDTO(0, "", "", "")) }
+    var lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    Log.d("navigateToDestination", "lazylist in Home: ${lazyListState}")
+
 
     LaunchedEffect(loading) {
         try {
+            println("trying to load home feed")
             viewModel.getAllPosts(
                 onSuccess = { posts ->
                     feedPosts = posts
                     println("feedPosts: ${feedPosts.size}")
                 },
             )
-            viewModel.getMyInfo (
-                onSuccess = { info ->
-                    myInfo = info
-                }
-            )
+            println("getting posts is fine")
             loading = false
         }
         catch (e: Exception) {
-            println("home feed load error")
-            showToast(context, "피드 로딩에 실패하였습니다")
+            if (e !is CancellationException) { // 유저가 너무 빨리 화면을 옮겨다니는 경우에는 CancellationException이 발생할 수 있지만, 서버 에러가 아니라서 패스
+                loading = false
+                Log.d("home feed load error", e.toString())
+                showToast(context, "홈 피드 로딩에 실패하였습니다")
+            }
         }
-
     }
 
     if(loading) {
@@ -111,61 +116,73 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
     }
     else {
         LazyColumn(
-            state = rememberLazyListState(),
+            state = lazyListState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 20.dp),
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
             items(feedPosts) { post ->
-                HomePost(post, viewModel = viewModel, navHostController = navHostController,myInfo)
+                HomePost(post, viewModel = viewModel, navHostController = navHostController)
             }
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
             item { Spacer(modifier = Modifier.height(70.dp)) }
         }
 
+        UpButton {
+            coroutineScope.launch {
+                lazyListState.animateScrollToItem(0)
+            }
+        }
     }
 }
 
 @Composable
-fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController,myInfo: UserDTO) {
+fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController, isLikedPost : Boolean = false) {
     val user = post.user
     val coroutinescope = rememberCoroutineScope()
+    var deleted by remember { mutableStateOf(false) }
 
 
-    Profile(
-        user.avatar_url,
-        user.username,
-        user.description,
-        onImageClick = {
-            if(user.id == myInfo.id)
-                navigateToDestination(navHostController, "Profile")
-            else
-                navigateToDestination(navHostController, "Profile/${user.id}")
-        },
-        onDescriptionClick = {
-            if(user.id == myInfo.id)
-                navigateToDestination(navHostController, "Profile")
-            else
-        navigateToDestination(navHostController, "Profile/${user.id}")
-        },
-        onUsernameClick = {
-            if(user.id == myInfo.id)
-                navigateToDestination(navHostController, "Profile")
-            else
-                navigateToDestination(navHostController, "Profile/${user.id}")
-                          },
-    );
-    Spacer(modifier = Modifier.height(11.dp))
-    Post(
-        post = post,
-        onHeartClick = {
-            coroutinescope.launch {
-                viewModel.toggleLike(post.id)
-            }
-        },
-    )
+    AnimatedVisibility(
+        visible = !deleted, // Show only when not deleted
+        enter = fadeIn(), // Fade in animation
+        exit = fadeOut() // Fade out animation when deleted
+    ) {
+        Column() {
+            Profile(
+                user.avatar_url,
+                user.username,
+                user.description,
+                onClick = {
+                    if (user.id == viewModel.myProfile.id)
+                        navigateToDestination(navHostController, "Profile")
+                    else
+                        navigateToDestination(navHostController, "Profile/${user.id}")
+                },
+            );
+            Spacer(modifier = Modifier.height(11.dp))
+            Post(
+                post = post,
+                onHeartClick = {
+                    coroutinescope.launch {
+                        viewModel.toggleLike(post.id)
+                        if (isLikedPost) {
+                            deleted = true
+                        }
+                    }
+                },
+                canDelete = (user.id == viewModel.myProfile.id),
+                onDelete = {
+                    coroutinescope.launch {
+                        viewModel.deletePost(post.id)
+                        deleted = true
+                    }
+                }
+            )
+        }
+    }
 }
 
 
