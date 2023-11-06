@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'password', 'email','description', 
-                  'avatar_url', 'follower_count', 'following_count', 'is_followed', 'tags', 'posts')
+                  'avatar_url', 'is_followed', 'tags', 'posts')
         error_messages={
             'username':{'error': 'Username is already taken'},
             'email':{'error': 'Email is already in use'}
@@ -30,9 +30,6 @@ class UserSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
             description= validated_data.get('description', ''),
             avatar_url=validated_data.get('avatar_url', 'https://default_avatar-url.com'),
-            follower_count=validated_data.get('follower_count', 0),
-            following_count=validated_data.get('following_count', 0)
-
         )
         return user
     #frontend needs to send @PATCH with only description and data
