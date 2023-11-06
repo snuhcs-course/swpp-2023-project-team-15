@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.eatandtell.di.ApiService
+import com.example.eatandtell.data.api.ApiService
 import com.example.eatandtell.dto.EditProfileRequest
 import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.PostDTO
@@ -64,15 +64,15 @@ class AppMainViewModel@Inject constructor(private val apiService: ApiService) : 
             val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
             this.uploadPost(postData)
             Log.d("upload photos and post",  "success")
-            //messageToDisplay.postValue("포스트가 업로드되었습니다")
-            showToast(context, "포스트가 업로드되었습니다")
+            messageToDisplay.postValue("포스트가 업로드되었습니다")
+            //showToast(context, "포스트가 업로드되었습니다")
         } catch (e: Exception) {
             // Handle exceptions, e.g., from network calls, here
             //except cancellation exception
             if (e !is CancellationException) {
                 Log.d("upload photos and post error", e.message ?: "Network error")
-                messageToDisplay.postValue("포스트 업로드에 실패했습니다")
-                showToast(context, "포스트 업로드에 실패했습니다")
+                messageToDisplay.postValue("포스트 업로드에 실패했습니다.")
+                //showToast(context, "포스트 업로드에 실패했습니다")
             }
             else {
                 Log.d("upload photos and post error", "cancellation exception")
@@ -114,10 +114,11 @@ class AppMainViewModel@Inject constructor(private val apiService: ApiService) : 
             if (e !is CancellationException) {
                 Log.d("edit profile error", e.message ?: "Network error")
                 showToast(context, "프로필 편집에 실패했습니다")
+                messageToDisplay.postValue("프로필 편집에 실패했습니다")
             }
             else {
                 Log.d("edit profile error", "cancellation exception")
-                showToast(context, "프로필이 편집되었습니다")
+                messageToDisplay.postValue("프로필이 편집되었습니다")
                 //TOOD: navigate을 해버리니까 cancellation 에러가 뜸. 그렇다고 navigate을 코루틴 내에서 화면이 너무 안 넘어가서 버튼을 연타하게 됨
             }
         }
@@ -272,26 +273,14 @@ class AppMainViewModel@Inject constructor(private val apiService: ApiService) : 
                 val response = apiService.refreshTags(authorization)
                 onSuccess(response.user_tags)
                 Log.d("refresh tags", "success")
-                showToast(context, "태그가 업데이트되었습니다")
+                messageToDisplay.postValue("태그가 업데이트되었습니다")
             } catch (e: Exception) {
                 Log.d("refresh tags error", e.message ?: "Network error")
-                showToast(context, "태그 업데이트에 실패하였습니다")
+                messageToDisplay.postValue("태그 업데이트에 실패하였습니다")
             }
         }
     }
 }
 // Event wrapper to handle one-time events
-class Event<out T>(private val content: T) {
-    var hasBeenHandled = false
-        private set
-
-    fun getContentIfNotHandled(): T? {
-        return if (!hasBeenHandled) {
-            hasBeenHandled = true
-            content
-        } else null
-    }
-    fun peekContent(): T = content
-}
 
 

@@ -1,7 +1,7 @@
 package com.example.eatandtell.ui.start
 
 import android.util.Log
-import com.example.eatandtell.di.ApiService
+import com.example.eatandtell.data.api.ApiService
 import com.example.eatandtell.di.RetrofitClient
 import com.example.eatandtell.dto.LoginRequest
 import com.example.eatandtell.dto.LoginResponse

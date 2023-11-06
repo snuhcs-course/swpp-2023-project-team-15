@@ -2,7 +2,7 @@ package com.example.eatandtell.ui.appmain
 import android.content.ContentResolver
 import android.net.Uri
 import android.util.Log
-import com.example.eatandtell.di.ApiService
+import com.example.eatandtell.data.api.ApiService
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.ui.start.MainCoroutineRule
 import io.mockk.every

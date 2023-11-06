@@ -1,4 +1,4 @@
-package com.example.eatandtell.di
+package com.example.eatandtell.data.api
 
 import com.example.eatandtell.dto.*
 import okhttp3.MultipartBody

@@ -3,7 +3,8 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.eatandtell.SharedPreferencesManager
-import com.example.eatandtell.di.ApiService
+import com.example.eatandtell.data.api.ApiService
+import com.example.eatandtell.data.repository.MainRepository
 import com.example.eatandtell.dto.LoginRequest
 import com.example.eatandtell.dto.RegisterRequest
 import com.example.eatandtell.ui.showToast
@@ -11,11 +12,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class StartViewModel @Inject constructor(private val apiService: ApiService) : ViewModel() {
+class StartViewModel @Inject constructor(private val mainRepository: MainRepository) : ViewModel() {
     suspend fun loginUser(username: String, password: String, context: Context): String? {
         val loginData = LoginRequest(username, password)
+        val response = mainRepository.loginUser(loginData)
+
         return try {
-            val response = apiService.loginUser(loginData)
+
             val token = response.token
             Log.d("login", "success")
             SharedPreferencesManager.setToken(context, token)

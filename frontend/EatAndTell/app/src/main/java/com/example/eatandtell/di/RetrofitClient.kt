@@ -1,4 +1,5 @@
 package com.example.eatandtell.di
+import com.example.eatandtell.data.api.ApiService
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
