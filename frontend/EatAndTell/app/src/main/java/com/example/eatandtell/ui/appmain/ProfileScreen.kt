@@ -79,7 +79,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -> Unit, buttonText: String, itsMe : Boolean = false, context : ComponentActivity? = null) {
-    var tags by remember { mutableStateOf(userInfo.tags) } //TODO: tags만 업데이트하지 말고 userInfo를 다시 불러와야 할까?
+    var tags by remember { mutableStateOf(userInfo.tags) }
     val coroutinescope = rememberCoroutineScope()
 
 
@@ -277,9 +277,12 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
 @Composable
 fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navController: NavHostController, userId: Int? = null) {
     var userPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
-    var myInfo = viewModel.myInfo
+    var myInfo by remember { mutableStateOf(UserInfoDTO(0, "", "", "", listOf(), false,0, 0)) }
     var selectedTab by remember { mutableStateOf("MY") }
-    var loading by remember { mutableStateOf(true) } //이때는 프로필은 고정이고, 하위 feed만 로딩하면 된다
+    var loading by remember { mutableStateOf(1) }
+    // loading == 1: 전체 로딩
+    // loading == 2: 하위 피드만 재로딩
+    // loading == 0: 로딩 안함
 
 
     var lazyListState = rememberLazyListState()
@@ -288,109 +291,138 @@ fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, nav
     Log.d("navigateToDestination", "lazylist in MyProfile: ${lazyListState}")
 
 
-    LaunchedEffect(selectedTab) {
-        loading = true
+    LaunchedEffect(selectedTab, loading) {
         try {
-            if(selectedTab == "MY") viewModel.getUserFeed(
+            if(loading == 1) viewModel.getUserFeed( //전체 로딩
+                userId = userId,
+                onSuccess = { info, posts ->
+                    myInfo = info
+                    userPosts = posts
+                }
+            )
+
+            else if (loading == 2 && selectedTab == "MY") viewModel.getUserFeed( //하위 피드만 재로딩
                 userId = userId,
                 onSuccess = { info, posts ->
                     userPosts = posts
                 }
             )
 
-            else viewModel.getLikedFeed (
+            else if (loading == 2) viewModel.getLikedFeed ( //하위 피드만 재로딩
                 onSuccess = { posts ->
                     userPosts = posts
                 }
             )
-            loading = false
+            loading = 0
         }
         catch (e: Exception) {
             if (e !is CancellationException) { // 유저가 너무 빨리 화면을 옮겨다니는 경우에는 CancellationException이 발생할 수 있지만, 서버 에러가 아니라서 패스
-                loading = false
+                loading = 0
                 println("feed load error $e")
                 showToast(context, "유저 피드 로딩에 실패하였습니다 $e")
             }
         }
     }
 
-    LazyColumn(
-        state = lazyListState,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp)) {
-
-        item {
-            ProfileRow(
-                viewModel = viewModel,
-                userInfo = myInfo,
-                onClick = {
-                   navigateToDestination(navController, "EditProfile")
-                },
-                buttonText = "프로필 편집",
-                itsMe = true,
-                context = context,
+    if(loading == 1) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                //로딩 화면
+                modifier = Modifier
+                    .size(70.dp)
             )
         }
+    }
 
-        item {
-            TabRow(
-                selectedTabIndex = if (selectedTab == "MY") 0 else 1,
-                containerColor = Color.White,
-                contentColor = Color.Black,
-            ) {
-                Tab(
-                    text = { Text("MY") },
-                    selected = selectedTab == "MY",
-                    onClick = { selectedTab = "MY"; loading = true },
-                    selectedContentColor = MainColor,
-                    unselectedContentColor = Gray,
-                )
-                Tab(
-                    text = { Text("LIKED") },
-                    selected = selectedTab == "LIKED",
-                    onClick = { selectedTab = "LIKED"; loading = true },
-                    selectedContentColor = MainColor,
-                    unselectedContentColor = Gray,
+
+
+    else {
+        LazyColumn(
+            state = lazyListState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp)
+        ) {
+
+            item {
+                ProfileRow(
+                    viewModel = viewModel,
+                    userInfo = myInfo,
+                    onClick = {
+                        navigateToDestination(navController, "EditProfile")
+                    },
+                    buttonText = "프로필 편집",
+                    itsMe = true,
+                    context = context,
                 )
             }
-        }
 
-        item { Spacer(modifier = Modifier.height(16.dp)) }
-
-        if(loading) {
-            item { Spacer(modifier = Modifier.height(30.dp))}
             item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                TabRow(
+                    selectedTabIndex = if (selectedTab == "MY") 0 else 1,
+                    containerColor = Color.White,
+                    contentColor = Color.Black,
                 ) {
-                    CircularProgressIndicator(
-                        //로딩 화면
-                        modifier = Modifier
-                            .size(70.dp)
+                    Tab(
+                        text = { Text("MY") },
+                        selected = selectedTab == "MY",
+                        onClick = { selectedTab = "MY"; loading = 2 },
+                        selectedContentColor = MainColor,
+                        unselectedContentColor = Gray,
+                    )
+                    Tab(
+                        text = { Text("LIKED") },
+                        selected = selectedTab == "LIKED",
+                        onClick = { selectedTab = "LIKED"; loading = 2 },
+                        selectedContentColor = MainColor,
+                        unselectedContentColor = Gray,
                     )
                 }
             }
+
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+
+            if (loading == 2) {
+                item { Spacer(modifier = Modifier.height(30.dp)) }
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            //로딩 화면
+                            modifier = Modifier
+                                .size(70.dp)
+                        )
+                    }
+                }
+            } else {
+                if (selectedTab == "MY") items(userPosts) { post -> //내가 쓴 리뷰들
+                    ProfilePost(post = post, viewModel = viewModel, isCurrentUser = true)
+                }
+                else items(userPosts) { post -> //좋아요한 리뷰들 -> 이 경우에만 toggleLike하면 delete되어야 하므로 isLikedPost = true
+                    HomePost(
+                        post = post,
+                        viewModel = viewModel,
+                        navHostController = navController,
+                        isLikedPost = true
+                    )
+                }
+            }
+
+            // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
+            item { Spacer(modifier = Modifier.height(70.dp)) }
         }
 
-        else {
-            if (selectedTab == "MY") items(userPosts) { post -> //내가 쓴 리뷰들
-                ProfilePost(post = post, viewModel = viewModel, isCurrentUser = true)
+        UpButton {
+            coroutineScope.launch {
+                lazyListState.animateScrollToItem(0)
             }
-            else items(userPosts) { post -> //좋아요한 리뷰들 -> 이 경우에만 toggleLike하면 delete되어야 하므로 isLikedPost = true
-                HomePost(post = post, viewModel = viewModel, navHostController = navController, isLikedPost = true)
-            }
-        }
-
-        // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
-        item { Spacer(modifier = Modifier.height(70.dp)) }
-    }
-
-    UpButton {
-        coroutineScope.launch {
-            lazyListState.animateScrollToItem(0)
         }
     }
 }

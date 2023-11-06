@@ -27,7 +27,6 @@ class AppMainViewModel() : ViewModel() {
 
     private var token: String? = null
     var myProfile = UserDTO(0, "", "", "", listOf())
-    var myInfo = UserInfoDTO(0, "", "", "", listOf(), false, 0, 0)
 
     fun initialize(token: String?) {
         this.token = token
@@ -72,12 +71,11 @@ class AppMainViewModel() : ViewModel() {
             //except cancellation exception
             if (e !is CancellationException) {
                 Log.d("upload photos and post error", e.message ?: "Network error")
-                showToast(context, "포스트 업로드에 실패했습니다") //TODO: timeout 문제 (10초 제한)
+                showToast(context, "포스트 업로드에 실패했습니다")
             }
             else {
                 Log.d("upload photos and post error", "cancellation exception")
                 showToast(context, "포스트가 업로드되었습니다")
-                //TOOD: navigate을 해버리니까 cancellation 에러가 뜸. 그렇다고 navigate을 코루틴 내에서 화면이 너무 안 넘어가서 버튼을 연타하게 됨
             }
         }
     }
@@ -127,7 +125,6 @@ class AppMainViewModel() : ViewModel() {
             else {
                 Log.d("edit profile error", "cancellation exception")
                 showToast(context, "프로필이 편집되었습니다")
-                //TOOD: navigate을 해버리니까 cancellation 에러가 뜸. 그렇다고 navigate을 코루틴 내에서 화면이 너무 안 넘어가서 버튼을 연타하게 됨
             }
         }
     }
@@ -249,19 +246,12 @@ class AppMainViewModel() : ViewModel() {
         try {
             val response = apiService.getMyFeed(authorization)
             val myProf = UserDTO(response.id, response.username, response.description, response.avatar_url, listOf())
-            val myInf = UserInfoDTO(
-                id = response.id,
-                username = response.username,
-                description = response.description,
-                avatar_url = response.avatar_url,
-                tags = response.tags,
-                is_followed = response.is_followed,
-                follower_count = response.follower_count,
-                following_count = response.following_count,
+            val myFoll = listOf(
+                response.follower_count,
+                response.following_count,
             )
             Log.d("getMyProfile", "success")
             myProfile = myProf
-            myInfo = myInf
         } catch (e: Exception) {
             Log.d("getMyProfile error", e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function
@@ -324,6 +314,7 @@ class AppMainViewModel() : ViewModel() {
         val authorization = "Token $token"
         try {
             val response = apiService.refreshTags(authorization)
+            myProfile = UserDTO(myProfile.id, myProfile.username, myProfile.description, myProfile.avatar_url, response.user_tags) //프로필 편집 후 myProfile 업데이트
             onSuccess(response.user_tags)
             Log.d("refresh tags", "success")
             showToast(context, "태그가 업데이트되었습니다")
