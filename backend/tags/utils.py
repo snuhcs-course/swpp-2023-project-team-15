@@ -53,7 +53,7 @@ def ml_sentiment_analysis(review_text):
     headers = {"Authorization": f"Bearer {config('HUGGINGFACE_AUTH_KEY')}"}
 
     def query(payload):
-        response = requests.post(API_URL, headers=headers, json=payload)
+        response = requests.post(API_URL, headers=headers, json=payload) # TODO: add retry logic
         return response.json()
         
     output = query({
