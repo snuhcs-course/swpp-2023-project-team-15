@@ -11,21 +11,27 @@ from rest_framework.response import Response
 
 from tags.models import Tag
 from tags.utils import (category_name_to_tags, deepl_translate_ko_to_en,
-                        ml_tagging, ml_sentiment_analysis)
+                        ml_sentiment_analysis, ml_tagging)
 
 from .models import Post
 from .serializers import PostSerializer, data_list
 
 
-def get_top_tags_after_translation(possible_tags, translated_description):
+def get_top_tag_after_translation_only_label(possible_tags, translated_description):
     label_score_dict = ml_tagging(translated_description, possible_tags)
     max_label = max(label_score_dict, key=label_score_dict.get)
     
     if label_score_dict[max_label] > 0.3:
+        return max_label
+    return None
+
+def get_top_tags_after_translation(possible_tags, translated_description):
+    max_label = get_top_tag_after_translation_only_label(possible_tags, translated_description)
+
+    if max_label is not None:
         matching_tag = Tag.objects.filter(en_label=max_label).first()
         return matching_tag
     return None
-
 
 def create_tags_on_thread(post):
     print("Thread started")
