@@ -124,7 +124,6 @@ def refresh_user_tags(request):
 
     # Define the mapping of ratings to weights with a 0.5 interval (actually there is no 0.5 score coming. every weight is on my own..)
     rating_weights = {1: -3.0, 1.5: -2.2, 2: -1.5, 2.5: -0.5, 3: 0.0, 3.5: 0.5, 4: 1.5, 4.5: 2.2, 5: 3.0}
-    #sentiment_weights = {'POSITIVE': 1.0, 'NEUTRAL': 0.0, 'NEGATIVE': -1.0}
 
     # Dictionary to store tag weights for each labels (label: weight)
     tag_weighted_sums = {}
@@ -139,7 +138,9 @@ def refresh_user_tags(request):
             rating = post.rating
             if label not in tag_weighted_sums:
                 tag_weighted_sums[label] = 0
-            tag_weighted_sums[label] = round(tag_weighted_sums.get(label, 0) + rating_weights[rating], 3)
+            tag_weighted_sums[label] = round(tag_weighted_sums.get(label, 0) + rating_weights[rating], 4)
+            if (post.sentiment is not None): #최대 1, 최소 -1이므로 *3
+                tag_weighted_sums[label] = round(tag_weighted_sums.get(label, 0) + float(post.sentiment) * 3, 4)
 
     print("tag_counts", tag_weighted_sums)
     # Dictionary to store the most frequently occurring tag not regarding types

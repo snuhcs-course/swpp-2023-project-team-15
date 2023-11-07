@@ -29,10 +29,11 @@ class PostSerializer(serializers.ModelSerializer):
     is_liked = serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
+    sentiment = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ('id', 'restaurant', 'photos', 'user', 'rating', 'description', 'created_at', 'is_liked', 'like_count','tags')
+        fields = ('id', 'restaurant', 'photos', 'user', 'rating', 'description', 'created_at', 'is_liked', 'like_count','tags', 'sentiment')
         read_only_fields = ('user',)
 
     def create(self, validated_data):
@@ -70,6 +71,10 @@ class PostSerializer(serializers.ModelSerializer):
     def get_tags(self, obj):
         tags = obj.tags.all()
         return [f"{tag.ko_label}" for tag in tags]
+    
+    def get_sentiment(self, obj):
+        return obj.sentiment
+    
 
 def data_list(serializer):
     class DataListSerializer(serializers.Serializer):
