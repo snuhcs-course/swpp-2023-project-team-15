@@ -1,6 +1,8 @@
 from unittest import TestCase
 
-from tags.utils import category_name_to_tags
+from posts.views import (get_top_tag_after_translation_only_label,
+                         get_top_tags_after_translation)
+from tags.utils import category_name_to_tags, deepl_translate_ko_to_en
 
 
 # Create your tests here.
@@ -38,5 +40,39 @@ class TagGenerateTestCase(TestCase):
         self.assert_helper("음식점 > 일식 > 초밥,롤", ["일식", "해산물"])
         self.assert_helper("음식점 > 일식 > 참치회", ["일식", "해산물"])
         self.assert_helper("음식점 > 양식 > 해산물 > 바닷가재", ["양식", "해산물"])
+
+
+class TagInferenceTestCase(TestCase):
+    def assert_helper(self, text, expected_tag):
+        translated_description = deepl_translate_ko_to_en(text)        
+        possible_tags = [
+            'preferes for Family Gathering',
+            'prefers for Group Dining',
+            'prefers for a Date',
+            'prefers Upscale',
+            'prefers Expensive',
+            'prefers Cost-Effective',
+            'prefers Instagrammable',
+            'prefers Quiet',
+            'prefers Lively',
+            'prefers With Alcohol',
+        ]
+        matching_tag = get_top_tag_after_translation_only_label(
+            possible_tags=possible_tags,
+            translated_description=translated_description
+        )
         
+        self.assertEqual(matching_tag, expected_tag)
+    
+    def test_nomatch(self):
+        self.assert_helper('너무 맛없고 비려요!', None)
+        
+    def test_quite(self):
+        self.assert_helper('고등어구이가 별미입니다. 분위기도 조용하고, 사시미도 맛있어요.', 'prefers Quiet')
+    
+    def test_cost_effective(self):
+        self.assert_helper('개인적으로 이 메뉴 젤 만족! 5000원이에요~', 'prefers Cost-Effective')
+    
+    def test_expensive(self):
+        self.assert_helper('가격이 싸진 않지만 맛있어요.', 'prefers Expensive')
         
