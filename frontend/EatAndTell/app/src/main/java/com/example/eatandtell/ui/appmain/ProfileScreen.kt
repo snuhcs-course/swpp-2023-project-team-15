@@ -104,7 +104,7 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(text = "${userInfo.follower_count} Followings" ,
+            Text(text = "${userInfo.following_count} Followings" ,
                  style = TextStyle(
                      fontSize = 16.sp,
                      lineHeight = 18.sp,
@@ -113,7 +113,7 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                         color = Color.Black,
                      )
             )
-            Text(text = "${userInfo.following_count} Followers",
+            Text(text = "${userInfo.follower_count} Followers",
                 style = TextStyle(
                     fontSize = 16.sp,
                     lineHeight = 18.sp,
@@ -250,6 +250,9 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                 userInfo = userInfo,
                 onClick = {
                     /* TODO: toggle follow */
+                          coroutineScope.launch {
+                              viewModel.toggleFollow(userInfo.id)
+                          }
                 },
                 buttonText = if (userInfo.is_followed) "팔로잉" else "팔로우하기",
                 itsMe = false,

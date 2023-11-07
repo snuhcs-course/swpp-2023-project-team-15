@@ -229,6 +229,16 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
+    suspend fun toggleFollow(user_id: Int){
+        val authorization = "Token $token"
+        try {
+            val response = apiService.toggleFollow(authorization, user_id)
+            Log.d("toggle follow", "success")
+        } catch (e: Exception) {
+            Log.d("toggle follow error", e.message ?: "Network error")
+        }
+    }
+
     suspend fun deletePost(post_id: Int) {
         val authorization = "Token $token"
         try {
