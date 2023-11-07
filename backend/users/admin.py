@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from users.models import User
+from users.models import User, Follow
 
 
 # Register your models here.
@@ -43,4 +43,20 @@ class CustomUserAdmin(UserAdmin):
     list_display = (
         "username",
         "description",
+    )
+
+@admin.register(Follow)
+class FollowAdmin(admin.ModelAdmin):
+    list_display = (
+        "follower",
+        "followee",
+        "created",
+    )
+    list_filter = (
+        "follower",
+        "followee",
+    )
+    search_fields = (
+        "follower__username",
+        "followee__username",
     )

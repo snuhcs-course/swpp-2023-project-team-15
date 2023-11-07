@@ -15,17 +15,23 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.RestReqDTO
+import com.example.eatandtell.dto.SearchedRestDTO
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.ui.DraggableStarRating
@@ -36,6 +42,7 @@ import com.example.eatandtell.ui.PostImage
 import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.WhiteTextField
 import com.example.eatandtell.ui.showToast
+import com.example.eatandtell.ui.theme.Black
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -50,10 +57,10 @@ import java.io.InputStream
 
 
 @Composable
-fun UploadScreen(navController: NavHostController, context: ComponentActivity, viewModel: AppMainViewModel) {
+fun UploadScreen(navController: NavHostController, context: ComponentActivity, viewModel: AppMainViewModel, searchId : Int?, placeName : String?, categoryName : String?) {
 
     var restaurantName by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue(""))
+        mutableStateOf(TextFieldValue(placeName ?: ""))
     }
 
     var reviewDescription by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -155,20 +162,21 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                WhiteTextField(
-                    value = restaurantName.text,
-                    onValueChange = { restaurantName = TextFieldValue(it) },
-                    placeholder = "맛집명",
-                    modifier = Modifier
-                        .border(
-                            width = 0.5.dp,
-                            color = Color(0xFFC5C5C5),
-                            shape = RoundedCornerShape(size = 4.dp)
-                        )
-                        .height(IntrinsicSize.Min)
-                        .width(160.dp)
+                //식당 이름
+                Text(
+                    text = restaurantName.text,
+                    style = TextStyle(
+                    fontSize = 16.sp,
+                    lineHeight = 21.sp,
+                    fontWeight = FontWeight(700),
+                    color = Black,
+                ), modifier = Modifier
+                    .weight(1f)
+                    .height(22.dp),
+                    overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.width(16.dp))
+
+                Spacer(modifier = Modifier.width(8.dp))
                 DraggableStarRating(
                     currentRating = myRating.toInt(),
                     onRatingChanged = { myRating = it.toString() })
@@ -195,7 +203,7 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
             Spacer(modifier = Modifier.height(16.dp))
             UploadButton(
                 viewModel = viewModel,
-                restaurant = RestReqDTO(name = restaurantName.text),
+                restaurant = RestReqDTO(name = restaurantName.text, search_id = searchId, category_name = categoryName),
                 photoPaths = photoPaths,
                 rating = myRating,
                 description = reviewDescription.text,
@@ -229,7 +237,7 @@ fun UploadButton(viewModel: AppMainViewModel,
                  context: Context,
                  onClickNav: () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
-    var enable by remember { mutableStateOf(true) }
+    var notLoading by remember { mutableStateOf(true) }
 
 
     val onClickReal: () -> Unit = {
@@ -241,7 +249,7 @@ fun UploadButton(viewModel: AppMainViewModel,
             else -> {
                 try {
                     coroutineScope.launch {
-                        enable = false
+                        notLoading = false
                         viewModel.uploadPhotosAndPost(
                             photoPaths = photoPaths,
                             restaurant = restaurant,
@@ -260,5 +268,5 @@ fun UploadButton(viewModel: AppMainViewModel,
         }
     }
 
-    MainButton(onClickReal, "리뷰 작성", enable = enable)
+    MainButton(onClickReal, "리뷰 작성", notLoading = notLoading)
 }

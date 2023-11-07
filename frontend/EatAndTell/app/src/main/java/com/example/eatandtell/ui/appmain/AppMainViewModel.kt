@@ -11,6 +11,7 @@ import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.RegisterRequest
 import com.example.eatandtell.dto.RestReqDTO
+import com.example.eatandtell.dto.SearchedRestDTO
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
@@ -70,12 +71,11 @@ class AppMainViewModel() : ViewModel() {
             //except cancellation exception
             if (e !is CancellationException) {
                 Log.d("upload photos and post error", e.message ?: "Network error")
-                showToast(context, "포스트 업로드에 실패했습니다") //TODO: timeout 문제 (10초 제한)
+                showToast(context, "포스트 업로드에 실패했습니다")
             }
             else {
                 Log.d("upload photos and post error", "cancellation exception")
                 showToast(context, "포스트가 업로드되었습니다")
-                //TOOD: navigate을 해버리니까 cancellation 에러가 뜸. 그렇다고 navigate을 코루틴 내에서 화면이 너무 안 넘어가서 버튼을 연타하게 됨
             }
         }
     }
@@ -125,7 +125,6 @@ class AppMainViewModel() : ViewModel() {
             else {
                 Log.d("edit profile error", "cancellation exception")
                 showToast(context, "프로필이 편집되었습니다")
-                //TOOD: navigate을 해버리니까 cancellation 에러가 뜸. 그렇다고 navigate을 코루틴 내에서 화면이 너무 안 넘어가서 버튼을 연타하게 됨
             }
         }
     }
@@ -178,6 +177,16 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
+    suspend fun getLikedFeed(onSuccess: (List<PostDTO>) -> Unit) {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.getLikedFeed(authorization)
+            onSuccess(response)
+        } catch (e: Exception) {
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
 
     suspend fun getUserFeed(userId: Int? = null, onSuccess: (UserInfoDTO, List<PostDTO>) -> Unit) {
         val authorization = "Token $token"
@@ -222,13 +231,27 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
+    suspend fun deletePost(post_id: Int) {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.deletePost(authorization, post_id)
+            Log.d("delete post", "success")
+        } catch (e: Exception) {
+            Log.d("delete post error", e.message ?: "Network error")
+        }
+    }
+
     private suspend fun getMyProfile(){
         val authorization = "Token $token"
         try {
             val response = apiService.getMyFeed(authorization)
-            val myInfo = UserDTO(response.id, response.username, response.description, response.avatar_url, listOf())
+            val myProf = UserDTO(response.id, response.username, response.description, response.avatar_url, listOf())
+            val myFoll = listOf(
+                response.follower_count,
+                response.following_count,
+            )
             Log.d("getMyProfile", "success")
-            myProfile = myInfo
+            myProfile = myProf
         } catch (e: Exception) {
             Log.d("getMyProfile error", e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function
@@ -274,10 +297,24 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
+    suspend fun getSearchedRest(restaurantName: String, x: String?=null, y: String?=null) : List<SearchedRestDTO> {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.getSearchedRest(authorization, restaurantName, x, y)
+            Log.d("search rest", "success")
+            return response.data
+        } catch (e: Exception) {
+            Log.d("search rest error", e.message ?: "Network error")
+            return listOf()
+            //throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
     suspend fun refreshTags(onSuccess: (List<String>) -> Unit, context: Context) {
         val authorization = "Token $token"
         try {
             val response = apiService.refreshTags(authorization)
+            myProfile = UserDTO(myProfile.id, myProfile.username, myProfile.description, myProfile.avatar_url, response.user_tags) //프로필 편집 후 myProfile 업데이트
             onSuccess(response.user_tags)
             Log.d("refresh tags", "success")
             showToast(context, "태그가 업데이트되었습니다")

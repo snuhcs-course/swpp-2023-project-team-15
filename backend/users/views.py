@@ -12,6 +12,7 @@ from tags.models import Tag
 
 from .serializers import UserInfoSerializer, UserPostSerializer, UserSerializer
 from posts.serializers import PostSerializer
+from .models import Follow
 
 User= get_user_model()
 
@@ -74,6 +75,7 @@ def get_my_liked_posts(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_user_profile(request, pk):
     user = get_object_or_404(User, pk=pk)
     serializer = UserSerializer(user, context={'request': request})
@@ -81,6 +83,7 @@ def get_user_profile(request, pk):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_user_posts(request, pk):
     user = get_object_or_404(User, pk=pk)
     serializer = UserPostSerializer(user, context={'request': request})
@@ -88,6 +91,7 @@ def get_user_posts(request, pk):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def filter_users(request):
     queryset = User.objects.all()
    # Filter by username
@@ -114,6 +118,7 @@ def filter_users(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def refresh_user_tags(request):
     user = request.user
 
@@ -153,3 +158,23 @@ def refresh_user_tags(request):
 
     return Response({"user_tags": [i.ko_label for i in updated_tags]})
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def follow(request, pk):
+    user = request.user
+    print(f'User {user} is trying to follow user {pk}')
+
+    if user.following.filter(id=pk).exists():
+        #TODO
+        Follow.objects.filter(follower=user, followee_id=pk).delete()
+        following = False
+    else:
+        #TODO
+        try:
+            Follow.objects.create(follower=user, followee_id=pk)
+            following = True
+        except IntegrityError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    # Serialize the user data and return it
+    return Response({"following": following}, status=status.HTTP_200_OK)

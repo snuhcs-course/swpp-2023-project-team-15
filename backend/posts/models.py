@@ -5,9 +5,10 @@ from django.db import models
 
 class Restaurant(models.Model):
     name = models.CharField(max_length=255)
+    search_id = models.CharField(max_length=255, null=True)
+    category_name = models.CharField(max_length=255, null=True)
+    
 
-    def __str__(self):
-        return self.name
 
 
 class Post(models.Model):
@@ -31,8 +32,6 @@ class Post(models.Model):
     class Meta:
         ordering = ['-created_at']
 
-    def __str__(self):
-        return f"{self.pk}"
 
 
 class PostPhoto(models.Model):
