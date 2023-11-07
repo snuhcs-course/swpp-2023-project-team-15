@@ -60,7 +60,8 @@ def ml_sentiment_analysis(review_text):
         "inputs": review_text,
     })
 
-    print ("output", output)
+    output = output[0]
+    output = {i['label']: i['score'] for i in output}
 
     return output
 

@@ -53,11 +53,11 @@ def create_tags_on_thread(post):
         post.tags.add(matching_tag)
 
     # calculate sentiment for post
-    sentiment_output = ml_sentiment_analysis(translated_description)
-    # get scores
-    positive_score = sentiment_output[0][0].get('score')
-    neutral_score = sentiment_output[0][1].get('score')
-    negative_score = sentiment_output[0][2].get('score')
+    sentiment_dict = ml_sentiment_analysis(translated_description)
+    positive_score = sentiment_dict['positive']
+    neutral_score = sentiment_dict['neutral']
+    negative_score = sentiment_dict['negative']
+
     print ('positive_score', positive_score)
     print ('neutral_score', neutral_score)
     print ('negative_score', negative_score)
