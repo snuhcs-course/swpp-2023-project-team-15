@@ -81,7 +81,8 @@ import kotlinx.coroutines.launch
 fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -> Unit, buttonText: String, itsMe : Boolean = false, context : ComponentActivity? = null) {
     var tags by remember { mutableStateOf(userInfo.tags) }
     val coroutinescope = rememberCoroutineScope()
-
+    var buttonText by remember { mutableStateOf(buttonText) }
+    var follwerCount by remember { mutableStateOf(userInfo.follower_count) }
 
     Column {
         //Profile and follow button
@@ -93,8 +94,8 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
             verticalAlignment = Alignment.CenterVertically
         ) {
             Profile(userInfo.avatar_url, userInfo.username, userInfo.description)
-            if (itsMe || buttonText == "팔로우하기") MediumRedButton(onClick = { onClick() }, text = buttonText)
-            else MediumWhiteButton(onClick = { onClick() }, text = buttonText)
+            if (itsMe || buttonText == "팔로우하기") MediumRedButton(onClick = { onClick(); buttonText = "팔로잉"; follwerCount += 1 }, text = buttonText)
+            else MediumWhiteButton(onClick = { onClick(); buttonText = "팔로우하기"; follwerCount -= 1 }, text = buttonText)
         }
         Spacer(modifier = Modifier.height(11.dp))
 
@@ -113,7 +114,7 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                         color = Color.Black,
                      )
             )
-            Text(text = "${userInfo.follower_count} Followers",
+            Text(text = "${follwerCount} Followers",
                 style = TextStyle(
                     fontSize = 16.sp,
                     lineHeight = 18.sp,
