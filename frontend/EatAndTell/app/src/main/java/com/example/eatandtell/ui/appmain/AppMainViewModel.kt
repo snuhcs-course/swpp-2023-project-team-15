@@ -28,11 +28,9 @@ class AppMainViewModel() : ViewModel() {
     private var token: String? = null
     var myProfile = UserDTO(0, "", "", "", listOf())
 
-    fun initialize(token: String?) {
+    suspend fun initialize(token: String?) {
         this.token = token
-        viewModelScope.launch {
-            getMyProfile()
-        }
+        getMyProfile() // Since it's a suspend function, you can call it directly without launch
     }
 
     private val apiService = RetrofitClient.retro.create(ApiService::class.java)
@@ -228,6 +226,16 @@ class AppMainViewModel() : ViewModel() {
             Log.d("toggle like", "success")
         } catch (e: Exception) {
             Log.d("toggle like error", e.message ?: "Network error")
+        }
+    }
+
+    suspend fun toggleFollow(user_id: Int){
+        val authorization = "Token $token"
+        try {
+            val response = apiService.toggleFollow(authorization, user_id)
+            Log.d("toggle follow", "success")
+        } catch (e: Exception) {
+            Log.d("toggle follow error", e.message ?: "Network error")
         }
     }
 
