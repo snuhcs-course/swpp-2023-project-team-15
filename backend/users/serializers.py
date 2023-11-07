@@ -13,6 +13,8 @@ class UserSerializer(serializers.ModelSerializer):
     email = models.EmailField(unique=True, blank=False)
     is_followed = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
+    follower_count = serializers.SerializerMethodField()
+    following_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -30,10 +32,8 @@ class UserSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
             description= validated_data.get('description', ''),
             avatar_url=validated_data.get('avatar_url', 'https://default_avatar-url.com'),
-            follower_count=validated_data.get('follower_count', 0),
-            following_count=validated_data.get('following_count', 0)
-
         )
+        
         return user
     #frontend needs to send @PATCH with only description and data
     def update(self, instance, validated_data):
@@ -49,12 +49,23 @@ class UserSerializer(serializers.ModelSerializer):
         return value
     
     def get_is_followed(self, obj):
+        request = self.context.get('request', None)
+        if request:
+            user = request.user
+            return obj.followers.filter(id=user.id).exists()
         return False
+    
+    def get_follower_count(self, obj):
+        return obj.followers.count()
+    
+    def get_following_count(self, obj):
+        return obj.following.count()
     
     def get_tags(self, obj):
         tags = obj.tags.all()
         return [f"{tag.ko_label}" for tag in tags]
     
+
 class UserPostSerializer(serializers.ModelSerializer):
     posts = PostSerializer(source='post_set', many=True, read_only=True)
     

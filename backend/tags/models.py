@@ -16,8 +16,7 @@ tags = [
 
 class Tag(models.Model):
     TAG_TYPES = [
-        ('country', 'country'),
-        ('ingredient', 'ingredient'),
+        ('from_category', 'from_category'),
         ('atmosphere', 'atmosphere'),
     ]
 
