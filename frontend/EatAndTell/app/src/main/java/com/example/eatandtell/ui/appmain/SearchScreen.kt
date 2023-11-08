@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.eatandtell.dto.PostDTO
+import com.example.eatandtell.dto.TopTag
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.ui.CustomTextField
 import com.example.eatandtell.ui.Profile
@@ -52,6 +53,10 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
 
     var triggerSearch by remember { mutableStateOf(false) }
 
+    var topTags by remember { mutableStateOf<List<TopTag>>(emptyList()) }
+
+
+
 
     //searchBar
     Column (
@@ -66,9 +71,20 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
             onSearchClick = { triggerSearch = true }
         )
         Spacer(modifier = Modifier.height(20.dp))
-        // Check if both lists are empty and triggerSearch is false
-        DefaultTagView(searchText.text)
 
+
+        LaunchedEffect(Unit) { // LaunchedEffect with Unit to run only once
+            viewModel.getTopTags(
+                onSuccess = { tags ->
+                    topTags = tags.take(5) // Take the first five tags
+                },
+                onError = { errorMessage ->
+                    showToast(context, "Failed to load top tags: $errorMessage")
+                }
+            )
+        }
+        // Check if both lists are empty and triggerSearch is false
+        DefaultTagView(searchText.text, topTags.map { it.ko_label })
 
         //search for userLists
         LaunchedEffect(triggerSearch) {
@@ -189,13 +205,12 @@ fun SearchBar(value: TextFieldValue, onValueChange: (TextFieldValue) -> Unit, on
 }
 
 @Composable
-fun DefaultTagView(text: String) {
+fun DefaultTagView(text: String, tags: List<String>) {
     if (
         text == "@" ||
         text == "#" ||
         text.isEmpty()
     ) {
-        val tags = listOf("#육식주의자", "#미식가", "#리뷰왕", "#감성", "#한식")
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             mainAxisSpacing = 8.dp,
