@@ -84,8 +84,12 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
             )
         }
         // Check if both lists are empty and triggerSearch is false
-        DefaultTagView(searchText.text, topTags.map { it.ko_label })
-
+        DefaultTagView(searchText.text, topTags.map { it.ko_label }) { tag ->
+            // Set the searchText to the tag that was clicked
+            searchText = TextFieldValue("#$tag")
+            // Trigger the search
+            triggerSearch = true
+        }
         //search for userLists
         LaunchedEffect(triggerSearch) {
             println("search screen "+searchText.text + " " + triggerSearch)
@@ -205,7 +209,7 @@ fun SearchBar(value: TextFieldValue, onValueChange: (TextFieldValue) -> Unit, on
 }
 
 @Composable
-fun DefaultTagView(text: String, tags: List<String>) {
+fun DefaultTagView(text: String, tags: List<String>, onTagClick: (String) -> Unit = {}) {
     if (
         text == "@" ||
         text == "#" ||
@@ -217,7 +221,9 @@ fun DefaultTagView(text: String, tags: List<String>) {
             crossAxisSpacing = 8.dp
         ) {
             tags.forEach { tagName ->
-                Tag(tagName)
+                Tag(tagName) {
+                    onTagClick(tagName)
+                }
             }
         }
         Spacer(modifier = Modifier.height(11.dp))

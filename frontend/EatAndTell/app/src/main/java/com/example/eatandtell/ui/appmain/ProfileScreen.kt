@@ -153,7 +153,7 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                     crossAxisSpacing = 8.dp
                 ) {
                     tags.forEach { tagName ->
-                        Tag(tagName)
+                        Tag(tagName) {} // Passing an empty lambda to indicate no action on click
                     }
                 }
             }

@@ -354,13 +354,15 @@ fun PreviewMediumRedButton() {
 
 
 @Composable
-fun Tag(text: String) {
+fun Tag(text: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .background(color = White, shape = RoundedCornerShape(size = 18.dp))
             .border(2.dp, MainColor, RoundedCornerShape(size = 18.dp))
-            .padding(horizontal = 12.dp, vertical = 2.dp),
-        contentAlignment = Alignment.Center
+            .padding(horizontal = 12.dp, vertical = 2.dp)
+            .clickable(onClick = onClick),
+
+    contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
@@ -380,7 +382,7 @@ fun Tag(text: String) {
 @Composable
 fun PreviewTag() {
     EatAndTellTheme {
-        Tag(text = "#육식주의자")
+        Tag(text = "#육식주의자", onClick = { /**/ })
     }
 }
 
