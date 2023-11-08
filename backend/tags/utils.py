@@ -42,6 +42,11 @@ def ml_tagging(review_text, possible_tags):
 
     print("output222", output)
 
+    # if output has no labels, return empty dict
+    if not output['labels']:
+        print ("some error on ml tagging")
+        return {}
+
 
     label_score_dict = dict(zip(output['labels'], output['scores']))
 
@@ -59,6 +64,8 @@ def ml_sentiment_analysis(review_text):
     output = query({
         "inputs": review_text,
     })
+
+    print ("sentiment output", output)
 
     output = output[0]
     output = {i['label']: i['score'] for i in output}

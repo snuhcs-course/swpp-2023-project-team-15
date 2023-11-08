@@ -34,7 +34,7 @@ def get_top_tags_after_translation(possible_tags, translated_description):
     return None
 
 def create_tags_on_thread(post):
-    print("Thread started")
+    print("Thread started for post ", post.id)
     # calculate category tags
     category_name = post.restaurant.category_name
     if category_name is not None:
@@ -189,3 +189,20 @@ def restaurant_search(request):
     use_keys = ['id', 'place_name', 'road_address_name', 'category_name', 'x', 'y']
     parsed_response = [{k: item[k] for k in use_keys} for item in response.json()['documents']]
     return Response({"data": parsed_response}, status=status.HTTP_200_OK)
+
+
+# ----------------- helper functions for data administration -----------------
+# for all posts, clear tags and sentiment, and create tags and sentiment again
+def create_tags_on_all_posts():
+    print("Re-Create started")
+    # calculate category tags
+    posts = Post.objects.all()
+    for post in posts:
+        post.tags.clear()
+        post.sentiment = 0.0
+        create_tags_on_thread(post)
+    print("Re-Create finished")
+
+def create_tags_on_post_id(id):
+    post = Post.objects.get(id=id)
+    create_tags_on_thread(post)
