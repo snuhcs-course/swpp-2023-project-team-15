@@ -800,7 +800,7 @@ fun MenuWithDropDown(modifier: Modifier, onClick: () -> Unit = { /**/ }) {
             .height(18.dp)
             .clickable(onClick = {
                 isDropDownExpanded = !isDropDownExpanded
-                })
+            })
     )
 
     DropdownMenu(
@@ -898,4 +898,24 @@ fun UpButton(onClick: () -> Unit = {}) {
             .fillMaxSize()
             .wrapContentSize(Alignment.BottomEnd)
     )
+}
+
+@Composable
+fun SearchSelectButton(
+    onClick: () -> Unit,
+    text: String,
+    selected: Boolean,
+) {
+    val buttonSizeModifier = Modifier.size(width = 96.dp, height = 36.dp) // 버튼 크기 조절
+
+    Box(
+        modifier = buttonSizeModifier,
+        contentAlignment = Alignment.Center
+    ) {
+        if (selected) {
+            MediumWhiteButton(onClick = { onClick() }, text = text)
+        } else {
+            MediumRedButton(onClick = { onClick() }, text = text)
+        }
+    }
 }
