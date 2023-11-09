@@ -11,21 +11,27 @@ from rest_framework.response import Response
 
 from tags.models import Tag
 from tags.utils import (category_name_to_tags, deepl_translate_ko_to_en,
-                        ml_tagging)
+                        ml_sentiment_analysis, ml_tagging)
 
 from .models import Post
 from .serializers import PostSerializer, data_list
 
 
-def get_top_tags_after_translation(possible_tags, translated_description):
+def get_top_tag_after_translation_only_label(possible_tags, translated_description):
     label_score_dict = ml_tagging(translated_description, possible_tags)
     max_label = max(label_score_dict, key=label_score_dict.get)
     
     if label_score_dict[max_label] > 0.3:
+        return max_label
+    return None
+
+def get_top_tags_after_translation(possible_tags, translated_description):
+    max_label = get_top_tag_after_translation_only_label(possible_tags, translated_description)
+
+    if max_label is not None:
         matching_tag = Tag.objects.filter(en_label=max_label).first()
         return matching_tag
     return None
-
 
 def create_tags_on_thread(post):
     print("Thread started")
@@ -37,20 +43,35 @@ def create_tags_on_thread(post):
             tag_obj, _ = Tag.objects.get_or_create(type='from_category', ko_label=tag, en_label='')
             post.tags.add(tag_obj)
     
-    
-    # calculate atmosphere tags
+    #translate
     if len(post.description) < 5:
-        print(f'create tag skipped: description too short: {post.description}.')
+        print(f'create tag and sentiment skipped: description too short: {post.description}.')
         return
     translated_description = deepl_translate_ko_to_en(post.description)
     print('translated description', translated_description)
+
+    # calculate atmosphere tags
     tags_atmosphere = Tag.objects.filter(type='atmosphere').values('en_label')
     possible_tags = [tag['en_label'] for tag in tags_atmosphere]
     matching_tag = get_top_tags_after_translation(possible_tags, translated_description)
     print('fount tag', matching_tag)
     if matching_tag is not None:
         post.tags.add(matching_tag)
-    
+
+    # calculate sentiment for post
+    sentiment_dict = ml_sentiment_analysis(translated_description)
+    positive_score = sentiment_dict['positive']
+    neutral_score = sentiment_dict['neutral']
+    negative_score = sentiment_dict['negative']
+
+    print ('positive_score', positive_score)
+    print ('neutral_score', neutral_score)
+    print ('negative_score', negative_score)
+    # get sentiment
+    post.sentiment = round(positive_score - negative_score, 4)
+    print ('sentiment', post.sentiment)
+    post.save()
+
     print("Thread finished")
 
 
@@ -70,6 +91,7 @@ class PostViewSet(viewsets.ModelViewSet):
         
         thread = threading.Thread(target=create_tags_on_thread, args=(post,), daemon=True)
         thread.start()
+
                 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

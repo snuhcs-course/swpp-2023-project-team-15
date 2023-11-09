@@ -28,6 +28,8 @@ class Post(models.Model):
     
     tags = models.ManyToManyField('tags.Tag', related_name='posts', blank=True)
 
+    sentiment = models.DecimalField(max_digits=5, decimal_places=4, default=0.0)
+
     
     class Meta:
         ordering = ['-created_at']
