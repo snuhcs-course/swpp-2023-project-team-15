@@ -191,18 +191,3 @@ def restaurant_search(request):
     return Response({"data": parsed_response}, status=status.HTTP_200_OK)
 
 
-# ----------------- helper functions for data administration -----------------
-# for all posts, clear tags and sentiment, and create tags and sentiment again
-def create_tags_on_all_posts():
-    print("Re-Create started")
-    # calculate category tags
-    posts = Post.objects.all()
-    for post in posts:
-        post.tags.clear()
-        post.sentiment = 0.0
-        create_tags_on_thread(post)
-    print("Re-Create finished")
-
-def create_tags_on_post_id(id):
-    post = Post.objects.get(id=id)
-    create_tags_on_thread(post)

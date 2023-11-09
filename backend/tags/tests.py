@@ -52,7 +52,7 @@ class TagGenerateTestCase(TestCase):
 	25	atmosphere	가성비	Cost-Effective
 24	atmosphere	서비스	friendly service
 	23	atmosphere	조용한	Quiet, Calm
-	22	atmosphere	시끌벅적	Lively, Noisy
+	22	atmosphere	시끌벅적	Noisy
 	21	atmosphere	술과 함께	Alcohol
 '''
 
@@ -69,7 +69,7 @@ class TagInferenceTestCase(TestCase):
             'Cost-Effective',
             'friendly service',
             'Quiet, Calm',
-            'Noisy, Lively',
+            'Noisy',
             'Alcohol, Drinking',
         ]
         matching_tag = get_top_tag_after_translation_only_label(
