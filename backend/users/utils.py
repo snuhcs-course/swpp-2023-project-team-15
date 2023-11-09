@@ -1,5 +1,5 @@
-from django.db.models import Count, Avg
 from django.contrib.auth import get_user_model
+from django.db.models import Avg, Count, StdDev
 
 User= get_user_model()
 
@@ -84,3 +84,35 @@ def get_review_angel():
     # return top users' ids
     return list(top_users.keys())
 
+
+def get_review_gourmet():
+    # get dict of average standard deviation of all users' ratings
+    user_stddev_dict = User.objects.annotate(std_dev=StdDev('posts__rating')).values(
+        'id', 'std_dev').order_by('id').distinct().values()
+
+    # if user has no standard deviation or not enough ratings to compute one, exclude them
+    user_stddev_dict = {item['id']: item['std_dev']
+                        for item in user_stddev_dict if item['std_dev'] is not None}
+
+    # sort by standard deviation, highest first
+    sorted_user_stddev = sorted(
+        user_stddev_dict.items(), key=lambda x: x[1], reverse=True)
+    print("sorted_user_stddev", sorted_user_stddev)
+    # get top 10 percent users with the highest standard deviation
+    top_10_percent = max(1, int(len(user_stddev_dict) * 0.1))
+
+    # select these top users, ensuring they have a standard deviation greater than zero
+    top_users = dict(sorted_user_stddev[:top_10_percent])
+    top_users = {k: v for k, v in top_users.items() if v > 0}
+    
+    print("top_users", top_users)
+
+    # for users with the same standard deviation as the last user in the top 10 percent, include them
+    for user_id, std_dev in sorted_user_stddev[top_10_percent:]:
+        if std_dev == sorted_user_stddev[top_10_percent-1][1]:
+            top_users[user_id] = std_dev
+        else:
+            break
+
+    # return top users' ids
+    return list(top_users.keys())
