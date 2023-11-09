@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from tags.models import Tag
-from tags.utils import (category_name_to_tags, deepl_translate_ko_to_en,
+from tags.utils import (category_name_to_tags, google_translate_ko_to_en,
                         ml_sentiment_analysis, ml_tagging)
 
 from .models import Post
@@ -47,7 +47,7 @@ def create_tags_on_thread(post):
     if len(post.description) < 5:
         print(f'create tag and sentiment skipped: description too short: {post.description}.')
         return
-    translated_description = deepl_translate_ko_to_en(post.description)
+    translated_description = google_translate_ko_to_en(post.description)
     print('translated description', translated_description)
 
     # calculate atmosphere tags

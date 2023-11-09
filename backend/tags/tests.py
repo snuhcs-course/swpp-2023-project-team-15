@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from posts.views import (get_top_tag_after_translation_only_label,
                          get_top_tags_after_translation)
-from tags.utils import category_name_to_tags, deepl_translate_ko_to_en
+from tags.utils import category_name_to_tags, google_translate_ko_to_en
 
 
 # Create your tests here.
@@ -59,7 +59,7 @@ class TagGenerateTestCase(TestCase):
 
 class TagInferenceTestCase(TestCase):
     def assert_helper(self, text, expected_tag):
-        translated_description = deepl_translate_ko_to_en(text)        
+        translated_description = google_translate_ko_to_en(text)        
         possible_tags = [
             'for Family Gathering',
             'trending, hot, instagram',

@@ -1,26 +1,24 @@
 import requests
+import html
 from decouple import config
 
 
-def deepl_translate_ko_to_en(text):
-    url = "https://api-free.deepl.com/v2/translate"
+def google_translate_ko_to_en(text):
+    url = f"https://translation.googleapis.com/language/translate/v2?key={config('GOOGLE_AUTH_KEY')}"
 
     data = {
-        'text': text,
-        'source_lang': 'KO',
-        'target_lang': 'EN',
+        "q": text,
+        "target": "en"
     }
+    
 
-    headers = {
-        'Authorization': f'DeepL-Auth-Key {config("DEEPL_AUTH_KEY")}',
-    }
-
-    response = requests.post(url, headers=headers, data=data)
+    response = requests.post(url, data=data)
 
     if response.status_code == 200:
         result_json = response.json()
-        translations = result_json['translations']
-        translated_text = translations[0]['text']
+        translations = result_json['data']['translations']
+        translated_text = translations[0]['translatedText']
+        translated_text = html.unescape(translated_text)
         return translated_text
     else:
         return f"Error: {response.status_code}"
@@ -38,6 +36,7 @@ def ml_tagging(review_text, possible_tags):
     output = query({
         "inputs": review_text,
         "parameters": {"candidate_labels": possible_tags},
+        "options": {"wait_for_model": True},
     })
 
     print("output222", output)
@@ -63,6 +62,8 @@ def ml_sentiment_analysis(review_text):
         
     output = query({
         "inputs": review_text,
+        "options": {"wait_for_model": True},
+
     })
 
     print ("sentiment output", output)
