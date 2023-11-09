@@ -230,13 +230,15 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
-    suspend fun toggleFollow(user_id: Int){
+    suspend fun toggleFollow(user_id: Int) : Boolean{
         val authorization = "Token $token"
-        try {
+        return try {
             val response = apiService.toggleFollow(authorization, user_id)
             Log.d("toggle follow", "success")
+            true
         } catch (e: Exception) {
             Log.d("toggle follow error", e.message ?: "Network error")
+            false
         }
     }
 

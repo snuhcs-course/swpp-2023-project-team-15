@@ -79,10 +79,11 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -> Unit, buttonText: String, itsMe : Boolean = false, context : ComponentActivity? = null) {
+fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -> Unit, buttonText: String, itsMe : Boolean = false, context : ComponentActivity? = null,     onFollowClick: (Boolean) -> Unit, // Added this parameter
+) {
     var tags by remember { mutableStateOf(userInfo.tags) }
     val coroutinescope = rememberCoroutineScope()
-    var buttonText by remember { mutableStateOf(buttonText) }
+//    var buttonText by remember { mutableStateOf(buttonText) }
     var follwerCount by remember { mutableStateOf(userInfo.follower_count) }
 
     Column {
@@ -96,8 +97,17 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
         ) {
             Profile(userInfo.avatar_url, userInfo.username, userInfo.description)
             if (itsMe) MediumRedButton(onClick = { onClick()}, text = buttonText)
-            else if (buttonText == "팔로우하기") MediumRedButton(onClick = { onClick(); buttonText = "팔로잉"; follwerCount += 1 }, text = buttonText)
-            else MediumWhiteButton(onClick = { onClick(); buttonText = "팔로우하기"; follwerCount -= 1 }, text = buttonText)
+            else if (buttonText == "팔로우하기") {
+                MediumRedButton(onClick = {
+                    // Call onFollowClick with true indicating a follow action
+                    onFollowClick(true)
+                }, text = buttonText)
+            } else {
+                MediumWhiteButton(onClick = {
+                    // Call onFollowClick with false indicating an unfollow action
+                    onFollowClick(false)
+                }, text = buttonText)
+            }
         }
         Spacer(modifier = Modifier.height(11.dp))
 
@@ -250,19 +260,36 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                 .fillMaxSize()
                 .padding(horizontal = 20.dp)) {
 
-            item {ProfileRow(
-                viewModel = viewModel,
-                userInfo = userInfo,
-                onClick = {
-                    /* TODO: toggle follow */
-                    coroutineScope.launch {
-                        viewModel.toggleFollow(userInfo.id)
-                    }
-                },
-                buttonText = if (userInfo.is_followed) "팔로잉" else "팔로우하기",
-                itsMe = false,
-                context = context,
-            )}
+
+            item {
+                ProfileRow(
+                    viewModel = viewModel,
+                    userInfo = userInfo,
+                    onFollowClick = { isFollowing ->
+                        coroutineScope.launch {
+                            val result = viewModel.toggleFollow(userInfo.id)
+                            if (result) {
+                                // Directly update the userInfo object
+                                userInfo = if (isFollowing) {
+                                    userInfo.copy(is_followed = true, follower_count = userInfo.follower_count + 1)
+                                } else {
+                                    userInfo.copy(is_followed = false, follower_count = userInfo.follower_count - 1)
+                                }
+                            }
+                        }
+                    },
+                    buttonText = if (userInfo.is_followed) "팔로잉" else "팔로우하기",
+                    itsMe = userId == viewModel.myProfile.id, // Example of determining if it's the current user's profile
+                    context = context,
+                    onClick = {
+                        /* TODO: toggle follow */
+                        coroutineScope.launch {
+                            viewModel.toggleFollow(userInfo.id)
+                        }
+                    },
+                )
+            }
+
 
             item {Spacer(modifier = Modifier.height(16.dp))}
 
@@ -391,6 +418,7 @@ fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, nav
                     buttonText = "프로필 편집",
                     itsMe = true,
                     context = context,
+                    onFollowClick = {},
                 )
             }
 
@@ -497,7 +525,8 @@ fun ProfileRowPreview() {
             viewModel = AppMainViewModel(),
             userInfo = UserInfoDTO(0, "joshua-i", "본인 프로필입니다~", "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8", tags = listOf("육식주의자"), false,10, 20),
             onClick = {},
-            buttonText = "팔로우하기"  // New buttonText parameter
+            buttonText = "팔로우하기" , // New buttonText parameter
+            onFollowClick = {}, // Added this parameter
         )
     }
 }
