@@ -29,7 +29,7 @@ def get_review_king():
 
 def get_influencer():
     # get dict of follower counts of all users
-    user_followers_count_dict = User.objects.annotate(follower_count=Count('followees')).values('id', 'follower_count').order_by('id').distinct().values()
+    user_followers_count_dict = User.objects.annotate(follower_count=Count('followers')).values('id', 'follower_count').order_by('id').distinct().values()
     user_followers_count_dict = {item['id']: item['follower_count'] for item in user_followers_count_dict}
 
     print("user_followers_count_dict", user_followers_count_dict)
