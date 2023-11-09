@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, viewsets
@@ -11,11 +11,11 @@ from rest_framework.response import Response
 
 from posts.serializers import PostSerializer
 from tags.models import Tag
+from users.utils import (get_influencer, get_review_angel, get_review_gourmet,
+                         get_review_king)
 
 from .models import Follow
 from .serializers import UserInfoSerializer, UserPostSerializer, UserSerializer
-
-from django.db.models import Count
 
 User= get_user_model()
 
@@ -159,16 +159,24 @@ def refresh_user_tags(request):
     most_frequent_tags = {k: v for k, v in most_frequent_tags.items() if v > 0}
 
     print ("most_frequent_tags", most_frequent_tags)
-
-    # Update user's tags with the most frequently occurring tags
-    updated_tags = Tag.objects.filter(ko_label__in=most_frequent_tags.keys())
+    
+    tag_ko_label_candidates = list(most_frequent_tags.keys())
+        
+    # Add not ML-related tags
+    non_ml_related_tags = [
+        (get_review_king, '리뷰왕'),
+        (get_influencer, '인플루언서'),
+        (get_review_angel, '리뷰천사'),
+        (get_review_gourmet, '고든램지'),
+    ]
+    for candidate_function, tag_ko_label in non_ml_related_tags:
+        if user.id in candidate_function():
+            tag_ko_label_candidates.append(tag_ko_label)
+    
+    # Update user's tags with candidates
+    updated_tags = Tag.objects.filter(ko_label__in=tag_ko_label_candidates)
+    
     user.tags.set(updated_tags)
-
-
-
-
-
-
     return Response({"user_tags": [i.ko_label for i in updated_tags]})
 
 @api_view(['POST'])

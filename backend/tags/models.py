@@ -17,6 +17,7 @@ tags = [
 class Tag(models.Model):
     TAG_TYPES = [
         ('from_category', 'from_category'),
+        ('user_stat', 'user_stat'),
         ('atmosphere', 'atmosphere'),
     ]
 
