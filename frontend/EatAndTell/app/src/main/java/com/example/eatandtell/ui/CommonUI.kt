@@ -776,7 +776,6 @@ fun Post(
                     onHeartClick(post_id)
                     isLiked = !isLiked
                     likes = likes + 1
-                    
                 }, post_id = post_id)
             }
         }

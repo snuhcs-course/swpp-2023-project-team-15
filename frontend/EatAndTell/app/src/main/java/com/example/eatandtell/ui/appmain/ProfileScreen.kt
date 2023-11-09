@@ -263,7 +263,7 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
             item {Spacer(modifier = Modifier.height(16.dp))}
 
             items(userPosts) { post ->
-                ProfilePost(post = post, viewModel = viewModel, isCurrentUser = false, onDelete = {loading = true})
+                ProfilePost(post = post, viewModel = viewModel, isCurrentUser = false)
             }
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
@@ -407,7 +407,7 @@ fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, nav
                 }
             } else {
                 if (selectedTab == "MY") items(userPosts) { post -> //내가 쓴 리뷰들
-                    ProfilePost(post = post, viewModel = viewModel, isCurrentUser = true, onDelete = {loading = 2})
+                    ProfilePost(post = post, viewModel = viewModel, isCurrentUser = true)
                 }
                 else items(userPosts) { post -> //좋아요한 리뷰들 -> 이 경우에만 toggleLike하면 delete되어야 하므로 isLikedPost = true
                     HomePost(
@@ -449,7 +449,7 @@ fun ProfileRowPreview() {
 
 
 @Composable
-fun ProfilePost(post: PostDTO, viewModel: AppMainViewModel, isCurrentUser: Boolean, onDelete: () -> Unit = {}) {
+fun ProfilePost(post: PostDTO, viewModel: AppMainViewModel, isCurrentUser: Boolean) {
     val coroutinescope = rememberCoroutineScope()
     var deleted by remember { mutableStateOf(false) }
 
@@ -473,7 +473,6 @@ fun ProfilePost(post: PostDTO, viewModel: AppMainViewModel, isCurrentUser: Boole
                         viewModel.deletePost(post.id)
                         deleted = true
                     }
-                    onDelete()
                 }
             )
         }

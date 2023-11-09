@@ -123,7 +123,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
             items(feedPosts) { post ->
-                HomePost(post, viewModel = viewModel, navHostController = navHostController, onDelete = {loading = true})
+                HomePost(post, viewModel = viewModel, navHostController = navHostController)
             }
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
@@ -139,7 +139,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
 }
 
 @Composable
-fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController, isLikedPost : Boolean = false, onDelete: () -> Unit = {} ) {
+fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController, isLikedPost : Boolean = false) {
     val user = post.user
     val coroutinescope = rememberCoroutineScope()
     var deleted by remember { mutableStateOf(false) }
@@ -179,7 +179,6 @@ fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHo
                         viewModel.deletePost(post.id)
                         deleted = true
                     }
-                    onDelete()
                 }
             )
         }
