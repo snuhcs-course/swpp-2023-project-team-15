@@ -1,8 +1,9 @@
 package com.example.eatandtell.ui.start
 
 import android.util.Log
-import com.example.eatandtell.data.api.ApiService
-import com.example.eatandtell.di.RetrofitClient
+import com.example.eatandtell.data.repository.ApiRepository
+import com.example.eatandtell.data.repository.TokenRepository
+import com.example.eatandtell.di.NetworkModule
 import com.example.eatandtell.dto.LoginRequest
 import com.example.eatandtell.dto.LoginResponse
 import com.example.eatandtell.dto.RegisterRequest
@@ -11,7 +12,6 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -49,15 +50,15 @@ class MainCoroutineRule(private val dispatcher: TestDispatcher = StandardTestDis
     }
 }
 
-@UninstallModules(RetrofitClient::class)
+@UninstallModules(NetworkModule::class)
 @HiltAndroidTest
 @ExtendWith(MockKExtension::class)
 class StartViewModelTest {
 
     @MockK
     private val context: StartActivity = mockk(relaxed = true)
-    var mockApiService=mockk<ApiService>(relaxed = true)
-
+    private val mockRepository=mockk<ApiRepository>(relaxed = true)
+    private val mockTokenRepository=mockk<TokenRepository>(relaxed = true)
 
 
     @ExperimentalCoroutinesApi
@@ -81,39 +82,40 @@ class StartViewModelTest {
     // use RunTest to test suspend functions. See https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-test/
     //loginUser has no side effects, so no need to mock API
     @Test
-    fun loginUser_meme_returnsTrue() = runTest {
+    fun loginUser_meme_updates_state_to_Success() = runTest {
         // mock static method of Log. See https://stackoverflow.com/a/55251961
-        val viewModel= StartViewModel(mockApiService)
+        val viewModel= StartViewModel(mockRepository,mockTokenRepository)
         val fakeResponse = LoginResponse("success")
         val loginRequestData = LoginRequest("username", "password")
 
-        coEvery { mockApiService.loginUser(loginRequestData) } returns fakeResponse
-        val gotToken = viewModel.loginUser("meme", "meme", context)
-        println("gotToken: $gotToken")
-        assertNotNull(gotToken)
+        coEvery { mockRepository.loginUser(loginRequestData) } returns Result.success(fakeResponse)
+        viewModel.loginUser("username", "password", context)
+        advanceUntilIdle()
+
+
+
+        // Assert that the login state is updated to success
+        assertTrue(viewModel.loginState.value is LoginState.Success)
     }
 
     //testing registerUser on a unit level can have side effects so mock API
     @Test
     fun registerUser_meme_returnsTrue() = runTest {
-        val viewModel= StartViewModel(mockApiService)
+        val viewModel = StartViewModel(mockRepository, mockTokenRepository)
         // Define the behavior of your mock when specific functions are called
         val fakeResponse = RegisterResponse("success")
         val registerRequestData = RegisterRequest("username", "password", "email")
 
         // Setup the mock behavior for the ApiService
-        coEvery { mockApiService.registerUser(registerRequestData) } returns fakeResponse
+        coEvery { mockRepository.registerUser(registerRequestData) } returns Result.success(
+            fakeResponse
+        )
 
-        // Call the method you're testing on your ViewModel
-        val resultToken = viewModel.registerUser("username", "password", "email",context)
 
-        // Assert the expected outcomes
-        assertNotNull(resultToken)
-        assertEquals("success", resultToken)
-        println("gotToken: $resultToken")
+        viewModel.registerUser("username", "password", "email", context)
+        advanceUntilIdle()
 
-        // Verify that the mocked API service was called
-        coVerify { mockApiService.registerUser(registerRequestData) }
+        assert(viewModel.registerState.value is RegisterState.Success)
     }
     @After
     fun tearDown() {

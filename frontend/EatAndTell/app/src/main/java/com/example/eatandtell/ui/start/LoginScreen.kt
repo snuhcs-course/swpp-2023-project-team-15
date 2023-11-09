@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -39,7 +40,7 @@ import com.example.eatandtell.ui.GraySmallText
 import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.appmain.AppMainActivity
-import kotlinx.coroutines.launch
+import com.example.eatandtell.ui.showToast
 
 @Composable
 fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
@@ -66,6 +67,27 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
 
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
 
+    val loginState by viewModel.loginState
+
+    // Handle side-effects like navigation based on the login state
+    LaunchedEffect(loginState) {
+        when (loginState) {
+            is LoginState.Success -> {
+                val intent = Intent(context, AppMainActivity::class.java)
+                intent.putExtra("Token", (loginState as LoginState.Success).token)
+                showToast(context,"Login Success")
+                context.startActivity(intent)
+                context.finish()
+            }
+            is LoginState.Error -> {
+                val errorMessage = (loginState as LoginState.Error).message
+                showToast(context,"Login Failed")
+
+            }
+            // Handle other states if necessary
+            else -> Unit
+        }
+    }
     // Main content
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -100,12 +122,13 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
         Spacer(modifier = Modifier.height(12.dp))
 
         LoginButton(
-            onClick = { token ->
+            onClick = {it->
                 Log.d("login screen", "ID: ${id.text}, Password: ${password.text}")
-                val intent = Intent(context, AppMainActivity::class.java)
-                intent.putExtra("Token", token) // 토큰 넘겨주기
-                context.startActivity(intent)
-                context.finish()
+                viewModel.loginUser(id.text, password.text,context)
+                //val intent = Intent(context, AppMainActivity::class.java)
+                //intent.putExtra("Token", token) // 토큰 넘겨주기
+                //context.startActivity(intent)
+                //context.finish()
             },
             id = id.text,
             password = password.text,
@@ -158,11 +181,7 @@ fun LoginButton(viewModel: StartViewModel, id: String, password: String, context
     MainButton(
         text = "로그인",
         onClick = {
-            coroutineScope.launch {
-                val token = viewModel.loginUser(id, password, context)
-                if (token != null)
-                    onClick(token)
-            }
+            onClick(null)
         }
     )
 }

@@ -2,6 +2,7 @@
 package com.example.eatandtell.ui.start
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,7 +35,7 @@ import com.example.eatandtell.ui.GraySmallText
 import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.appmain.AppMainActivity
-import kotlinx.coroutines.launch
+import com.example.eatandtell.ui.showToast
 
 @Composable
 fun SignupScreen(navController: NavController, context: ComponentActivity, viewModel: StartViewModel) {
@@ -55,6 +57,27 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
     }
 
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
+
+
+    val registerState by viewModel.registerState
+    LaunchedEffect(registerState) {
+        when (registerState) {
+            is RegisterState.Success -> {
+                val intent = Intent(context, AppMainActivity::class.java)
+                intent.putExtra("Token", (registerState as RegisterState.Success).token)
+                showToast(context,"Register Success")
+                context.startActivity(intent)
+                context.finish()
+            }
+            is RegisterState.Error -> {
+                val errorMessage = (registerState as RegisterState.Error).message
+                showToast(context,"Register Failed")
+
+            }
+            // Handle other states if necessary
+            else -> Unit
+        }
+    }
 
     // Main content of SignupActivity
     Column(
@@ -113,11 +136,10 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
         Spacer(modifier = Modifier.height(12.dp))
 
         SignupButton(
-            onClick =  { token ->
-                val intent = Intent(context, AppMainActivity::class.java)
-                intent.putExtra("Token", token) // 토큰 넘겨주기
-                context.startActivity(intent)
-                context.finish()
+            onClick =  {it->
+
+                Log.d("register screen", "Username ${username.text}, Password: ${password.text}")
+                viewModel.registerUser(username.text, password.text,email.text,context)
             },
             email = email.text,
             username = username.text,
@@ -169,16 +191,16 @@ fun SignupButton (
 
     MainButton(text = "회원가입",
         onClick={
-            val token= when {
-                email.isBlank() -> "이메일을 입력하세요"
+            when {
+                /*email.isBlank() -> "이메일을 입력하세요"
                 !isEmailValid(email) -> "이메일 주소가 올바르지 않습니다"
                 username.isBlank() -> "아이디를 입력하세요"
                 username.length !in 4..20 -> "아이디가 올바르지 않습니다"
                 password.isBlank() ->  "비밀번호를 입력하세요"
                 password.length !in 4..20 ->"비밀번호가 올바르지 않습니다"
                 confirmPassword.isBlank() -> "비밀번호 확인을 입력하세요"
-                password != confirmPassword ->  "비밀번호 확인이 틀립니다"
-                /*email.isBlank() -> showToast(context, "이메일을 입력하세요")
+                password != confirmPassword ->  "비밀번호 확인이 틀립니다"*/
+                email.isBlank() -> showToast(context, "이메일을 입력하세요")
                 !isEmailValid(email) -> showToast(context, "이메일 주소가 올바르지 않습니다")
                 username.isBlank() -> showToast(context, "아이디를 입력하세요")
                 username.length !in 4..20 -> showToast(context, "아이디가 올바르지 않습니다")
@@ -186,15 +208,12 @@ fun SignupButton (
                 password.length !in 4..20 -> showToast(context, "비밀번호가 올바르지 않습니다")
                 confirmPassword.isBlank() -> showToast(context, "비밀번호 확인을 입력하세요")
                 password != confirmPassword -> showToast(context, "비밀번호 확인이 틀립니다")
-                */else -> {
-                    coroutineScope.launch{
-                        viewModel.registerUser(username, password, email, context)
-                    }
+                else -> {
+                    onClick(null)
                 }
-            } as String
+            }
 
-            if (token !=null)
-                onClick(token)
-            println(token)
+
+
         })
 }

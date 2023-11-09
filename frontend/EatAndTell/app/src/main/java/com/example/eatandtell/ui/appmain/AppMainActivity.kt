@@ -19,15 +19,26 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.eatandtell.ui.showToast
+import dagger.hilt.android.AndroidEntryPoint
 
 //import com.example.eatandtell.ui.AppNavigation
-
+@AndroidEntryPoint
 class AppMainActivity : ComponentActivity() {
     private val appMainViewModel: AppMainViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val token = intent.getStringExtra("Token")
         appMainViewModel.initialize(token)
+
+        appMainViewModel.uploadStatus.observe(this){message->
+            showToast(this,message)
+        }
+        appMainViewModel.editStatus.observe(this){message->
+            showToast(this,message)
+        }
+
+
 
         setContent {
             Surface(

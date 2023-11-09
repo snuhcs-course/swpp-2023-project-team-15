@@ -15,8 +15,9 @@ import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.toggleLikeResponse
 import okhttp3.MultipartBody
+import javax.inject.Inject
 
-class MainRepository(private val apiService: ApiService) {
+class ApiRepository@Inject constructor(private val apiService: ApiService) {
 
     suspend fun loginUser(loginData: LoginRequest): Result<LoginResponse> = runCatching {
         apiService.loginUser(loginData)
@@ -70,5 +71,7 @@ class MainRepository(private val apiService: ApiService) {
         apiService.refreshTags(authorization)
     }
 
-    // You may want to add other methods to interact with the API as needed
+
+
+
 }

@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
-import com.example.eatandtell.SharedPreferencesManager
+import com.example.eatandtell.data.security.SharedPreferencesManager
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.ui.CustomTextField
 import com.example.eatandtell.ui.EditProfileImage

@@ -1,4 +1,4 @@
-package com.example.eatandtell
+package com.example.eatandtell.data.security
 
 import android.content.Context
 import android.content.SharedPreferences

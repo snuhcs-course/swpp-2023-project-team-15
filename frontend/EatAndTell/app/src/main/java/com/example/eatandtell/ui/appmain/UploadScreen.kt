@@ -50,7 +50,6 @@ import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.WhiteTextField
 import com.example.eatandtell.ui.showToast
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.launch
 
 
 @Composable
@@ -95,6 +94,7 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
             if (e !is CancellationException) { // 유저가 너무 빨리 화면을 옮겨다니는 경우에는 CancellationException이 발생할 수 있지만, 서버 에러가 아니라서 패스
                 loading = false
                 println("get my profile load error")
+                println(e)
                 showToast(context, "프로필 로딩에 실패하였습니다")
             }
         }
@@ -250,17 +250,18 @@ fun UploadButton(viewModel: AppMainViewModel,
 
             else -> {
                 try {
-                    coroutineScope.launch {
+                    viewModel.uploadPhotosAndPost(
+                        photoPaths = photoPaths,
+                        restaurant = restaurant,
+                        rating = rating,
+                        description = description,
+                        context = context
+                    )
+                    onClickNav()
+                    /*coroutineScope.launch {
                         enable = false
-                        viewModel.uploadPhotosAndPost(
-                            photoPaths = photoPaths,
-                            restaurant = restaurant,
-                            rating = rating,
-                            description = description,
-                            context = context
-                        )
-                        onClickNav() //Navigation을 먼저 해버리니까
-                    }
+                         //Navigation을 먼저 해버리니까
+                    }*/
                 } catch (e: Exception) {
                     // Handle exceptions, e.g., from network calls, here
                     showToast(context, "An error occurred: ${e.message}")

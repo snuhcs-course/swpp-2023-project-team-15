@@ -2,10 +2,11 @@ package com.example.eatandtell.ui.appmain
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.eatandtell.data.api.ApiService
+import com.example.eatandtell.data.repository.ApiRepository
 import com.example.eatandtell.dto.EditProfileRequest
 import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.PostDTO
@@ -24,9 +25,16 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 
 @HiltViewModel
-class AppMainViewModel@Inject constructor(private val apiService: ApiService) : ViewModel()  {
+class AppMainViewModel@Inject constructor(private val apiRepository: ApiRepository) : ViewModel()  {
 
     private var token: String? = null
+
+    private val _uploadStatus = MutableLiveData<String>()
+    val uploadStatus: LiveData<String> = _uploadStatus
+
+    private val _editStatus = MutableLiveData<String>()
+    val editStatus: LiveData<String> = _editStatus
+
     fun initialize(token: String?) {
         this.token = token
     }
@@ -43,83 +51,101 @@ class AppMainViewModel@Inject constructor(private val apiService: ApiService) : 
         return null
     }
 
-    suspend fun uploadPhotosAndPost(photoPaths: List<Uri>,
+    fun uploadPhotosAndPost(photoPaths: List<Uri>,
                                     restaurant : RestReqDTO,
                                     rating: String,
                                     description: String,
                                     context: Context
                                     ) {
 
-        val photoUrls = mutableListOf<String>()
-        val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it,context) }
-        for(byteArray in photoByteArrays) {
-            val requestBody: RequestBody = byteArray.toRequestBody("image/*".toMediaTypeOrNull())
-            val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("image", "this_name_does_not_matter.jpg", requestBody)
-            val imageUrl = getImageURL(fileToUpload)
-            photoUrls.add(imageUrl)
-        }
-        try {
-            Log.d("upload photos and post",  "trying")
-            val photos = photoUrls.map { PhotoReqDTO(it) }
-            val postData = UploadPostRequest(restaurant = restaurant, photos = photos, rating = rating, description = description)
-            this.uploadPost(postData)
-            Log.d("upload photos and post",  "success")
-            messageToDisplay.postValue("포스트가 업로드되었습니다")
-            //showToast(context, "포스트가 업로드되었습니다")
-        } catch (e: Exception) {
-            // Handle exceptions, e.g., from network calls, here
-            //except cancellation exception
-            if (e !is CancellationException) {
-                Log.d("upload photos and post error", e.message ?: "Network error")
-                messageToDisplay.postValue("포스트 업로드에 실패했습니다.")
-                //showToast(context, "포스트 업로드에 실패했습니다")
+
+
+        viewModelScope.launch {
+            val photoUrls = mutableListOf<String>()
+            val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it, context) }
+            for (byteArray in photoByteArrays) {
+                val requestBody: RequestBody =
+                   byteArray.toRequestBody("image/*".toMediaTypeOrNull())
+                val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData(
+                   "image",
+                    "this_name_does_not_matter.jpg",
+                   requestBody
+                )
+                try{
+                    val imageUrl = getImageURL(fileToUpload)
+                    photoUrls.add(imageUrl)
+                }catch(e:Exception){
+                    Log.d("Image Upload Error", e.message ?: "Upload failed")
+                    _uploadStatus.postValue("이미지 업로드에 실패했습니다.")
+                    return@launch
+                }
             }
-            else {
+            try {
+                Log.d("upload photos and post", "trying")
+                val photos = photoUrls.map { PhotoReqDTO(it) }
+                val postData = UploadPostRequest(
+                    restaurant = restaurant,
+                    photos = photos,
+                    rating = rating,
+                    description = description
+                )
+                uploadPost(postData)
+                Log.d("upload photos and post", "success")
+                _uploadStatus.postValue("포스트가 업로드되었습니다")
+
+            } catch (e: CancellationException) {
                 Log.d("upload photos and post error", "cancellation exception")
-                //showToast(context, "포스트가 업로드되었습니다")
-                messageToDisplay.postValue("포스트가 업로드되었습니다")
-                //TODO: navigate을 해버리니까 cancellation 에러가 뜸. 그렇다고 navigate을 코루틴 내에서 화면이 너무 안 넘어가서 버튼을 연타하게 됨
+            } catch (e:Exception){
+                Log.d("upload photos and post error", e.message ?: "Network error")
+                _uploadStatus.postValue("포스트 업로드에 실패했습니다.")
             }
-        }
+
+            }
     }
 
-    suspend fun uploadPhotosAndEditProfile(photoPaths: List<Uri>, //실제로는 length 1짜리
+    fun uploadPhotosAndEditProfile(photoPaths: List<Uri>, //실제로는 length 1짜리
                                     description: String,
                                     context: Context,
                                            org_avatar_url: String,
     ) {
+        viewModelScope.launch {
 
-        Log.d("edit profile photoPaths: ", photoPaths.toString())
-        val photoUrls = mutableListOf<String>()
-        val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it, context) }
-        for(byteArray in photoByteArrays) {
-            val requestBody: RequestBody = byteArray.toRequestBody("image/*".toMediaTypeOrNull())
-            val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData("image", "this_name_does_not_matter.jpg", requestBody)
-            val imageUrl = getImageURL(fileToUpload)
-            photoUrls.add(imageUrl)
-        }
-
-
-        try {
-            Log.d("edit profile", description)
-            Log.d("edit profile", photoUrls.toString())
-            Log.d("edit profile", org_avatar_url)
-            val url = if (photoUrls.isEmpty()) org_avatar_url else photoUrls[0]
-            val profileData = EditProfileRequest(description = description, avatar_url = url)
-            Log.d("edit profile", profileData.toString())
-            this.editProfile(profileData)
-            showToast(context, "프로필이 편집되었습니다")
-        } catch (e: Exception) {
-            // Handle exceptions, e.g., from network calls, here
-            if (e !is CancellationException) {
-                Log.d("edit profile error", e.message ?: "Network error")
-                showToast(context, "프로필 편집에 실패했습니다")
-                messageToDisplay.postValue("프로필 편집에 실패했습니다")
+            Log.d("edit profile photoPaths: ", photoPaths.toString())
+            val photoUrls = mutableListOf<String>()
+            val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it, context) }
+            for (byteArray in photoByteArrays) {
+                val requestBody: RequestBody =
+                    byteArray.toRequestBody("image/*".toMediaTypeOrNull())
+                val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData(
+                    "image",
+                    "this_name_does_not_matter.jpg",
+                    requestBody
+                )
+                val imageUrl = getImageURL(fileToUpload)
+                photoUrls.add(imageUrl)
             }
-            else {
-                Log.d("edit profile error", "cancellation exception")
-                messageToDisplay.postValue("프로필이 편집되었습니다")
-                //TOOD: navigate을 해버리니까 cancellation 에러가 뜸. 그렇다고 navigate을 코루틴 내에서 화면이 너무 안 넘어가서 버튼을 연타하게 됨
+
+
+            try {
+                Log.d("edit profile", description)
+                Log.d("edit profile", photoUrls.toString())
+                Log.d("edit profile", org_avatar_url)
+                val url = if (photoUrls.isEmpty()) org_avatar_url else photoUrls[0]
+                val profileData = EditProfileRequest(description = description, avatar_url = url)
+                Log.d("edit profile", profileData.toString())
+                editProfile(profileData)
+                showToast(context, "프로필이 편집되었습니다")
+            } catch (e: Exception) {
+                // Handle exceptions, e.g., from network calls, here
+                if (e !is CancellationException) {
+                    Log.d("edit profile error", e.message ?: "Network error")
+                    //showToast(context, "프로필 편집에 실패했습니다")
+                    _editStatus.postValue("프로필 편집에 실패했습니다")
+                } else {
+                    Log.d("edit profile error", "cancellation exception")
+                    _editStatus.postValue("프로필이 편집되었습니다")
+                    //TOOD: navigate을 해버리니까 cancellation 에러가 뜸. 그렇다고 navigate을 코루틴 내에서 화면이 너무 안 넘어가서 버튼을 연타하게 됨
+                }
             }
         }
     }
@@ -128,7 +154,7 @@ class AppMainViewModel@Inject constructor(private val apiService: ApiService) : 
         val authorization = "Token $token"
 
         try {
-            apiService.uploadPost(authorization, postData)
+            apiRepository.uploadPost(authorization, postData)
         } catch (e: Exception) {
             val errorMessage = e.message ?: "Network error"
             Log.d("upload post error", errorMessage)
@@ -140,7 +166,7 @@ class AppMainViewModel@Inject constructor(private val apiService: ApiService) : 
         val authorization = "Token $token"
 
         try {
-            apiService.editProfile(authorization, profileData)
+            apiRepository.editProfile(authorization, profileData)
         } catch (e: Exception) {
             val errorMessage = e.message ?: "Network error"
             Log.d("edit profile error", errorMessage)
@@ -150,36 +176,40 @@ class AppMainViewModel@Inject constructor(private val apiService: ApiService) : 
 
     private suspend fun getImageURL(fileToUpload: MultipartBody.Part?): String {
         val authorization = "Token $token"
-
-        try {
-            val response = apiService.getImageURL(authorization, fileToUpload) // Assuming this is a suspend function call
-            val imageUrl = response.image_url
-            return imageUrl
-        } catch (e: Exception) {
-            val errorMessage = e.message ?: "Network error"
-            Log.d("get image url error", errorMessage)
-            throw e // rethrow the exception to be caught in the calling function
+        val response = apiRepository.getImageURL(authorization, fileToUpload) // Assuming this is a suspend function call
+        var get_img_url:String= ""
+        response.onSuccess { response ->
+            get_img_url= response.image_url
         }
+        response.onFailure { exception->
+            val errorMessage = exception.message ?: "Network error"
+            Log.d("image_url_error", errorMessage)
+            get_img_url= errorMessage
+        }
+        return get_img_url
     }
 
     suspend fun getAllPosts(onSuccess: (List<PostDTO>) -> Unit) {
         val authorization = "Token $token"
-        try {
-            val response = apiService.getAllPosts(authorization)
+        val response = apiRepository.getAllPosts(authorization)
+        response.onSuccess { response->
             onSuccess(response.data)
-        } catch (e: Exception) {
-            throw e // rethrow the exception to be caught in the calling function
+
         }
+        response.onFailure { message->
+            throw message
+        }
+
     }
 
 
     suspend fun getUserFeed(userId: Int? = null, onSuccess: (UserInfoDTO, List<PostDTO>) -> Unit) {
         val authorization = "Token $token"
-        try {
-            val response = (
-                if (userId != null) apiService.getUserFeed(authorization, userId)
-                 else apiService.getMyFeed(authorization)
-            )
+        val response = (
+                if (userId != null) apiRepository.getUserFeed(authorization, userId)
+                else apiRepository.getMyFeed(authorization)
+                )
+        response.onSuccess {response->
             println("user feed response is")
             println(response.tags)
             val myInfo = UserInfoDTO(
@@ -195,89 +225,103 @@ class AppMainViewModel@Inject constructor(private val apiService: ApiService) : 
             val myPosts = response.posts?: listOf() //posts가 null이라서 임시처리
             println("get user feed success")
             onSuccess(myInfo, myPosts)
-        } catch (e: Exception) {
+
+        }
+        response.onFailure { e->
             print("get user feed error")
             println(e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function
         }
+
     }
 
 
 
     suspend fun toggleLike(post_id: Int) {
         val authorization = "Token $token"
-        try {
-            val response = apiService.toggleLike(authorization, post_id)
-            Log.d("toggle like", "success")
-        } catch (e: Exception) {
+        val response = apiRepository.toggleLike(authorization, post_id)
+        response.onSuccess { Log.d("toggle like", "success") }
+        response.onFailure { e->
             Log.d("toggle like error", e.message ?: "Network error")
         }
+
+
     }
 
     suspend fun getMyProfile(onSuccess: (UserDTO) -> Unit){
         val authorization = "Token $token"
-        try {
-            val response = apiService.getMyFeed(authorization)
+        val response = apiRepository.getMyFeed(authorization)
+        response.onSuccess { response->
             val myInfo = UserDTO(response.id, response.username, response.description, response.avatar_url, listOf())
             Log.d("getMyProfile", "success")
-            onSuccess(myInfo)
-        } catch (e: Exception) {
-            Log.d("getMyProfile error", e.message ?: "Network error")
-            throw e // rethrow the exception to be caught in the calling function
-        }
+            onSuccess(myInfo) }
+       response.onFailure { e->
+           Log.d("getMyProfile error", e.message ?: "Network error")
+           throw e
+       }
     }
 
 
     suspend fun getFilteredUsersByName(username: String, onSuccess: (List<UserDTO>) -> Unit) {
         val authorization = "Token $token"
-        try {
-            val response = apiService.getFilteredUsersByName(authorization, username)
+        val response = apiRepository.getFilteredUsersByName(authorization, username)
+
+        response.onSuccess{response->
             //print response
             println(response)
             onSuccess(response)
             Log.d("getFilteredUsersByName", "success")
-        } catch (e: Exception) {
+        }
+
+        response.onFailure {e->
             Log.d("getFilteredUsersByName error", e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function
         }
+
     }
 
     suspend fun getFilteredUsersByTag(tag: String, onSuccess: (List<UserDTO>) -> Unit) {
         val authorization = "Token $token"
-        try {
-            val response = apiService.getFilteredUsersByTag(authorization, tag)
+        val response = apiRepository.getFilteredUsersByTag(authorization, tag)
+        response.onSuccess {response->
             onSuccess(response)
             Log.d("getFilteredUsersByTag", "success")
-        } catch (e: Exception) {
+        }
+        response.onFailure { e->
             Log.d("getFilteredUsersByTag error", e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function
         }
+
     }
 
     suspend fun getFilteredByRestaurants(restaurantName: String, onSuccess: (List<PostDTO>) -> Unit) {
         val authorization = "Token $token"
-        try {
-            val response = apiService.getFilteredByRestaurants(authorization, restaurantName)
+        val response = apiRepository.getFilteredByRestaurants(authorization, restaurantName)
+
+        response.onSuccess {response->
             onSuccess(response.data)
             Log.d("getFilteredByRestaurants", "success")
-        } catch (e: Exception) {
+        }
+        response.onFailure { e->
             Log.d("getFilteredByRestaurants error", e.message ?: "Network error")
             throw e // rethrow the exception to be caught in the calling function
         }
+
     }
 
     fun refreshTags(onSuccess: (List<String>) -> Unit, context: Context) {
         val authorization = "Token $token"
         viewModelScope.launch {
-            try {
-                val response = apiService.refreshTags(authorization)
+            val response = apiRepository.refreshTags(authorization)
+            response.onSuccess {response->
                 onSuccess(response.user_tags)
                 Log.d("refresh tags", "success")
-                messageToDisplay.postValue("태그가 업데이트되었습니다")
-            } catch (e: Exception) {
+                messageToDisplay.postValue("태그가 업데이트되었습니다")  }
+            response.onFailure {e->
                 Log.d("refresh tags error", e.message ?: "Network error")
                 messageToDisplay.postValue("태그 업데이트에 실패하였습니다")
             }
+
         }
     }
 }

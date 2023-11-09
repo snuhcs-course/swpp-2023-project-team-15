@@ -11,7 +11,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class) // Scoped to the whole application
-object RetrofitClient {
+object NetworkModule {
 
     private const val BASE_URL = "https://ec2-13-125-91-166.ap-northeast-2.compute.amazonaws.com/"
 

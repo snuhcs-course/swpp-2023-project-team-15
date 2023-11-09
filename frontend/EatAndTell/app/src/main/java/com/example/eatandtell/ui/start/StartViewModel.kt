@@ -1,55 +1,97 @@
 package com.example.eatandtell.ui.start
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.eatandtell.SharedPreferencesManager
-import com.example.eatandtell.data.api.ApiService
-import com.example.eatandtell.data.repository.MainRepository
+import androidx.lifecycle.viewModelScope
+import com.example.eatandtell.data.repository.ApiRepository
+import com.example.eatandtell.data.repository.TokenRepository
 import com.example.eatandtell.dto.LoginRequest
+import com.example.eatandtell.dto.LoginResponse
 import com.example.eatandtell.dto.RegisterRequest
-import com.example.eatandtell.ui.showToast
+import com.example.eatandtell.dto.RegisterResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class StartViewModel @Inject constructor(private val mainRepository: MainRepository) : ViewModel() {
-    suspend fun loginUser(username: String, password: String, context: Context): String? {
-        val loginData = LoginRequest(username, password)
-        val response = mainRepository.loginUser(loginData)
+class StartViewModel @Inject constructor(private val mainRepository: ApiRepository,private val tokenRepository: TokenRepository) : ViewModel() {
+    private val _loginState = mutableStateOf<LoginState>(LoginState.Idle)
+    val loginState: State<LoginState> = _loginState
+    private val _registerState = mutableStateOf<RegisterState>(RegisterState.Idle)
+    val registerState: State<RegisterState> = _registerState
 
-        return try {
+    fun loginUser(username: String, password: String, context: Context){
+        viewModelScope.launch {
+            val loginData = LoginRequest(username, password)
+            val response: Result<LoginResponse> = mainRepository.loginUser(loginData)
 
-            val token = response.token
-            Log.d("login", "success")
-            SharedPreferencesManager.setToken(context, token)
-            token // This will be the return value of the function
-        } catch (e: Exception) {
-            val errorMessage = e.message ?: "Network error"
-            Log.d("login", "error: $errorMessage")
-            //showToast(context, "로그인에 실패하였습니다")
-            null // In case of an error, return null or you could throw an exception
+
+            response.onSuccess { response ->
+                val token = response.token
+                //Log.d("login", "success")
+                tokenRepository.saveToken(context, token)
+                _loginState.value = LoginState.Success(response.token)
+            }
+
+            response.onFailure { exception ->
+                val errorMessage = exception.message ?: "Network error"
+                Log.d("login", "error: $errorMessage")
+                _loginState.value = LoginState.Error(exception.localizedMessage ?: "Unknown error")
+            }
+
         }
+
     }
 
+    fun registerUser(username: String, password: String, email: String, context: Context){
+        viewModelScope.launch {
+            val registrationData = RegisterRequest(username, password, email)
+            val response: Result<RegisterResponse> = mainRepository.registerUser(registrationData)
+            response.onSuccess { response ->
+                val token = response.token
+                Log.d("register", "success")
+                tokenRepository.saveToken(context, token)
+                _registerState.value = RegisterState.Success(response.token)
+            }
 
-    suspend fun registerUser(username: String, password: String, email: String, context: Context): String? {
-        val registrationData = RegisterRequest(username, password, email)
-        return try {
-            val response = apiService.registerUser(registrationData)
-            val token = response.token
-            //Log.d("sign up", "success")
-            SharedPreferencesManager.setToken(context, token)
-            token
-        } catch (e: Exception) {
-            val errorMessage = e.message ?: "Network error"
-            Log.d("sign up", "error: $errorMessage")
-            showToast(context, "회원가입에 실패하였습니다")
+            response.onFailure { exception ->
+                val errorMessage = exception.message ?: "Network error"
+                Log.d("login", "error: $errorMessage")
+                _registerState.value = RegisterState.Error(exception.localizedMessage ?: "Unknown error")
+            }
+            /*
+            response.onSuccess { it ->
+                val token = it.token
 
-            null
+                SharedPreferencesManager.setToken(context, token)
+
+            }
+            response.onFailure { exception ->
+
+
+                //showToast(context, "회원가입에 실패하였습니다")
+
+
+            }
+*/
         }
-
     }
 
 
 }
+sealed class LoginState{
+    object Idle:LoginState()
+    data class Success(val token:String):LoginState()
+    data class Error(val message:String):LoginState()
+}
+
+
+sealed class RegisterState{
+    object Idle:RegisterState()
+    data class Success(val token:String):RegisterState()
+    data class Error(val message:String):RegisterState()
+}
+
 

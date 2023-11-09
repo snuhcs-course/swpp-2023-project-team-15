@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.eatandtell.data.security.SharedPreferencesManager
 import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.appmain.AppMainActivity
 import com.example.eatandtell.ui.start.StartActivity
