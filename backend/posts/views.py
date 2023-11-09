@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from tags.models import Tag
-from tags.utils import (category_name_to_tags, deepl_translate_ko_to_en,
+from tags.utils import (category_name_to_tags, google_translate_ko_to_en,
                         ml_sentiment_analysis, ml_tagging)
 
 from .models import Post
@@ -34,7 +34,7 @@ def get_top_tags_after_translation(possible_tags, translated_description):
     return None
 
 def create_tags_on_thread(post):
-    print("Thread started")
+    print("Thread started for post ", post.id)
     # calculate category tags
     category_name = post.restaurant.category_name
     if category_name is not None:
@@ -47,7 +47,7 @@ def create_tags_on_thread(post):
     if len(post.description) < 5:
         print(f'create tag and sentiment skipped: description too short: {post.description}.')
         return
-    translated_description = deepl_translate_ko_to_en(post.description)
+    translated_description = google_translate_ko_to_en(post.description)
     print('translated description', translated_description)
 
     # calculate atmosphere tags
@@ -189,3 +189,5 @@ def restaurant_search(request):
     use_keys = ['id', 'place_name', 'road_address_name', 'category_name', 'x', 'y']
     parsed_response = [{k: item[k] for k in use_keys} for item in response.json()['documents']]
     return Response({"data": parsed_response}, status=status.HTTP_200_OK)
+
+

@@ -184,3 +184,9 @@ def follow(request, pk):
 
     # Serialize the user data and return it
     return Response({"following": following}, status=status.HTTP_200_OK)
+
+
+
+
+
+
