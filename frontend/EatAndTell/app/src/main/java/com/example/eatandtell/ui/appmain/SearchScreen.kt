@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -22,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -54,7 +56,8 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
 
     var userListsByTags by remember { mutableStateOf(emptyList<UserDTO>()) }
 
-    var postLists by remember { mutableStateOf(emptyList<PostDTO>()) }
+//    var postLists by remember { mutableStateOf(emptyList<PostDTO>()) }
+    val postLists = remember { mutableStateListOf<PostDTO>() }
 
     var loading by remember { mutableStateOf(false) }
 
@@ -138,7 +141,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
         LaunchedEffect(triggerSearch) {
             println("search screen "+searchText.text + " " + triggerSearch)
             if (triggerSearch) {
-                postLists = emptyList();
+                postLists.clear() // This will clear the MutableStateList
                 userLists = emptyList();
                 userListsByTags = emptyList();
                 loading = true
@@ -151,7 +154,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                                 loading = false
                             }
                         )
-                        postLists = emptyList() // Reset post lists
+                        postLists.clear() // This will clear the MutableStateList
                     }
                     else if(selectedButton == "태그") {
                         //TODO: search by tags
@@ -162,13 +165,14 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                                 loading = false
                             }
                         )
-                        postLists = emptyList() // Reset post lists
+                        postLists.clear() // This will clear the MutableStateList
                     }
                     else {
                         if (searchText.text.length>=1) viewModel.getFilteredByRestaurants(
                             searchText.text,
                             onSuccess = { posts ->
-                                postLists = posts // resulted post Lists
+                                postLists.clear() // This will clear the MutableStateList
+                                postLists.addAll(posts)
                                 loading = false
                             }
                         )
@@ -236,9 +240,25 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                         )
                     }
                 } else {
-                    items(postLists.size) { index ->
-                        val post = postLists[index]
-                        HomePost(post, viewModel = viewModel, navHostController = navController)
+                    items(items = postLists, key = { it.id }) { post ->
+                        HomePost(
+                            post = post,
+                            viewModel = viewModel,
+                            navHostController = navController,
+                            onLike = { postToLike ->
+                                val index = postLists.indexOf(postToLike)
+                                if (index != -1) {
+                                    val newLikeCount = if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
+                                    postLists[index] = postToLike.copy(
+                                        is_liked = !postToLike.is_liked,
+                                        like_count = newLikeCount
+                                    )
+                                }
+                            },
+                            onDelete = { postToDelete ->
+                                postLists.remove(postToDelete)
+                            }
+                        )
                     }
                 }
 

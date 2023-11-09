@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -94,7 +95,8 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
             verticalAlignment = Alignment.CenterVertically
         ) {
             Profile(userInfo.avatar_url, userInfo.username, userInfo.description)
-            if (itsMe || buttonText == "팔로우하기") MediumRedButton(onClick = { onClick(); buttonText = "팔로잉"; follwerCount += 1 }, text = buttonText)
+            if (itsMe) MediumRedButton(onClick = { onClick()}, text = buttonText)
+            else if (buttonText == "팔로우하기") MediumRedButton(onClick = { onClick(); buttonText = "팔로잉"; follwerCount += 1 }, text = buttonText)
             else MediumWhiteButton(onClick = { onClick(); buttonText = "팔로우하기"; follwerCount -= 1 }, text = buttonText)
         }
         Spacer(modifier = Modifier.height(11.dp))
@@ -106,13 +108,13 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                 .fillMaxWidth()
         ) {
             Text(text = "${userInfo.following_count} Followings" ,
-                 style = TextStyle(
-                     fontSize = 16.sp,
-                     lineHeight = 18.sp,
-                     fontFamily = Inter,
-                     fontWeight = FontWeight(500),
-                        color = Color.Black,
-                     )
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    lineHeight = 18.sp,
+                    fontFamily = Inter,
+                    fontWeight = FontWeight(500),
+                    color = Color.Black,
+                )
             )
             Text(text = "${follwerCount} Followers",
                 style = TextStyle(
@@ -197,7 +199,8 @@ fun ProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navCo
 
 @Composable
 fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navController: NavHostController, userId: Int? = null) {
-    var userPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
+//    var userPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
+    val userPosts = remember { mutableStateListOf<PostDTO>() }
     var userInfo by remember { mutableStateOf(UserInfoDTO(0, "", "", "", listOf(), false,0, 0)) }
     var loading by remember { mutableStateOf(true) } //이때는 유저 프로필까지 가져와야 한다.
     var lazyListState = rememberLazyListState()
@@ -210,7 +213,8 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                 userId = userId,
                 onSuccess = { info, posts ->
                     userInfo = info
-                    userPosts = posts
+                    userPosts.clear()
+                    userPosts.addAll(posts)
                 }
             )
             loading = false
@@ -251,9 +255,9 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                 userInfo = userInfo,
                 onClick = {
                     /* TODO: toggle follow */
-                          coroutineScope.launch {
-                              viewModel.toggleFollow(userInfo.id)
-                          }
+                    coroutineScope.launch {
+                        viewModel.toggleFollow(userInfo.id)
+                    }
                 },
                 buttonText = if (userInfo.is_followed) "팔로잉" else "팔로우하기",
                 itsMe = false,
@@ -262,9 +266,31 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
 
             item {Spacer(modifier = Modifier.height(16.dp))}
 
+//            items(userPosts) { post ->
+//                ProfilePost(post = post, viewModel = viewModel, isCurrentUser = false)
+//            }
+            // Replace the existing items call for userPosts
             items(userPosts) { post ->
-                ProfilePost(post = post, viewModel = viewModel, isCurrentUser = false)
+                ProfilePost(
+                    post = post,
+                    viewModel = viewModel,
+                    isCurrentUser = userId == null, // Or any other logic you have for determining if the user is the current user
+                    onLike = { postToLike ->
+                        val index = userPosts.indexOf(postToLike)
+                        if (index != -1) {
+                            val newLikeCount = if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
+                            userPosts[index] = postToLike.copy(
+                                is_liked = !postToLike.is_liked,
+                                like_count = newLikeCount
+                            )
+                        }
+                    },
+                    onDelete = { postToDelete ->
+                        userPosts.remove(postToDelete)
+                    }
+                )
             }
+
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
             item {Spacer(modifier = Modifier.height(70.dp))}
@@ -280,7 +306,7 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
 
 @Composable
 fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navController: NavHostController, userId: Int? = null) {
-    var userPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
+    val feedPosts = remember { mutableStateListOf<PostDTO>() }
     var myInfo by remember { mutableStateOf(UserInfoDTO(0, "", "", "", listOf(), false,0, 0)) }
     var selectedTab by remember { mutableStateOf("MY") }
     var loading by remember { mutableStateOf(1) }
@@ -301,20 +327,23 @@ fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, nav
                 userId = userId,
                 onSuccess = { info, posts ->
                     myInfo = info
-                    userPosts = posts
+                    feedPosts.clear()
+                    feedPosts.addAll(posts)
                 }
             )
 
             else if (loading == 2 && selectedTab == "MY") viewModel.getUserFeed( //하위 피드만 재로딩
                 userId = userId,
                 onSuccess = { info, posts ->
-                    userPosts = posts
+                    feedPosts.clear()
+                    feedPosts.addAll(posts)
                 }
             )
 
             else if (loading == 2) viewModel.getLikedFeed ( //하위 피드만 재로딩
                 onSuccess = { posts ->
-                    userPosts = posts
+                    feedPosts.clear()
+                    feedPosts.addAll(posts)
                 }
             )
             loading = 0
@@ -406,15 +435,41 @@ fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, nav
                     }
                 }
             } else {
-                if (selectedTab == "MY") items(userPosts) { post -> //내가 쓴 리뷰들
-                    ProfilePost(post = post, viewModel = viewModel, isCurrentUser = true)
+                if (selectedTab == "MY") items(feedPosts) { post -> //내가 쓴 리뷰들
+                    ProfilePost(post = post, viewModel = viewModel, isCurrentUser = true, onLike = { postToLike ->
+                        val index = feedPosts.indexOf(postToLike)
+                        if (index != -1) {
+                            val newLikeCount = if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
+                            feedPosts[index] = postToLike.copy(
+                                is_liked = !postToLike.is_liked,
+                                like_count = newLikeCount
+                            )
+                        }
+                    },
+                        onDelete = { postToDelete ->
+                            feedPosts.remove(postToDelete)
+                        })
                 }
-                else items(userPosts) { post -> //좋아요한 리뷰들 -> 이 경우에만 toggleLike하면 delete되어야 하므로 isLikedPost = true
+                else items(feedPosts) { post -> //좋아요한 리뷰들 -> 이 경우에만 toggleLike하면 delete되어야 하므로 isLikedPost = true
                     HomePost(
                         post = post,
                         viewModel = viewModel,
                         navHostController = navController,
-                        isLikedPost = true
+                        isLikedPost = true,
+                        onDelete = { postToDelete ->
+                            feedPosts.remove(postToDelete)
+                        }, onLike = { postToLike ->
+                            val index = feedPosts.indexOf(postToLike)
+                            if(index != -1) {
+                                // Determine the new like count based on the current is_liked state
+                                val newLikeCount = if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
+                                // Update the post with the new like state and count
+                                feedPosts[index] = postToLike.copy(
+                                    is_liked = !postToLike.is_liked,
+                                    like_count = newLikeCount
+                                )                    }
+                        }
+
                     )
                 }
             }
@@ -449,7 +504,8 @@ fun ProfileRowPreview() {
 
 
 @Composable
-fun ProfilePost(post: PostDTO, viewModel: AppMainViewModel, isCurrentUser: Boolean) {
+fun ProfilePost(post: PostDTO, viewModel: AppMainViewModel, isCurrentUser: Boolean, onLike: (PostDTO) -> Unit,
+                onDelete: (PostDTO) -> Unit) {
     val coroutinescope = rememberCoroutineScope()
     var deleted by remember { mutableStateOf(false) }
 
@@ -463,6 +519,7 @@ fun ProfilePost(post: PostDTO, viewModel: AppMainViewModel, isCurrentUser: Boole
             Post(
                 post = post,
                 onHeartClick = {
+                    onLike(post)
                     coroutinescope.launch {
                         viewModel.toggleLike(post.id)
                     }

@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -72,10 +73,12 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
-    var feedPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
+//    var feedPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
     var loading by remember { mutableStateOf(true) }
     var lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    val feedPosts = remember { mutableStateListOf<PostDTO>() }
+
 
     Log.d("navigateToDestination", "lazylist in Home: ${lazyListState}")
 
@@ -85,7 +88,9 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
             println("trying to load home feed")
             viewModel.getAllPosts(
                 onSuccess = { posts ->
-                    feedPosts = posts
+// Instead of reassigning, we clear and add all to mutate the list's contents
+                    feedPosts.clear()
+                    feedPosts.addAll(posts)
                     println("feedPosts: ${feedPosts.size}")
                 },
             )
@@ -122,9 +127,26 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
                 .padding(horizontal = 20.dp),
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
-            items(feedPosts) { post ->
-                HomePost(post, viewModel = viewModel, navHostController = navHostController)
+//            items(feedPosts) { post ->
+//                HomePost(post, viewModel = viewModel, navHostController = navHostController)
+//            }
+
+            items(items = feedPosts, key = { it.id }) { post ->
+                HomePost(post = post, viewModel = viewModel, navHostController = navHostController, onDelete = { postToDelete ->
+                    feedPosts.remove(postToDelete)
+                }, onLike = { postToLike ->
+                    val index = feedPosts.indexOf(postToLike)
+                    if(index != -1) {
+                        // Determine the new like count based on the current is_liked state
+                        val newLikeCount = if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
+                        // Update the post with the new like state and count
+                        feedPosts[index] = postToLike.copy(
+                            is_liked = !postToLike.is_liked,
+                            like_count = newLikeCount
+                        )                    }
+                })
             }
+
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
             item { Spacer(modifier = Modifier.height(70.dp)) }
@@ -139,7 +161,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
 }
 
 @Composable
-fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController, isLikedPost : Boolean = false) {
+fun HomePost(post: PostDTO, viewModel: AppMainViewModel, navHostController: NavHostController, isLikedPost : Boolean = false, onDelete: (PostDTO) -> Unit, onLike: (PostDTO) -> Unit) {
     val user = post.user
     val coroutinescope = rememberCoroutineScope()
     var deleted by remember { mutableStateOf(false) }
@@ -166,18 +188,16 @@ fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHo
             Post(
                 post = post,
                 onHeartClick = {
+                    onLike(post)
                     coroutinescope.launch {
                         viewModel.toggleLike(post.id)
-                        if (isLikedPost) {
-                            deleted = true
-                        }
                     }
                 },
                 canDelete = (user.id == viewModel.myProfile.id),
                 onDelete = {
+                    onDelete(post)
                     coroutinescope.launch {
                         viewModel.deletePost(post.id)
-                        deleted = true
                     }
                 }
             )
