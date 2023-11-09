@@ -15,6 +15,8 @@ from tags.models import Tag
 from .models import Follow
 from .serializers import UserInfoSerializer, UserPostSerializer, UserSerializer
 
+from django.db.models import Count
+
 User= get_user_model()
 
 
@@ -162,6 +164,11 @@ def refresh_user_tags(request):
     updated_tags = Tag.objects.filter(ko_label__in=most_frequent_tags.keys())
     user.tags.set(updated_tags)
 
+
+
+
+
+
     return Response({"user_tags": [i.ko_label for i in updated_tags]})
 
 @api_view(['POST'])
@@ -184,6 +191,8 @@ def follow(request, pk):
 
     # Serialize the user data and return it
     return Response({"following": following}, status=status.HTTP_200_OK)
+
+
 
 
 
