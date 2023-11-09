@@ -21,6 +21,7 @@ import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.appmain.AppMainActivity
 import com.example.eatandtell.ui.showToast
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignupScreen(navController: NavController, context: ComponentActivity, viewModel: StartViewModel) {
@@ -136,7 +137,7 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
 
 
 @Composable
-fun SignupButton (
+fun SignupButton(
     viewModel: StartViewModel,
     onClick: (String?) -> Unit,
     email: String,
@@ -145,13 +146,14 @@ fun SignupButton (
     confirmPassword: String,
     context: Context
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val emailRegex = Regex("^\\S+@\\S+\\.\\S+\$")
 
     fun isEmailValid(email: String): Boolean {
         return emailRegex.matches(email)
     }
 
-    val onClickReal = {
+    val onClickReal: () -> Unit = {
         when {
             email.isBlank() -> showToast(context, "이메일을 입력하세요")
             !isEmailValid(email) -> showToast(context, "이메일 주소가 올바르지 않습니다")
@@ -162,10 +164,13 @@ fun SignupButton (
             confirmPassword.isBlank() -> showToast(context, "비밀번호 확인을 입력하세요")
             password != confirmPassword -> showToast(context, "비밀번호 확인이 틀립니다")
             else -> {
-                viewModel.registerUser(username, password, email, context, onSuccess = onClick)
+                coroutineScope.launch {
+                    val token = viewModel.registerUser(username, password, email, context)
+                    if (token != null)
+                        onClick(token)
+                }
             }
         }
-
     }
 
     MainButton(onClick = onClickReal, text = "회원가입")

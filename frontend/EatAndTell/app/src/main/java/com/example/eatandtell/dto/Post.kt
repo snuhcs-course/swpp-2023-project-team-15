@@ -26,3 +26,7 @@ data class GetFeedResponse(
 data class toggleLikeResponse(
     val message : String,
 )
+
+data class toggleFollowResponse(
+    val message: String,
+)

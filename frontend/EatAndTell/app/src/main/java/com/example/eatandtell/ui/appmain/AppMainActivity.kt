@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -34,6 +35,7 @@ import com.example.eatandtell.dto.SearchedRestDTO
 import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.start.StartViewModel
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.launch
 
 //import com.example.eatandtell.ui.AppNavigation
 
@@ -71,8 +73,9 @@ class AppMainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val token = intent.getStringExtra("Token")
-        appMainViewModel.initialize(token)
-
+        lifecycleScope.launch {
+            appMainViewModel.initialize(token)
+        }
         Log.d("locationpermission", "onCreate")
 
         when {

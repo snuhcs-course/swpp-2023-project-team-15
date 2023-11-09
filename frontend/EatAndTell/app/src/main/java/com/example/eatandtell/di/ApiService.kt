@@ -37,6 +37,9 @@ interface ApiService {
     @PUT("posts/{post_id}/likes/") // The posts endpoint
     suspend fun toggleLike(@Header("Authorization") authorization: String,
                            @Path("post_id") post_id: Int): toggleLikeResponse
+    @POST("users/{user_id}/follow/") // The follow toggle endpoint
+    suspend fun toggleFollow(@Header("Authorization") authorization: String,
+                             @Path("user_id") user_id: Int): toggleFollowResponse
 
     @DELETE("posts/{post_id}/") // The posts endpoint
     suspend fun deletePost(@Header("Authorization") authorization: String,
