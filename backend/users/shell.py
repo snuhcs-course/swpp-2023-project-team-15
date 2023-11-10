@@ -68,4 +68,13 @@ def refresh_user_tags_by_user(user):
     updated_tags = Tag.objects.filter(ko_label__in=most_frequent_tags.keys())
     user.tags.set(updated_tags)
 
+
+    # get array of post counts of all users
+
+    users_with_posts_count = User.objects.annotate(post_count=Count('posts')).values_list('post_count', flat=True)
+    user_posts_count = list(users_with_posts_count)
+    print ("user_posts_count", user_posts_count)
+
+    # get array of follower counts of all users
+
     return Response({"user_tags": [i.ko_label for i in updated_tags]})
