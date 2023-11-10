@@ -906,7 +906,7 @@ fun SearchSelectButton(
     text: String,
     selected: Boolean,
 ) {
-    val buttonSizeModifier = Modifier.size(width = 96.dp, height = 36.dp) // 버튼 크기 조절
+    val buttonSizeModifier = Modifier.size(width = 102.dp, height = 36.dp) // 버튼 크기 조절
 
     Box(
         modifier = buttonSizeModifier,

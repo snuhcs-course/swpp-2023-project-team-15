@@ -30,6 +30,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -90,7 +91,8 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
         Spacer(modifier = Modifier.height(20.dp))
 
         Row(
-            horizontalArrangement = Arrangement.SpaceEvenly
+            modifier = Modifier.fillMaxWidth(), // Row가 화면의 전체 가로 길이를 차지하도록 설정
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             SearchSelectButton(
                 onClick = {
@@ -101,7 +103,6 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                 selected = selectedButton != "유저"
             )
 
-            Spacer(modifier = Modifier.width(16.dp))
 
             SearchSelectButton(
                 onClick = {
@@ -112,7 +113,6 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                 selected = selectedButton != "태그"
             )
 
-            Spacer(modifier = Modifier.width(16.dp))
 
             SearchSelectButton(
                 onClick = {
@@ -140,9 +140,10 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
         // show defaultTags when selectedbutton is "tag" and
         if(selectedButton == "태그" && userListsByTags.isEmpty()) {
             // Check if both lists are empty and triggerSearch is false
-            DefaultTagView(searchText.text, topTags.map { it.ko_label }) { tag ->
-                // Set the searchText to the tag that was clicked
-                searchText = TextFieldValue("$tag")
+            DefaultTagView(topTags.map { it.ko_label }) { tag ->
+                // Set the searchText to the tag that was clicked. set text cursor point to last
+                val newText = "$tag"
+                searchText = TextFieldValue(newText, TextRange(newText.length))
                 // Trigger the search
                 triggerSearch = true
             }
@@ -289,7 +290,7 @@ fun SearchBar(value: TextFieldValue, onValueChange: (TextFieldValue) -> Unit, on
     CustomTextField(
         value = value.text,
         onValueChange = { onValueChange(TextFieldValue(it)) },
-        placeholder = "",
+        placeholder = "유저, 태그, 식당 중에서 검색해보세요",
         trailingIcon = {
             Box(
                 modifier = Modifier.clickable(onClick = onSearchClick),
@@ -305,12 +306,7 @@ fun SearchBar(value: TextFieldValue, onValueChange: (TextFieldValue) -> Unit, on
 }
 
 @Composable
-fun DefaultTagView(text: String, tags: List<String>, onTagClick: (String) -> Unit = {}) {
-    if (
-        text == "@" ||
-        text == "#" ||
-        text.isEmpty()
-    ) {
+fun DefaultTagView(tags: List<String>, onTagClick: (String) -> Unit = {}) {
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             mainAxisSpacing = 8.dp,
@@ -323,8 +319,8 @@ fun DefaultTagView(text: String, tags: List<String>, onTagClick: (String) -> Uni
             }
         }
         Spacer(modifier = Modifier.height(11.dp))
-    }
 }
+
 
 @Preview
 @Composable
