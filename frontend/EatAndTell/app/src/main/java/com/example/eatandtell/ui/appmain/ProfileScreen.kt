@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -442,6 +444,14 @@ fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, nav
                     selectedTabIndex = if (selectedTab == "MY") 0 else 1,
                     containerColor = Color.White,
                     contentColor = Color.Black,
+                    indicator = { tabPositions ->
+                        Box(
+                            modifier = Modifier
+                                .tabIndicatorOffset(tabPositions[if (selectedTab == "MY") 0 else 1])
+                                .height(3.dp) // 인디케이터의 높이
+                                .background(MainColor) // 여기에서 MainColor로 색상 지정
+                        )
+                    }
                 ) {
                     Tab(
                         text = { Text("MY") },
