@@ -45,7 +45,10 @@ import com.example.eatandtell.ui.SearchSelectButton
 import com.example.eatandtell.ui.Tag
 import com.example.eatandtell.ui.showToast
 import com.google.accompanist.flowlayout.FlowRow
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 @Composable
 fun SearchScreen(navController: NavHostController, context: ComponentActivity, viewModel: AppMainViewModel) {
@@ -67,6 +70,10 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
 
     var selectedButton: String by remember { mutableStateOf("유저") }
 
+    val debouncePeriod = 300L
+
+    val searchJob = remember { mutableStateOf<Job?>(null) }
+
 
     //searchBar
     Column (
@@ -77,7 +84,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
         Spacer(modifier = Modifier.height(11.dp))
         SearchBar(
             value = searchText,
-            onValueChange = { searchText = it; /*TODO: triggerSearch = true; 이렇게 하니까 한글 입력할 때 자꾸 에러가 남*/},
+            onValueChange = { searchText = it;  triggerSearch = true; },
             onSearchClick = { triggerSearch = true }
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -88,6 +95,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
             SearchSelectButton(
                 onClick = {
                     selectedButton = "유저"
+                    triggerSearch = true
                 },
                 text = "유저",
                 selected = selectedButton != "유저"
@@ -98,6 +106,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
             SearchSelectButton(
                 onClick = {
                     selectedButton = "태그"
+                    triggerSearch = true
                 },
                 text = "태그",
                 selected = selectedButton != "태그"
@@ -108,6 +117,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
             SearchSelectButton(
                 onClick = {
                     selectedButton = "식당"
+                    triggerSearch = true
                 },
                 text = "식당",
                 selected = selectedButton != "식당"
@@ -140,52 +150,55 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
         //search for userLists
         LaunchedEffect(triggerSearch) {
             println("search screen "+searchText.text + " " + triggerSearch)
-            if (triggerSearch) {
-                postLists.clear() // This will clear the MutableStateList
-                userLists = emptyList();
-                userListsByTags = emptyList();
-                loading = true
-                try {
-                    if(selectedButton == "유저") { // If search by user@
-                        if (searchText.text.length>=2) viewModel.getFilteredUsersByName( // 실질 searchtext가 존재하는 경우만 검색
-                            searchText.text, // Remove @ from the search string
-                            onSuccess = { users ->
-                                userLists = users // resulted user Lists
-                                loading = false
-                            }
-                        )
-                        postLists.clear() // This will clear the MutableStateList
+            searchJob.value?.cancel() // 이전 검색 작업이 있다면 취소
+            searchJob.value = launch {
+                delay(debouncePeriod)
+                if (searchText.text.isNotEmpty()) {
+                    postLists.clear() // This will clear the MutableStateList
+                    userLists = emptyList();
+                    userListsByTags = emptyList();
+                    loading = true
+                    try {
+                        if (selectedButton == "유저") { // If search by user@
+                            if (searchText.text.length >= 1) viewModel.getFilteredUsersByName( // 실질 searchtext가 존재하는 경우만 검색
+                                searchText.text, // Remove @ from the search string
+                                onSuccess = { users ->
+                                    userLists = users // resulted user Lists
+                                    loading = false
+                                }
+                            )
+                            postLists.clear() // This will clear the MutableStateList
+                        } else if (selectedButton == "태그") {
+                            //TODO: search by tags
+                            if (searchText.text.length >= 1) viewModel.getFilteredUsersByTag(
+                                searchText.text,
+                                onSuccess = { users ->
+                                    userListsByTags = users // resulted user Lists
+                                    loading = false
+                                }
+                            )
+                            postLists.clear() // This will clear the MutableStateList
+                        } else {
+                            if (searchText.text.length >= 1) viewModel.getFilteredByRestaurants(
+                                searchText.text,
+                                onSuccess = { posts ->
+                                    postLists.clear() // This will clear the MutableStateList
+                                    postLists.addAll(posts)
+                                    loading = false
+                                }
+                            )
+                            userLists = emptyList() // Reset user lists
+                            userListsByTags = emptyList()
+                        }
+                    } catch (e: Exception) {
+                        println("searchload error")
+                        showToast(context, "search 로딩에 실패하였습니다")
+                        loading = false
                     }
-                    else if(selectedButton == "태그") {
-                        //TODO: search by tags
-                        if (searchText.text.length>=2) viewModel.getFilteredUsersByTag(
-                            searchText.text,
-                            onSuccess = { users ->
-                                userListsByTags = users // resulted user Lists
-                                loading = false
-                            }
-                        )
-                        postLists.clear() // This will clear the MutableStateList
-                    }
-                    else {
-                        if (searchText.text.length>=1) viewModel.getFilteredByRestaurants(
-                            searchText.text,
-                            onSuccess = { posts ->
-                                postLists.clear() // This will clear the MutableStateList
-                                postLists.addAll(posts)
-                                loading = false
-                            }
-                        )
-                        userLists = emptyList() // Reset user lists
-                        userListsByTags = emptyList()
-                    }
-                } catch (e: Exception) {
-                    println("searchload error")
-                    showToast(context, "search 로딩에 실패하였습니다")
-                    loading = false
+                    triggerSearch = false // reset the trigger
                 }
-                triggerSearch = false // reset the trigger
             }
+            triggerSearch = false
         }
 
         if(loading) {
@@ -276,7 +289,7 @@ fun SearchBar(value: TextFieldValue, onValueChange: (TextFieldValue) -> Unit, on
     CustomTextField(
         value = value.text,
         onValueChange = { onValueChange(TextFieldValue(it)) },
-        placeholder = "@: 유저, #: 태그, 없음: 식당 검색",
+        placeholder = "",
         trailingIcon = {
             Box(
                 modifier = Modifier.clickable(onClick = onSearchClick),
