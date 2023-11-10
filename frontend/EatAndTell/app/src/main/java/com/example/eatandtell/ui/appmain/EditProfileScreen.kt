@@ -121,7 +121,8 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                 CircularProgressIndicator(
                     //로딩 화면
                     modifier = Modifier
-                        .size(70.dp)
+                        .size(70.dp),
+                    color = MainColor
                 )
             }
         }

@@ -115,7 +115,8 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
             CircularProgressIndicator(
                 //로딩 화면
                 modifier = Modifier
-                    .size(70.dp)
+                    .size(70.dp),
+                color = MainColor
             )
         }
     }

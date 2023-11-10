@@ -45,6 +45,7 @@ import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.SearchSelectButton
 import com.example.eatandtell.ui.Tag
 import com.example.eatandtell.ui.showToast
+import com.example.eatandtell.ui.theme.MainColor
 import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -211,7 +212,8 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                 CircularProgressIndicator(
                     //로딩 화면
                     modifier = Modifier
-                        .size(70.dp)
+                        .size(70.dp),
+                    color = MainColor
                 )
             }
         }
