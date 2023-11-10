@@ -41,6 +41,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -138,6 +139,12 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
         }
         Spacer(modifier = Modifier.height(11.dp))
 
+
+        //Use rememberSaveable to preserve the list across recompositions.
+        var tags by rememberSaveable() {
+            mutableStateOf(userInfo.tags)
+        }
+
         //Tags
         Row (
             modifier = Modifier
@@ -180,9 +187,15 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                     .clickable(onClick = {
                         coroutinescope.launch {
                             viewModel.refreshTags(
-                                onSuccess = { it ->
-                                    tags = it
-                                    println("refreshed tags: $tags")
+                                onSuccess = { newTags ->
+                                    // Make sure newTags is actually a List<String>, not a String
+                                    if (newTags is List<*>) {
+                                        @Suppress("UNCHECKED_CAST")
+                                        tags = newTags as List<String>
+                                        println("refreshed tags: $tags")
+                                    } else {
+                                        println("Error: Expected a list of tags, but received something else.")
+                                    }
                                 },
                                 context = context!!
                             )
