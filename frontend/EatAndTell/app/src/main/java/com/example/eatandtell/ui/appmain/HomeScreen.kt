@@ -173,36 +173,41 @@ fun HomePost(post: PostDTO, viewModel: AppMainViewModel, navHostController: NavH
         exit = fadeOut() // Fade out animation when deleted
     ) {
         Column() {
-            Profile(
-                user.avatar_url,
-                user.username,
-                user.description,
-                onClick = {
-                    if (user.id == viewModel.myProfile.id)
-                        navigateToDestination(navHostController, "Profile")
-                    else
-                        navigateToDestination(navHostController, "Profile/${user.id}")
-                },
-            );
-            Spacer(modifier = Modifier.height(11.dp))
-            Post(
-                post = post,
-                onHeartClick = {
-                    onLike(post)
-                    coroutinescope.launch {
-                        viewModel.toggleLike(post.id)
+                Profile(
+                    user.avatar_url,
+                    user.username,
+                    user.description,
+                    onClick = {
+                        if (user.id == viewModel.myProfile.id)
+                            navigateToDestination(navHostController, "Profile")
+                        else
+                            navigateToDestination(navHostController, "Profile/${user.id}")
+                    },
+                );
+                Spacer(modifier = Modifier.height(11.dp))
+                Post(
+                    post = post,
+                    onHeartClick = {
+                        onLike(post)
+                        coroutinescope.launch {
+                            viewModel.toggleLike(post.id)
+                        }
+                    },
+                    canDelete = (user.id == viewModel.myProfile.id),
+                    onDelete = {
+                        deleted = true
+                        onDelete(post)
+                        coroutinescope.launch {
+                            viewModel.deletePost(post.id)
+                        }
                     }
-                },
-                canDelete = (user.id == viewModel.myProfile.id),
-                onDelete = {
-                    onDelete(post)
-                    coroutinescope.launch {
-                        viewModel.deletePost(post.id)
-                    }
-                }
-            )
+                )
+            
+
         }
     }
+
+
 }
 
 
