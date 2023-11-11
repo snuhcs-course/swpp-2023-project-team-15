@@ -214,7 +214,7 @@ fun SearchRestScreen(navController: NavHostController, context: AppMainActivity,
         //submit button
         Spacer(modifier = Modifier.height(16.dp))
         MainButton(onClick = {
-             navController.navigate("Upload/${selectedResult?.id}/${selectedResult?.place_name}/${selectedResult?.category_name}")
+            navController.navigate("Upload/${selectedResult?.id}/${selectedResult?.place_name}/${selectedResult?.category_name}")
         }, text = "식당 선택", enabled = selectedResult != null)
         Spacer(modifier = Modifier.height(70.dp))
 

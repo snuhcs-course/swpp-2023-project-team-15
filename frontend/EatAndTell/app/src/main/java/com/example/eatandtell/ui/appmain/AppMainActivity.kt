@@ -147,7 +147,7 @@ fun AppMain(
                 BottomNavBar(
                     onHomeClick = { navigateToDestination(navController, "Home")},
                     onSearchClick = { navigateToDestination(navController, "Search") },
-                    onPlusClick = { navigateToDestination(navController, "SearchRest") },
+                    onPlusClick = { navigateToDestination(navController, "Upload") },
                     onProfileClick = { navigateToDestination(navController, "Profile")},
                 )
         }
@@ -168,9 +168,9 @@ fun AppMainNavigate(navController: NavHostController, modifier: Modifier, contex
         composable(route = "Search") {
             SearchScreen(navController,context, viewModel)
         }
-//        composable(route = "Upload") {
-//            UploadScreen(navController, context, viewModel)
-//        }
+        composable(route = "Upload") {
+            UploadScreen(navController, context, viewModel, null, null, null)
+        }
         composable(
             route = "Upload/{search_id}/{place_name}/{category_name}",
             arguments = listOf(

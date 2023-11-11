@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.SearchedRestDTO
@@ -84,6 +85,12 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
     var loading by remember { mutableStateOf(false) }
     var myProfile = viewModel.myProfile
 
+    // Handle navigation result from SearchRestScreen
+    LaunchedEffect(key1 = navController.currentBackStackEntryAsState()) {
+        navController.currentBackStackEntry?.arguments?.getString("place_name")?.let {
+            restaurantName = TextFieldValue(it)
+        }
+    }
 //    LaunchedEffect(loading) {
 //        try {
 //            viewModel.getMyProfile (
@@ -164,19 +171,30 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                //식당 이름
-                Text(
-                    text = restaurantName.text,
-                    style = TextStyle(
-                    fontSize = 16.sp,
-                    lineHeight = 21.sp,
-                    fontWeight = FontWeight(700),
-                    color = Black,
-                ), modifier = Modifier
-                    .weight(1f)
-                    .height(22.dp),
-                    overflow = TextOverflow.Ellipsis
-                )
+
+                // Restaurant Name or Button
+                if (restaurantName.text.isEmpty()) {
+                    MediumWhiteButton(
+                        onClick = {
+                            navController.navigate("SearchRest")
+                        },
+                        text = "식당 검색"
+                    )
+                } else {
+                    // Display the restaurant name
+                    Text(
+                        text = restaurantName.text,
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            lineHeight = 21.sp,
+                            fontWeight = FontWeight(700),
+                            color = Black,
+                        ), modifier = Modifier
+                            .weight(1f)
+                            .height(22.dp),
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
                 Spacer(modifier = Modifier.width(8.dp))
                 DraggableStarRating(
