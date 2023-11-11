@@ -17,6 +17,7 @@ import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -610,6 +611,9 @@ fun ImageDialog(imageUrl: String, onClick: () -> Unit) {
 
     ) {
         Box (
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -623,9 +627,11 @@ fun ImageDialog(imageUrl: String, onClick: () -> Unit) {
                     contentDescription = "back",
                     tint = Black,
                     modifier = Modifier
-                        .size(24.dp)
+                        .size(32.dp)
                         .align(Alignment.End)
+                        .background(Color(0x55FFFFFF), shape = CircleShape)
                         .clickable { onClick() }
+                        .padding(8.dp)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Image(
@@ -634,6 +640,7 @@ fun ImageDialog(imageUrl: String, onClick: () -> Unit) {
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .border(2.dp, Color.White)
                 )
 
             }
