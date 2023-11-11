@@ -8,12 +8,14 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -33,6 +35,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -86,6 +89,11 @@ fun SearchRestScreen(navController: NavHostController, context: AppMainActivity,
     var searchResults by remember { mutableStateOf(listOf<SearchedRestDTO>()) }
     var scrollState = rememberScrollState(0)
 
+    fun hideKeyboard() {
+        val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(context.currentFocus?.windowToken, 0)
+    }
+
     LaunchedEffect(searchQuery) {
         if (searchQuery.isNotBlank()) {
             val res = viewModel.getSearchedRest(searchQuery, context.positionX, context.positionY)
@@ -93,8 +101,14 @@ fun SearchRestScreen(navController: NavHostController, context: AppMainActivity,
         }
     }
 
+
     Column(
         modifier = Modifier
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { hideKeyboard() }
+                )
+            }
             .fillMaxSize()
             .padding(horizontal = 20.dp),
     ) {
@@ -159,6 +173,7 @@ fun SearchRestScreen(navController: NavHostController, context: AppMainActivity,
                                 selectedResult =
                                     if (selectedResult == null || result.id != selectedResult!!.id) result
                                     else null
+                                hideKeyboard()
                                 //searchQuery = result.place_name //TODO or not?
                             })
                             .background(
