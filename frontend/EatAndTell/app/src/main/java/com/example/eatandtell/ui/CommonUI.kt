@@ -182,36 +182,49 @@ fun WhiteTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    modifier : Modifier,
-    width : Dp? = null,
-    height : Dp? = null,
+    modifier: Modifier,
+    width: Dp? = null,
+    height: Dp? = null,
+    textStyle: TextStyle = TextStyle(
+        fontFamily = Inter,
+        fontSize = 14.sp,
+        fontWeight = FontWeight(400),
+        color = Black,
+    )
 ) {
     TextField(
         value = value,
         onValueChange = onValueChange,
         visualTransformation = VisualTransformation.None,
-        modifier = modifier,
+        modifier = modifier
+            .then(
+                if (width != null && height != null) {
+                    Modifier.size(width, height)
+                } else {
+                    Modifier
+                }
+            ),
         colors = TextFieldDefaults.textFieldColors(
             containerColor = White,
             cursorColor = Black,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
         ),
-        placeholder = { Text(placeholder, style = TextStyle(
-            fontFamily = Inter,
-            fontSize = 14.sp,
-            fontWeight = FontWeight(400),
-            color = Gray,
-        ),
-        ) },
-        textStyle = TextStyle(
-            fontFamily = Inter,
-            fontSize = 14.sp,
-            fontWeight = FontWeight(400),
-            color = Black,
-        ),
+        placeholder = {
+            Text(
+                placeholder,
+                style = TextStyle(
+                    fontFamily = Inter,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight(400),
+                    color = Gray,
+                )
+            )
+        },
+        textStyle = textStyle,
     )
 }
+
 
 @Preview
 @Composable

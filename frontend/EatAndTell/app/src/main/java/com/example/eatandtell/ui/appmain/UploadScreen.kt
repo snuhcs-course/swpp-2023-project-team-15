@@ -14,7 +14,11 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -175,25 +179,39 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                 // Restaurant Name or Button
                 if (restaurantName.text.isEmpty()) {
                     MediumWhiteButton(
-                        onClick = {
-                            navController.navigate("SearchRest")
-                        },
+                        onClick = { navController.navigate("SearchRest") },
                         text = "식당 검색"
                     )
                 } else {
-                    // Display the restaurant name
-                    Text(
-                        text = restaurantName.text,
-                        style = TextStyle(
+                    WhiteTextField(
+                        value = restaurantName.text,
+                        onValueChange = { newText ->
+                            restaurantName = TextFieldValue(newText)
+                        },
+                        placeholder = "식당 이름",
+                        textStyle = TextStyle(
                             fontSize = 16.sp,
                             lineHeight = 21.sp,
                             fontWeight = FontWeight(700),
-                            color = Black,
-                        ), modifier = Modifier
+                            color = Black
+                        ),
+                        modifier = Modifier
                             .weight(1f)
-                            .height(22.dp),
-                        overflow = TextOverflow.Ellipsis
+                            .border(
+                                width = 0.5.dp,
+                                color = Color(0xFFC5C5C5),
+                                shape = RoundedCornerShape(4.dp)
+                            )
                     )
+                    IconButton(
+                        onClick = { navController.navigate("SearchRest") },
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "식당 선택"
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
