@@ -1,19 +1,13 @@
 // MainActivity.kt
 package com.example.eatandtell.ui
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -21,13 +15,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,13 +25,11 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontVariation.weight
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -53,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.example.eatandtell.R
@@ -285,7 +271,13 @@ fun MainButton(onClick: () -> Unit, text: String, notLoading : Boolean = true, e
     ) {
 
 
-        if (notLoading) Text(text, color = White,
+        if (notLoading) Text(text, color = White, style = TextStyle(
+            fontSize = 16.sp,
+            lineHeight = 18.sp,
+            fontFamily = Inter,
+            fontWeight = FontWeight(700),
+            color = Color.Black,
+            )
         )
         else //show loading
             CircularProgressIndicator(
@@ -326,12 +318,58 @@ fun MediumWhiteButton(onClick: () -> Unit, text: String) {
         )
     }
 }
-
 @Preview
 @Composable
 fun PreviewMediumWhiteButton() {
     EatAndTellTheme {
         MediumWhiteButton(onClick = { /**/ }, text = "사진 추가하기")
+    }
+}
+
+@Composable
+fun CustomButton(
+    onClick: () -> Unit,
+    text: String,
+    containerColor: Color, // Pass the container color as a parameter
+    textColor: Color,
+    borderColor: Color,
+    widthFraction: Float = 1f // Default to 1f which is full width
+) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = containerColor,
+            contentColor = textColor
+        ),
+        shape = RoundedCornerShape(size = 10.dp),
+        modifier = Modifier
+            .fillMaxWidth(widthFraction)
+            .height(36.dp),
+        border = BorderStroke(1.dp,borderColor),
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        Text(
+            text,
+            color = textColor,
+            style = TextStyle(
+                fontFamily = Inter,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Black,
+                textAlign = TextAlign.Center,
+            ),
+            modifier = Modifier
+                .padding(0.dp)
+                .align(Alignment.CenterVertically)
+        )
+    }
+}
+
+
+@Preview
+@Composable
+fun PreviewCustomButton() {
+    EatAndTellTheme {
+        CustomButton(onClick = { /**/ }, text = "팔로우하기", containerColor = White, textColor = Black, borderColor = Black)
     }
 }
 
@@ -582,7 +620,7 @@ fun ProfileText(
                 color = Color(0xFF848484)
             ),
             modifier = Modifier
-                .width(150.dp),
+                .width(145.dp),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
@@ -605,9 +643,30 @@ fun Profile(
     ) {
         ProfileImage(profileUrl = profileUrl)
         ProfileText(username = username, userDescription = userDescription)
+
     }
 }
 
+
+@Composable
+fun FollowText(count: Int, label: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = "$count", style = TextStyle(
+            fontSize = 16.sp,
+            lineHeight = 18.sp,
+            fontFamily = Inter,
+            fontWeight = FontWeight(700),
+            color = Color.Black,
+        ))
+        Text(text = label, style = TextStyle(
+            fontSize = 16.sp,
+            lineHeight = 18.sp,
+            fontFamily = Inter,
+            fontWeight = FontWeight(500),
+            color = Color.Black,
+        ))
+    }
+}
 
 // Post Photos
 @Composable

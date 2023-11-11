@@ -1,17 +1,13 @@
 package com.example.eatandtell.ui.appmain
-import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,14 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -43,7 +32,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -51,23 +39,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.eatandtell.dto.PostDTO
-import com.example.eatandtell.dto.RestaurantDTO
-import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
-import com.example.eatandtell.ui.HeartEmpty
-import com.example.eatandtell.ui.HeartFull
+import com.example.eatandtell.ui.CustomButton
+import com.example.eatandtell.ui.FollowText
+import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.MediumRedButton
-import com.example.eatandtell.ui.MediumWhiteButton
 import com.example.eatandtell.ui.Post
-import com.example.eatandtell.ui.PostImage
 import com.example.eatandtell.ui.Profile
-import com.example.eatandtell.ui.StarRating
 import com.example.eatandtell.ui.Tag
 import com.example.eatandtell.ui.UpButton
 import com.example.eatandtell.ui.showToast
@@ -75,6 +58,7 @@ import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.Gray
 import com.example.eatandtell.ui.theme.Inter
 import com.example.eatandtell.ui.theme.MainColor
+import com.example.eatandtell.ui.theme.White
 
 import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.CancellationException
@@ -82,12 +66,15 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -> Unit, buttonText: String, itsMe : Boolean = false, context : ComponentActivity? = null,     onFollowClick: (Boolean) -> Unit, // Added this parameter
+fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -> Unit, buttonText: String, itsMe : Boolean = false, context : ComponentActivity? = null,     onFollowClick: (Boolean,Int) -> Unit, // Added this parameter
 ) {
-    var tags by remember { mutableStateOf(userInfo.tags) }
+    var tags by rememberSaveable { mutableStateOf(userInfo.tags) }
     val coroutinescope = rememberCoroutineScope()
+
 //    var buttonText by remember { mutableStateOf(buttonText) }
-    var follwerCount by remember { mutableStateOf(userInfo.follower_count) }
+    var isFollowing by remember { mutableStateOf(userInfo.is_followed) }
+    var followerCount by remember { mutableStateOf(userInfo.follower_count) }
+    var followingCount by remember { mutableStateOf(userInfo.following_count) }
 
     Column {
         //Profile and follow button
@@ -98,54 +85,52 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Profile(userInfo.avatar_url, userInfo.username, userInfo.description)
-            if (itsMe) MediumRedButton(onClick = { onClick()}, text = buttonText)
+            Profile(userInfo.avatar_url, userInfo.username, userInfo.description )
+            FollowText(count = followingCount, label ="팔로잉" )
+            Spacer(modifier = Modifier.width(20.dp)) // adjust space between columns
+            FollowText(count = followerCount, label ="팔로워" )
+        }
+        Spacer(modifier = Modifier.height(11.dp))
+        //Edit Profile, Follow button
+        Row(modifier = Modifier
+            .fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ){
+            if (itsMe) CustomButton(onClick = { onClick()}, text = buttonText, containerColor = Gray, textColor = White, borderColor = Color.White, widthFraction = 0.3f)
             else if (buttonText == "팔로우하기") {
-                MediumRedButton(onClick = {
+                CustomButton(onClick = {
                     // Call onFollowClick with true indicating a follow action
-                    onFollowClick(true)
-                }, text = buttonText)
+//                    onFollowClick(true)
+                    // Optimistically update UI
+                    val newFollowingState = !isFollowing
+                    val newFollowerCount = if (newFollowingState) followerCount + 1 else followerCount - 1
+                    isFollowing = newFollowingState
+                    followerCount = newFollowerCount
+                    onFollowClick(newFollowingState, newFollowerCount)
+
+                    coroutinescope.launch {
+                        val success = viewModel.toggleFollow(userInfo.id)
+                        if (!success) {
+                            // Revert UI changes if the operation failed
+                            isFollowing = !newFollowingState
+                            followerCount =
+                                if (isFollowing) followerCount + 1 else followerCount - 1
+                            onFollowClick(isFollowing, followerCount)
+                            // Show error message
+                            showToast(context!!, "팔로우에 실패하였습니다")
+                        }
+                    }
+                }, text = buttonText, containerColor = Gray, textColor = White, borderColor = White) //border white
             } else {
-                MediumWhiteButton(onClick = {
+                CustomButton(onClick = {
                     // Call onFollowClick with false indicating an unfollow action
                     onFollowClick(false)
-                }, text = buttonText)
+                }, text = buttonText, containerColor = White, textColor = Gray, borderColor = Black)
             }
         }
+
+
         Spacer(modifier = Modifier.height(11.dp))
-
-        //Followings and followers
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Text(text = "${userInfo.following_count} Followings" ,
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    lineHeight = 18.sp,
-                    fontFamily = Inter,
-                    fontWeight = FontWeight(500),
-                    color = Color.Black,
-                )
-            )
-            Text(text = "${follwerCount} Followers",
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    lineHeight = 18.sp,
-                    fontFamily = Inter,
-                    fontWeight = FontWeight(500),
-                    color = Color.Black,
-                )
-            )
-        }
-        Spacer(modifier = Modifier.height(11.dp))
-
-
-        //Use rememberSaveable to preserve the list across recompositions.
-        var tags by rememberSaveable() {
-            mutableStateOf(userInfo.tags)
-        }
 
         //Tags
         Row (
@@ -178,19 +163,16 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                     }
                 }
             }
-
-            //refresh button
-            if (itsMe) Icon(
-                imageVector = Icons.Default.Refresh,
-                contentDescription = "Refresh Icon",
-                tint = MainColor,
-                modifier = Modifier
-                    .size(24.dp)
-                    .clickable(onClick = {
+        }
+        Spacer(modifier = Modifier.height(11.dp))
+        //refresh button
+        if (itsMe) {
+                CustomButton(
+                    onClick = {
                         coroutinescope.launch {
                             viewModel.refreshTags(
                                 onSuccess = { newTags ->
-                                    // Make sure newTags is actually a List<String>, not a String
+                                    // Check and cast newTags to List<String>
                                     if (newTags is List<*>) {
                                         @Suppress("UNCHECKED_CAST")
                                         tags = newTags as List<String>
@@ -201,18 +183,20 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                                 },
                                 context = context!!
                             )
-
                         }
-
-                    })
-                    .align(Alignment.CenterVertically)
-            )
-        }
+                    },
+                    text = "태그 갱신",
+                    containerColor = MainColor,
+                    textColor = White,
+                    borderColor = White
+                )
+            }
 
         Spacer(modifier = Modifier.height(15.dp))
     }
 
 }
+
 
 
 @Composable
