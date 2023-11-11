@@ -3,9 +3,13 @@ package com.example.eatandtell.ui.start
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -17,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import com.example.eatandtell.R
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.navigation.NavController
 import com.example.eatandtell.ui.appmain.AppMainActivity
@@ -54,11 +60,21 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
 
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
 
+    fun hideKeyboard() {
+        val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(context.currentFocus?.windowToken, 0)
+    }
+
     // Main content
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { hideKeyboard() }
+                )
+            }
             .fillMaxSize()
             .padding(horizontal = 20.dp)
     ) {
@@ -82,6 +98,7 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
                 }
             },
             placeholder = "비밀번호를 입력하세요",
+
             )
         Spacer(modifier = Modifier.height(12.dp))
 

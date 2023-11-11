@@ -32,11 +32,13 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -110,7 +112,7 @@ fun HeartEmpty(onClick: (Int) -> Unit, post_id: Int) {
 
 //text fields
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun CustomTextField(
     value: String,
@@ -122,9 +124,17 @@ fun CustomTextField(
     maxLines : Int = 1,
     enable : Boolean = true,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     TextField(
         value = value,
-        onValueChange = onValueChange,
+        onValueChange = { newValue ->
+            onValueChange(newValue)
+            if (maxLines == 1 && newValue.endsWith("\n")) { // 엔터 키가 눌린 경우
+                keyboardController?.hide() // 키보드 숨기기
+                onValueChange(newValue.trim()) // 엔터 문자 제거
+            }
+        },
         visualTransformation = visualTransformation,
         trailingIcon = {
             Box(modifier = Modifier.clickable { onTrailingIconClick?.invoke() }) {

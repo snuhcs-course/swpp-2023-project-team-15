@@ -2,13 +2,16 @@
 package com.example.eatandtell.ui.start
 import android.content.Context
 import android.content.Intent
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
@@ -44,11 +47,21 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
 
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
 
+    fun hideKeyboard() {
+        val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(context.currentFocus?.windowToken, 0)
+    }
+
     // Main content of SignupActivity
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)
+        modifier = Modifier
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { hideKeyboard() }
+                )
+            }.fillMaxSize().padding(horizontal = 20.dp)
     ) {
         Logo()
         Spacer(modifier = Modifier.height(17.dp))
