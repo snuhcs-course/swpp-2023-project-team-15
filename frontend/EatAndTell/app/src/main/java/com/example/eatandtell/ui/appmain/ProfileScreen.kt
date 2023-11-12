@@ -278,7 +278,7 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
 //                ProfilePost(post = post, viewModel = viewModel, isCurrentUser = false)
 //            }
             // Replace the existing items call for userPosts
-            items(userPosts) { post ->
+            items(items = userPosts, key = { it.id }) { post ->
                 ProfilePost(
                     post = post,
                     viewModel = viewModel,
@@ -293,9 +293,11 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                             )
                         }
                     },
-                    onDelete = { postToDelete ->
-                        userPosts.remove(postToDelete)
-                    }
+//                    onDelete = { postToDelete ->
+//                        userPosts.remove(postToDelete)
+//                    }
+                    onDelete = {postToDelete ->
+                        }
                 )
             }
 
@@ -453,7 +455,7 @@ fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, nav
                     }
                 }
             } else {
-                if (selectedTab == "MY") items(feedPosts) { post -> //내가 쓴 리뷰들
+                if (selectedTab == "MY") items(items = feedPosts, key = { it.id }) { post -> //내가 쓴 리뷰들
                     ProfilePost(post = post, viewModel = viewModel, isCurrentUser = true, onLike = { postToLike ->
                         val index = feedPosts.indexOf(postToLike)
                         if (index != -1) {
@@ -468,7 +470,7 @@ fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, nav
                             feedPosts.remove(postToDelete)
                         })
                 }
-                else items(feedPosts) { post -> //좋아요한 리뷰들 -> 이 경우에만 toggleLike하면 delete되어야 하므로 isLikedPost = true
+                else items(items = feedPosts, key = { it.id }) { post -> //좋아요한 리뷰들 -> 이 경우에만 toggleLike하면 delete되어야 하므로 isLikedPost = true
                     HomePost(
                         post = post,
                         viewModel = viewModel,
@@ -545,9 +547,10 @@ fun ProfilePost(post: PostDTO, viewModel: AppMainViewModel, isCurrentUser: Boole
                 },
                 canDelete = isCurrentUser,
                 onDelete = {
+                    deleted = true
+                    onDelete(post)
                     coroutinescope.launch {
                         viewModel.deletePost(post.id)
-                        deleted = true
                     }
                 }
             )
