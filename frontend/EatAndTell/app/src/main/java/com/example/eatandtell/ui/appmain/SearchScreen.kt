@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -44,7 +43,6 @@ import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.TopTag
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.ui.CustomTextField
-import com.example.eatandtell.ui.MediumWhiteButton
 import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.SearchSelectButton
 import com.example.eatandtell.ui.Tag
@@ -53,7 +51,6 @@ import com.example.eatandtell.ui.theme.MainColor
 import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 @Composable
@@ -275,20 +272,20 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                             post = post,
                             viewModel = viewModel,
                             navHostController = navController,
-                            onLike = { postToLike ->
-                                val index = postLists.indexOf(postToLike)
-                                if (index != -1) {
-                                    val newLikeCount = if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
-                                    postLists[index] = postToLike.copy(
-                                        is_liked = !postToLike.is_liked,
-                                        like_count = newLikeCount
-                                    )
-                                }
-                            },
                             onDelete = { postToDelete ->
                                 postLists.remove(postToDelete)
                             }
-                        )
+                        ) { postToLike ->
+                            val index = postLists.indexOf(postToLike)
+                            if (index != -1) {
+                                val newLikeCount =
+                                    if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
+                                postLists[index] = postToLike.copy(
+                                    is_liked = !postToLike.is_liked,
+                                    like_count = newLikeCount
+                                )
+                            }
+                        }
                     }
                 }
 

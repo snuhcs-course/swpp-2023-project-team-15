@@ -47,8 +47,6 @@ import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.UserInfoDTO
 import com.example.eatandtell.ui.CustomButton
 import com.example.eatandtell.ui.FollowText
-import com.example.eatandtell.ui.MainButton
-import com.example.eatandtell.ui.MediumRedButton
 import com.example.eatandtell.ui.Post
 import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.Tag
@@ -66,15 +64,15 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -> Unit, buttonText: String, itsMe : Boolean = false, context : ComponentActivity? = null,     onFollowClick: (Boolean,Int) -> Unit, // Added this parameter
+fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -> Unit, buttonText: String, itsMe : Boolean = false, context : ComponentActivity? = null, // Added this parameter
 ) {
     var tags by rememberSaveable { mutableStateOf(userInfo.tags) }
     val coroutinescope = rememberCoroutineScope()
 
 //    var buttonText by remember { mutableStateOf(buttonText) }
     var isFollowing by remember { mutableStateOf(userInfo.is_followed) }
-    var followerCount by remember { mutableStateOf(userInfo.follower_count) }
-    var followingCount by remember { mutableStateOf(userInfo.following_count) }
+//    var followerCount by remember { mutableStateOf(userInfo.follower_count) }
+//    var followingCount by remember { mutableStateOf(userInfo.following_count) }
 
     Column {
         //Profile and follow button
@@ -86,9 +84,9 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
             verticalAlignment = Alignment.CenterVertically
         ) {
             Profile(userInfo.avatar_url, userInfo.username, userInfo.description )
-            FollowText(count = followingCount, label ="팔로잉" )
+            FollowText(count = userInfo.following_count, label ="팔로잉" )
             Spacer(modifier = Modifier.width(20.dp)) // adjust space between columns
-            FollowText(count = followerCount, label ="팔로워" )
+            FollowText(count = userInfo.follower_count, label ="팔로워" )
         }
         Spacer(modifier = Modifier.height(11.dp))
         //Edit Profile, Follow button
@@ -96,35 +94,16 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
             .fillMaxWidth(),
             horizontalArrangement = Arrangement.End
         ){
-            if (itsMe) CustomButton(onClick = { onClick()}, text = buttonText, containerColor = Gray, textColor = White, borderColor = Color.White, widthFraction = 0.3f)
+            if (itsMe) CustomButton(onClick = onClick, text = buttonText, containerColor = Gray, textColor = White, borderColor = Color.White, widthFraction = 0.3f)
             else if (buttonText == "팔로우하기") {
                 CustomButton(onClick = {
                     // Call onFollowClick with true indicating a follow action
-//                    onFollowClick(true)
-                    // Optimistically update UI
-                    val newFollowingState = !isFollowing
-                    val newFollowerCount = if (newFollowingState) followerCount + 1 else followerCount - 1
-                    isFollowing = newFollowingState
-                    followerCount = newFollowerCount
-                    onFollowClick(newFollowingState, newFollowerCount)
-
-                    coroutinescope.launch {
-                        val success = viewModel.toggleFollow(userInfo.id)
-                        if (!success) {
-                            // Revert UI changes if the operation failed
-                            isFollowing = !newFollowingState
-                            followerCount =
-                                if (isFollowing) followerCount + 1 else followerCount - 1
-                            onFollowClick(isFollowing, followerCount)
-                            // Show error message
-                            showToast(context!!, "팔로우에 실패하였습니다")
-                        }
-                    }
+                    onClick()
                 }, text = buttonText, containerColor = Gray, textColor = White, borderColor = White) //border white
             } else {
                 CustomButton(onClick = {
                     // Call onFollowClick with false indicating an unfollow action
-                    onFollowClick(false)
+                    onClick()
                 }, text = buttonText, containerColor = White, textColor = Gray, borderColor = Black)
             }
         }
@@ -265,24 +244,26 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                 ProfileRow(
                     viewModel = viewModel,
                     userInfo = userInfo,
-                    onFollowClick = { isFollowing ->
-                        coroutineScope.launch {
-                            val result = viewModel.toggleFollow(userInfo.id)
-                            if (result) {
-                                // Directly update the userInfo object
-                                userInfo = if (isFollowing) {
-                                    userInfo.copy(is_followed = true, follower_count = userInfo.follower_count + 1)
-                                } else {
-                                    userInfo.copy(is_followed = false, follower_count = userInfo.follower_count - 1)
-                                }
-                            }
-                        }
-                    },
+//                    onfClick = { isFollowing ->
+//                        coroutineScope.launch {
+//                            val result = viewModel.toggleFollow(userInfo.id)
+//                            if (result) {
+//                                // Directly update the userInfo object
+//                                userInfo = if (isFollowing) {
+//                                    userInfo.copy(is_followed = true, follower_count = userInfo.follower_count + 1)
+//                                } else {
+//                                    userInfo.copy(is_followed = false, follower_count = userInfo.follower_count - 1)
+//                                }
+//                            }
+//                        }
+//                    },
                     buttonText = if (userInfo.is_followed) "팔로잉" else "팔로우하기",
                     itsMe = userId == viewModel.myProfile.id, // Example of determining if it's the current user's profile
                     context = context,
                     onClick = {
                         /* TODO: toggle follow */
+                        val followerCount = if (userInfo.is_followed) userInfo.follower_count - 1 else userInfo.follower_count + 1
+                        userInfo = userInfo.copy(is_followed = !userInfo.is_followed, follower_count = followerCount)
                         coroutineScope.launch {
                             viewModel.toggleFollow(userInfo.id)
                         }
@@ -419,7 +400,6 @@ fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, nav
                     buttonText = "프로필 편집",
                     itsMe = true,
                     context = context,
-                    onFollowClick = {},
                 )
             }
 
@@ -493,22 +473,23 @@ fun MyProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, nav
                         post = post,
                         viewModel = viewModel,
                         navHostController = navController,
-                        isLikedPost = true,
                         onDelete = { postToDelete ->
                             feedPosts.remove(postToDelete)
-                        }, onLike = { postToLike ->
-                            val index = feedPosts.indexOf(postToLike)
-                            if(index != -1) {
-                                // Determine the new like count based on the current is_liked state
-                                val newLikeCount = if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
-                                // Update the post with the new like state and count
-                                feedPosts[index] = postToLike.copy(
-                                    is_liked = !postToLike.is_liked,
-                                    like_count = newLikeCount
-                                )                    }
                         }
 
-                    )
+                    ) { postToLike ->
+                        val index = feedPosts.indexOf(postToLike)
+                        if (index != -1) {
+                            // Determine the new like count based on the current is_liked state
+                            val newLikeCount =
+                                if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
+                            // Update the post with the new like state and count
+                            feedPosts[index] = postToLike.copy(
+                                is_liked = !postToLike.is_liked,
+                                like_count = newLikeCount
+                            )
+                        }
+                    }
                 }
             }
 
@@ -536,7 +517,6 @@ fun ProfileRowPreview() {
             userInfo = UserInfoDTO(0, "joshua-i", "본인 프로필입니다~", "https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8", tags = listOf("육식주의자"), false,10, 20),
             onClick = {},
             buttonText = "팔로우하기" , // New buttonText parameter
-            onFollowClick = {}, // Added this parameter
         )
     }
 }
