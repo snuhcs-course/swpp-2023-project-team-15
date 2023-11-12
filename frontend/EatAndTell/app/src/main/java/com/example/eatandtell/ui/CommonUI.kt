@@ -15,9 +15,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.twotone.Face
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +28,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -49,6 +53,7 @@ import com.example.eatandtell.ui.theme.EatAndTellTheme
 import com.example.eatandtell.ui.theme.Gray
 import com.example.eatandtell.ui.theme.Inter
 import com.example.eatandtell.ui.theme.MainColor
+import com.example.eatandtell.ui.theme.PaleOrange
 import com.example.eatandtell.ui.theme.White
 
 public fun showToast(context: Context, message: String) {
@@ -330,22 +335,26 @@ fun PreviewMediumWhiteButton() {
 fun CustomButton(
     onClick: () -> Unit,
     text: String,
-    containerColor: Color, // Pass the container color as a parameter
-    textColor: Color,
-    borderColor: Color,
-    widthFraction: Float = 1f // Default to 1f which is full width
+    textColor: Color = Black,
+    fontWeight: Int = 500,
+    containerColor: Color = MainColor, // Pass the container color as a parameter
+    borderColor: Color = White,
+    cornerRadius: Dp = 40.dp, // You can specify the corner radius
+    height: Dp = 36.dp, // You can specify the height
+    widthFraction: Float = 0.9f, // Default to 1f which is full width
+    icon: ImageVector? = null // Icon is optional
 ) {
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
-            contentColor = textColor
         ),
-        shape = RoundedCornerShape(size = 10.dp),
+        shape = RoundedCornerShape(cornerRadius),
+        enabled = true,
         modifier = Modifier
             .fillMaxWidth(widthFraction)
-            .height(36.dp),
-        border = BorderStroke(1.dp,borderColor),
+            .height(height),
+        border = BorderStroke(3.dp,borderColor),
         contentPadding = PaddingValues(0.dp)
     ) {
         Text(
@@ -353,14 +362,23 @@ fun CustomButton(
             color = textColor,
             style = TextStyle(
                 fontFamily = Inter,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Black,
+                fontSize = 16.sp,
+                fontWeight = FontWeight(fontWeight),
                 textAlign = TextAlign.Center,
             ),
             modifier = Modifier
                 .padding(0.dp)
                 .align(Alignment.CenterVertically)
         )
+        // If an icon is provided, display it
+        icon?.let {
+            Spacer(modifier = Modifier.width(10.dp)) // Add space between text and icon
+            Icon(
+                imageVector = Icons.Default.Refresh,
+                contentDescription = "Refresh Icon",
+                tint = White
+            )
+        }
     }
 }
 
@@ -369,7 +387,7 @@ fun CustomButton(
 @Composable
 fun PreviewCustomButton() {
     EatAndTellTheme {
-        CustomButton(onClick = { /**/ }, text = "팔로우하기", containerColor = White, textColor = Black, borderColor = Black)
+        CustomButton(onClick = { /**/ }, text = "태그 갱신", containerColor = Gray, borderColor = White)
     }
 }
 
@@ -419,7 +437,7 @@ fun PreviewMediumRedButton() {
 fun Tag(text: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .background(color = White, shape = RoundedCornerShape(size = 18.dp))
+            .background(color = PaleOrange, shape = RoundedCornerShape(size = 18.dp))
             .border(2.dp, MainColor, RoundedCornerShape(size = 18.dp))
             .padding(horizontal = 12.dp, vertical = 2.dp)
             .clickable(onClick = onClick),
@@ -650,7 +668,7 @@ fun Profile(
 
 @Composable
 fun FollowText(count: Int, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+   Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = "$count", style = TextStyle(
             fontSize = 16.sp,
             lineHeight = 18.sp,

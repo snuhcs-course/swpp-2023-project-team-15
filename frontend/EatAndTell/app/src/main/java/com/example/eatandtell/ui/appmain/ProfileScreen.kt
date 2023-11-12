@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,7 +20,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -49,6 +53,8 @@ import com.example.eatandtell.ui.CustomButton
 import com.example.eatandtell.ui.FollowText
 import com.example.eatandtell.ui.Post
 import com.example.eatandtell.ui.Profile
+import com.example.eatandtell.ui.ProfileImage
+import com.example.eatandtell.ui.ProfileText
 import com.example.eatandtell.ui.Tag
 import com.example.eatandtell.ui.UpButton
 import com.example.eatandtell.ui.showToast
@@ -56,6 +62,8 @@ import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.Gray
 import com.example.eatandtell.ui.theme.Inter
 import com.example.eatandtell.ui.theme.MainColor
+import com.example.eatandtell.ui.theme.PaleGray
+import com.example.eatandtell.ui.theme.PaleOrange
 import com.example.eatandtell.ui.theme.White
 
 import com.google.accompanist.flowlayout.FlowRow
@@ -69,48 +77,49 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
     var tags by rememberSaveable { mutableStateOf(userInfo.tags) }
     val coroutinescope = rememberCoroutineScope()
 
-//    var buttonText by remember { mutableStateOf(buttonText) }
     var isFollowing by remember { mutableStateOf(userInfo.is_followed) }
-//    var followerCount by remember { mutableStateOf(userInfo.follower_count) }
-//    var followingCount by remember { mutableStateOf(userInfo.following_count) }
 
     Column {
-        //Profile and follow button
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Profile(userInfo.avatar_url, userInfo.username, userInfo.description )
-            FollowText(count = userInfo.following_count, label ="팔로잉" )
-            Spacer(modifier = Modifier.width(20.dp)) // adjust space between columns
-            FollowText(count = userInfo.follower_count, label ="팔로워" )
-        }
-        Spacer(modifier = Modifier.height(11.dp))
-        //Edit Profile, Follow button
-        Row(modifier = Modifier
-            .fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ){
-            if (itsMe) CustomButton(onClick = onClick, text = buttonText, containerColor = Gray, textColor = White, borderColor = Color.White, widthFraction = 0.3f)
-            else if (buttonText == "팔로우하기") {
-                CustomButton(onClick = {
-                    // Call onFollowClick with true indicating a follow action
-                    onClick()
-                }, text = buttonText, containerColor = Gray, textColor = White, borderColor = White) //border white
-            } else {
-                CustomButton(onClick = {
-                    // Call onFollowClick with false indicating an unfollow action
-                    onClick()
-                }, text = buttonText, containerColor = White, textColor = Gray, borderColor = Black)
+
+            // First row with profile image, follower, and following
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp), // Add padding as needed
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ProfileImage(profileUrl = userInfo.avatar_url, size = 60.dp)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    FollowText(count = userInfo.following_count, label ="팔로잉" )
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    FollowText(count = userInfo.follower_count, label ="팔로워" )
+                }
             }
-        }
 
+            // Second row with profile text and edit profile button
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 0.dp, vertical = 8.dp), // Adjust padding as needed
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ProfileText(username = userInfo.username,  userInfo.description)
 
+                if (itsMe) CustomButton(onClick = onClick, text = buttonText, containerColor = PaleGray)
+                else if (buttonText == "팔로우하기") {
+                    CustomButton(onClick = {
+                        onClick()
+                    }, text = buttonText, containerColor = PaleGray)
+                } else {
+                    CustomButton(onClick = {
+                        onClick()
+                    }, text = buttonText, containerColor = White, borderColor = PaleGray)
+                }
+            }
         Spacer(modifier = Modifier.height(11.dp))
-
         //Tags
         Row (
             modifier = Modifier
@@ -143,9 +152,14 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                 }
             }
         }
-        Spacer(modifier = Modifier.height(11.dp))
+        Spacer(modifier = Modifier.height(15.dp))
+
         //refresh button
         if (itsMe) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ){
                 CustomButton(
                     onClick = {
                         coroutinescope.launch {
@@ -165,11 +179,17 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                         }
                     },
                     text = "태그 갱신",
-                    containerColor = MainColor,
                     textColor = White,
-                    borderColor = White
+                    fontWeight = 900,
+                    containerColor = MainColor,
+                    borderColor = PaleGray,
+                    cornerRadius = 15.dp,
+                    height = 45.dp,
+                    widthFraction = 1f,
+                    icon = Icons.Default.Refresh // Pass the refresh icon
                 )
             }
+        }
 
         Spacer(modifier = Modifier.height(15.dp))
     }
@@ -244,19 +264,6 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                 ProfileRow(
                     viewModel = viewModel,
                     userInfo = userInfo,
-//                    onfClick = { isFollowing ->
-//                        coroutineScope.launch {
-//                            val result = viewModel.toggleFollow(userInfo.id)
-//                            if (result) {
-//                                // Directly update the userInfo object
-//                                userInfo = if (isFollowing) {
-//                                    userInfo.copy(is_followed = true, follower_count = userInfo.follower_count + 1)
-//                                } else {
-//                                    userInfo.copy(is_followed = false, follower_count = userInfo.follower_count - 1)
-//                                }
-//                            }
-//                        }
-//                    },
                     buttonText = if (userInfo.is_followed) "팔로잉" else "팔로우하기",
                     itsMe = userId == viewModel.myProfile.id, // Example of determining if it's the current user's profile
                     context = context,
@@ -273,10 +280,6 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
 
 
             item {Spacer(modifier = Modifier.height(16.dp))}
-
-//            items(userPosts) { post ->
-//                ProfilePost(post = post, viewModel = viewModel, isCurrentUser = false)
-//            }
             // Replace the existing items call for userPosts
             items(items = userPosts, key = { it.id }) { post ->
                 ProfilePost(
@@ -293,9 +296,6 @@ fun UserProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                             )
                         }
                     },
-//                    onDelete = { postToDelete ->
-//                        userPosts.remove(postToDelete)
-//                    }
                     onDelete = {postToDelete ->
                         }
                 )
