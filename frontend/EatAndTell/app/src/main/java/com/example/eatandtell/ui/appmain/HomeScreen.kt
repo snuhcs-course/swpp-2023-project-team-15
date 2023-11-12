@@ -131,30 +131,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
 //            items(feedPosts) { post ->
 //                HomePost(post, viewModel = viewModel, navHostController = navHostController)
 //            }
-<<<<<<< Updated upstream
 
-=======
->>>>>>> Stashed changes
-            items(items = feedPosts, key = { it.id }) { post ->
-                HomePost(post = post, viewModel = viewModel, navHostController = navHostController, onDelete = { postToDelete ->
-                    feedPosts.remove(postToDelete)
-                }, onLike = { postToLike ->
-                    val index = feedPosts.indexOf(postToLike)
-                    if(index != -1) {
-<<<<<<< Updated upstream
-                        // Determine the new like count based on the current is_liked state
-                        val newLikeCount = if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
-                        // Update the post with the new like state and count
-                        feedPosts[index] = postToLike.copy(
-                            is_liked = !postToLike.is_liked,
-                            like_count = newLikeCount
-                        )                    }
-=======
-                        feedPosts[index] = postToLike.copy(is_liked = !postToLike.is_liked)
-                    }
->>>>>>> Stashed changes
-                })
-            }
             items(items = feedPosts, key = { it.id }) { post ->
                 HomePost(post = post, viewModel = viewModel, navHostController = navHostController, onDelete = { postToDelete ->
                     feedPosts.remove(postToDelete)
@@ -170,7 +147,6 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
                         )                    }
                 })
             }
-
 
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
@@ -186,11 +162,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
 }
 
 @Composable
-<<<<<<< Updated upstream
 fun HomePost(post: PostDTO, viewModel: AppMainViewModel, navHostController: NavHostController, isLikedPost : Boolean = false, onDelete: (PostDTO) -> Unit, onLike: (PostDTO) -> Unit) {
-=======
-fun HomePost(post: PostDTO, viewModel: AppMainViewModel, navHostController: NavHostController, onDelete: (PostDTO) -> Unit, onLike: (PostDTO) -> Unit) {
->>>>>>> Stashed changes
     val user = post.user
     val coroutinescope = rememberCoroutineScope()
     var deleted by remember { mutableStateOf(false) }
@@ -202,39 +174,6 @@ fun HomePost(post: PostDTO, viewModel: AppMainViewModel, navHostController: NavH
         exit = fadeOut() // Fade out animation when deleted
     ) {
         Column() {
-<<<<<<< Updated upstream
-                Profile(
-                    user.avatar_url,
-                    user.username,
-                    user.description,
-                    onClick = {
-                        if (user.id == viewModel.myProfile.id)
-                            navigateToDestination(navHostController, "Profile")
-                        else
-                            navigateToDestination(navHostController, "Profile/${user.id}")
-                    },
-                );
-                Spacer(modifier = Modifier.height(11.dp))
-                Post(
-                    post = post,
-                    onHeartClick = {
-                        onLike(post)
-                        coroutinescope.launch {
-                            viewModel.toggleLike(post.id)
-                        }
-                    },
-                    canDelete = (user.id == viewModel.myProfile.id),
-                    onDelete = {
-                        deleted = true
-                        onDelete(post)
-                        coroutinescope.launch {
-                            viewModel.deletePost(post.id)
-                        }
-                    }
-                )
-            
-
-=======
             Profile(
                 user.avatar_url,
                 user.username,
@@ -257,13 +196,15 @@ fun HomePost(post: PostDTO, viewModel: AppMainViewModel, navHostController: NavH
                 },
                 canDelete = (user.id == viewModel.myProfile.id),
                 onDelete = {
+                    deleted = true
                     onDelete(post)
                     coroutinescope.launch {
                         viewModel.deletePost(post.id)
                     }
                 }
             )
->>>>>>> Stashed changes
+
+
         }
     }
 
