@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,13 +76,16 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
 
     var myRating by rememberSaveable { mutableStateOf("0") }
 
-    var photoPaths by remember { mutableStateOf(listOf<Uri>()) } //핸드폰 내의 파일 경로
+
+// Directly use the ViewModel's state
+    val photoPaths = viewModel.photoUris
 
     val galleryLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) {
-            photoPaths = it
+        rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+            // Update the ViewModel state when new images are selected
+            viewModel.photoUris.clear()
+            viewModel.photoUris.addAll(uris)
         }
-
     var clickedImageIndex by remember { mutableStateOf(-1) }
 
 
@@ -289,7 +293,7 @@ fun UploadButton(viewModel: AppMainViewModel,
                     coroutineScope.launch {
                         notLoading = false
                         viewModel.uploadPhotosAndPost(
-                            photoPaths = photoPaths,
+                            photoPaths = viewModel.photoUris, // Use ViewModel's photoUris
                             restaurant = restaurant,
                             rating = rating,
                             description = description,

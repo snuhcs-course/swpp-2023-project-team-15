@@ -3,6 +3,10 @@ import RetrofitClient
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eatandtell.di.ApiService
@@ -28,10 +32,11 @@ class AppMainViewModel() : ViewModel() {
 
     private var token: String? = null
     var myProfile = UserDTO(0, "", "", "", listOf())
-
+    var photoUris = mutableStateListOf<Uri>()// store image uri
+        private set 
     suspend fun initialize(token: String?) {
         this.token = token
-        getMyProfile() // Since it's a suspend function, you can call it directly without launch
+        getMyProfile()
     }
 
     private val apiService = RetrofitClient.retro.create(ApiService::class.java)
@@ -77,6 +82,7 @@ class AppMainViewModel() : ViewModel() {
                 showToast(context, "포스트가 업로드되었습니다")
             }
         }
+        photoUris.clear()
     }
 
     suspend fun uploadPhotosAndEditProfile(photoPaths: List<Uri>, //실제로는 length 1짜리
