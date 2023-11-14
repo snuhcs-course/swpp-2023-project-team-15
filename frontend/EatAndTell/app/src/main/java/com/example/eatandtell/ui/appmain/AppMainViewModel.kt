@@ -3,6 +3,10 @@ import RetrofitClient
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eatandtell.di.ApiService
@@ -12,6 +16,7 @@ import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.RegisterRequest
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.SearchedRestDTO
+import com.example.eatandtell.dto.TopTag
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
@@ -27,10 +32,11 @@ class AppMainViewModel() : ViewModel() {
 
     private var token: String? = null
     var myProfile = UserDTO(0, "", "", "", listOf())
-
+    var photoUris = mutableStateListOf<Uri>()// store image uri
+        private set 
     suspend fun initialize(token: String?) {
         this.token = token
-        getMyProfile() // Since it's a suspend function, you can call it directly without launch
+        getMyProfile()
     }
 
     private val apiService = RetrofitClient.retro.create(ApiService::class.java)
@@ -76,6 +82,7 @@ class AppMainViewModel() : ViewModel() {
                 showToast(context, "포스트가 업로드되었습니다")
             }
         }
+        photoUris.clear()
     }
 
     suspend fun uploadPhotosAndEditProfile(photoPaths: List<Uri>, //실제로는 length 1짜리
@@ -229,13 +236,15 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
-    suspend fun toggleFollow(user_id: Int){
+    suspend fun toggleFollow(user_id: Int) : Boolean{
         val authorization = "Token $token"
-        try {
+        return try {
             val response = apiService.toggleFollow(authorization, user_id)
             Log.d("toggle follow", "success")
+            true
         } catch (e: Exception) {
             Log.d("toggle follow error", e.message ?: "Network error")
+            false
         }
     }
 
@@ -331,4 +340,19 @@ class AppMainViewModel() : ViewModel() {
             showToast(context, "태그 업데이트에 실패하였습니다")
         }
     }
+
+    suspend fun getTopTags(onSuccess: (List<TopTag>) -> Unit, onError: (String) -> Unit) {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.getTopTags(authorization)
+            onSuccess(response)
+            Log.d("getTopTags", "success")
+        } catch (e: Exception) {
+            val errorMessage = e.message ?: "Network error"
+            Log.d("getTopTags error", errorMessage)
+            onError(errorMessage)
+        }
+    }
+
+
 }

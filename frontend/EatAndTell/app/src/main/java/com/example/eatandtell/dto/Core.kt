@@ -64,3 +64,13 @@ data class PostDTO(
 data class TagsDTO(
     val user_tags : List<String>
 )
+
+
+
+// Data class to match the JSON structure for each tag
+data class TopTag(
+    val ko_label: String,
+    val en_label: String,
+    val type: String
+)
+

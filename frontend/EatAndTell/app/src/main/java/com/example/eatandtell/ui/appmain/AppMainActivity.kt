@@ -2,6 +2,7 @@
 package com.example.eatandtell.ui.appmain
 import android.Manifest
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -17,6 +18,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.compose.ui.unit.dp
@@ -147,7 +149,7 @@ fun AppMain(
                 BottomNavBar(
                     onHomeClick = { navigateToDestination(navController, "Home")},
                     onSearchClick = { navigateToDestination(navController, "Search") },
-                    onPlusClick = { navigateToDestination(navController, "SearchRest") },
+                    onPlusClick = { navigateToDestination(navController, "Upload") },
                     onProfileClick = { navigateToDestination(navController, "Profile")},
                 )
         }
@@ -168,9 +170,9 @@ fun AppMainNavigate(navController: NavHostController, modifier: Modifier, contex
         composable(route = "Search") {
             SearchScreen(navController,context, viewModel)
         }
-//        composable(route = "Upload") {
-//            UploadScreen(navController, context, viewModel)
-//        }
+        composable(route = "Upload") {
+            UploadScreen(navController, context, viewModel, null, null, null)
+        }
         composable(
             route = "Upload/{search_id}/{place_name}/{category_name}",
             arguments = listOf(
