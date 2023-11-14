@@ -59,21 +59,24 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
         Spacer(modifier = Modifier.height(11.dp))
         SearchBar(
             value = searchText,
-            onValueChange = { searchText = it; triggerSearch = true },
+            onValueChange = { searchText = it; /*TODO: triggerSearch = true; 이렇게 하니까 한글 입력할 때 자꾸 에러가 남*/},
             onSearchClick = { triggerSearch = true }
         )
         Spacer(modifier = Modifier.height(20.dp))
         // Check if both lists are empty and triggerSearch is false
-        DefaultTagView(userLists, postLists, triggerSearch)
+        DefaultTagView(searchText.text)
 
 
         //search for userLists
         LaunchedEffect(triggerSearch) {
+            println("search screen "+searchText.text + " " + triggerSearch)
             if (triggerSearch) {
+                postLists = emptyList();
+                userLists = emptyList();
                 loading = true
                 try {
                     if(searchText.text.startsWith("@")) { // If search starts with @
-                        viewModel.getFilteredUsersByName(
+                        if (searchText.text.length>=2) viewModel.getFilteredUsersByName( // 실질 searchtext가 존재하는 경우만 검색
                             searchText.text.drop(1), // Remove @ from the search string
                             onSuccess = { users ->
                                 userLists = users // resulted user Lists
@@ -84,7 +87,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                     }
                     else if(searchText.text.startsWith("#")) {
                         //TODO: search by tags
-                        viewModel.getFilteredUsersByTag(
+                        if (searchText.text.length>=2) viewModel.getFilteredUsersByTag(
                             searchText.text.drop(1), // Remove @ from the search string
                             onSuccess = { users ->
                                 userLists = users // resulted user Lists
@@ -94,7 +97,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                         postLists = emptyList() // Reset post lists
                     }
                     else {
-                        viewModel.getFilteredByRestaurants(
+                        if (searchText.text.length>=1) viewModel.getFilteredByRestaurants(
                             searchText.text,
                             onSuccess = { posts ->
                                 postLists = posts // resulted post Lists
@@ -138,14 +141,18 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                             username = user.username,
                             userDescription = user.description,
                             onClick = {
-                                navController.navigate("Profile/${user.id}")
+                                if (user.id == viewModel.myProfile?.id) {
+                                    navController.navigate("Profile")
+                                } else {
+                                    navController.navigate("Profile/${user.id}")
+                                }
                             },
                         )
                     }
                 } else {
                     items(postLists.size) { index ->
                         val post = postLists[index]
-                        HomePost(post, viewModel = viewModel, navHostController = navController, myProfile = post.user)
+                        HomePost(post, viewModel = viewModel, navHostController = navController)
                     }
                 }
 
@@ -179,8 +186,12 @@ fun SearchBar(value: TextFieldValue, onValueChange: (TextFieldValue) -> Unit, on
 }
 
 @Composable
-fun DefaultTagView(userLists: List<UserDTO>, postLists: List<PostDTO>, triggerSearch: Boolean) {
-    if (userLists.isEmpty() && postLists.isEmpty() && !triggerSearch) {
+fun DefaultTagView(text: String) {
+    if (
+        text == "@" ||
+        text == "#" ||
+        text.isEmpty()
+    ) {
         val tags = listOf("#육식주의자", "#미식가", "#리뷰왕", "#감성", "#한식")
         FlowRow(
             modifier = Modifier.fillMaxWidth(),

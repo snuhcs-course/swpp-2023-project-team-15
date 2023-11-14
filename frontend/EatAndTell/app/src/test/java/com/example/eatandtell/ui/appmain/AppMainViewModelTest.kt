@@ -79,7 +79,7 @@ class AppMainViewModelTest {
         val mockInputStream = ByteArrayInputStream(byteArray)
         val photoPath= listOf(mockUri)
         val rating ="3.0"
-        val restaurant=RestReqDTO("example_rest")
+        val restaurant=RestReqDTO("example_rest",1,"")
         val description= "test"
         val mockPostData= mockk<UploadPostRequest>()
         val postDTO=PostDTO(1, UserDTO(1,"test","test","", listOf("")), RestaurantDTO(1,"test"),"0","test",

@@ -1,42 +1,77 @@
 import threading
 
+import requests
+from decouple import config
 from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, permissions, status, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from tags.models import Tag
-from tags.utils import deepl_translate_ko_to_en, ml_tagging
+from tags.utils import (category_name_to_tags, deepl_translate_ko_to_en,
+                        ml_sentiment_analysis, ml_tagging)
 
 from .models import Post
 from .serializers import PostSerializer, data_list
 
 
-def get_top_tags_after_translation(possible_tags, translated_description):
+def get_top_tag_after_translation_only_label(possible_tags, translated_description):
     label_score_dict = ml_tagging(translated_description, possible_tags)
     max_label = max(label_score_dict, key=label_score_dict.get)
     
     if label_score_dict[max_label] > 0.3:
+        return max_label
+    return None
+
+def get_top_tags_after_translation(possible_tags, translated_description):
+    max_label = get_top_tag_after_translation_only_label(possible_tags, translated_description)
+
+    if max_label is not None:
         matching_tag = Tag.objects.filter(en_label=max_label).first()
         return matching_tag
     return None
 
-
 def create_tags_on_thread(post):
     print("Thread started")
+    # calculate category tags
+    category_name = post.restaurant.category_name
+    if category_name is not None:
+        category_tags = category_name_to_tags(category_name)
+        for tag in category_tags:
+            tag_obj, _ = Tag.objects.get_or_create(type='from_category', ko_label=tag, en_label='')
+            post.tags.add(tag_obj)
+    
+    #translate
+    if len(post.description) < 5:
+        print(f'create tag and sentiment skipped: description too short: {post.description}.')
+        return
     translated_description = deepl_translate_ko_to_en(post.description)
-    tags_first_ten = Tag.objects.values('en_label')[:10]
-    tags_second_ten = Tag.objects.values('en_label')[10:20]
-    tags_third_ten = Tag.objects.values('en_label')[20:30]
-    
-    for possible_tags_queryset in [tags_first_ten, tags_second_ten, tags_third_ten]:
-        possible_tags = [tag['en_label'] for tag in possible_tags_queryset]
-        matching_tag = get_top_tags_after_translation(possible_tags, translated_description)
-        print('fount tag', matching_tag)
-        if matching_tag is not None:
-            post.tags.add(matching_tag)
-    
+    print('translated description', translated_description)
+
+    # calculate atmosphere tags
+    tags_atmosphere = Tag.objects.filter(type='atmosphere').values('en_label')
+    possible_tags = [tag['en_label'] for tag in tags_atmosphere]
+    matching_tag = get_top_tags_after_translation(possible_tags, translated_description)
+    print('fount tag', matching_tag)
+    if matching_tag is not None:
+        post.tags.add(matching_tag)
+
+    # calculate sentiment for post
+    sentiment_dict = ml_sentiment_analysis(translated_description)
+    positive_score = sentiment_dict['positive']
+    neutral_score = sentiment_dict['neutral']
+    negative_score = sentiment_dict['negative']
+
+    print ('positive_score', positive_score)
+    print ('neutral_score', neutral_score)
+    print ('negative_score', negative_score)
+    # get sentiment
+    post.sentiment = round(positive_score - negative_score, 4)
+    print ('sentiment', post.sentiment)
+    post.save()
+
     print("Thread finished")
 
 
@@ -56,6 +91,7 @@ class PostViewSet(viewsets.ModelViewSet):
         
         thread = threading.Thread(target=create_tags_on_thread, args=(post,), daemon=True)
         thread.start()
+
                 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -122,4 +158,34 @@ class PostViewSet(viewsets.ModelViewSet):
         })
         return context
     
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def restaurant_search(request):
+    url = "https://dapi.kakao.com/v2/local/search/keyword.json"
     
+    query = request.query_params.get('query')
+    
+    if not query:
+        return Response({"message": "`query` parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
+    x = request.query_params.get('x')
+    y = request.query_params.get('y')
+    
+    if not x or not y:
+        x = "126.938024740159"
+        y = "37.4697520000202"        
+
+    querystring = {
+        "category_group_code": "FD6,CE7",
+        "query": query,
+        "x": x,
+        "y": y,
+        "sort": "distance",
+    }
+
+    headers = {"Authorization": f"KakaoAK {config('KAKAO_ACCESS_KEY')}"}
+
+    response = requests.get(url, headers=headers, params=querystring)
+
+    use_keys = ['id', 'place_name', 'road_address_name', 'category_name', 'x', 'y']
+    parsed_response = [{k: item[k] for k in use_keys} for item in response.json()['documents']]
+    return Response({"data": parsed_response}, status=status.HTTP_200_OK)

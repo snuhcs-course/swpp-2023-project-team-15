@@ -66,8 +66,7 @@ fun navigateToDestination(navController: NavHostController, destination: String)
         }
         // Avoid multiple copies of the same destination when re-selecting the same item
         launchSingleTop = true
-        // if 'upload' or 'editprofile', do not restoreState (리뷰, 맛집명, 수정한 내용이 남아있는 것 방지)
-        restoreState = (destination != "Upload" && destination != "EditProfile")
+        restoreState = (destination == "Home") // TODO: 이유는 모르겠지만 MyProfile에서는 lazyliststate 복원이 안 돼서 Home에서만 함
     }
 }
 
@@ -89,11 +88,24 @@ fun PreviewNavigationBar() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(currentScreenName: String, navigateToHome: () -> Unit) {
+
+    val nameText = (
+        when (currentScreenName) {
+            "Home" -> "홈"
+            "Search" -> "검색"
+            "SearchRest" -> "맛집 검색"
+            "Upload" -> "리뷰 작성"
+            "Profile" -> "프로필"
+            "EditProfile" -> "프로필 편집"
+            else -> "Eat & Tell"
+        }
+    )
+
     CenterAlignedTopAppBar(
         title = { Text(
-            text = currentScreenName,
+            text = nameText,
                     style = TextStyle(
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Black,
                     ),

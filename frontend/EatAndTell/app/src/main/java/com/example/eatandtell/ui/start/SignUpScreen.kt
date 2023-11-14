@@ -36,6 +36,7 @@ import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.appmain.AppMainActivity
 import com.example.eatandtell.ui.showToast
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignupScreen(navController: NavController, context: ComponentActivity, viewModel: StartViewModel) {
@@ -173,7 +174,7 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
 
 
 @Composable
-fun SignupButton (
+fun SignupButton(
     viewModel: StartViewModel,
     onClick: (String?) -> Unit,
     email: String,
@@ -188,6 +189,7 @@ fun SignupButton (
     fun isEmailValid(email: String): Boolean {
         return emailRegex.matches(email)
     }
+
 
     MainButton(text = "회원가입",
         onClick={
@@ -216,4 +218,6 @@ fun SignupButton (
 
 
         })
+
+
 }

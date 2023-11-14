@@ -1,8 +1,13 @@
 
 package com.example.eatandtell.ui.appmain
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,6 +17,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+
+import androidx.compose.ui.graphics.BlendMode.Companion.Screen
+import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
+
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -19,17 +32,82 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+
 import com.example.eatandtell.ui.showToast
 import dagger.hilt.android.AndroidEntryPoint
+import com.example.eatandtell.dto.SearchedRestDTO
+import com.example.eatandtell.ui.showToast
+import com.example.eatandtell.ui.start.StartViewModel
+import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.launch
+
 
 //import com.example.eatandtell.ui.AppNavigation
 @AndroidEntryPoint
 class AppMainActivity : ComponentActivity() {
     private val appMainViewModel: AppMainViewModel by viewModels()
+
+    var positionX = ""
+    var positionY = ""
+    var requestPermissionLauncher : ActivityResultLauncher<String> = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+
+            Log.d("locationpermission", "asking then granted")
+            // Permission is granted. Continue the action or workflow in your
+            // app.
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location ->
+                    if (location != null) {
+                        positionX = location.longitude.toString()
+                        positionY = location.latitude.toString()
+
+                    }
+                }
+        } else {
+            //request permission again
+            ActivityResultContracts.RequestPermission()
+
+            Log.d("locationpermission", "asking then not granted")
+            showToast(this, "위치 권한이 허용되지 않았습니다.")
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val token = intent.getStringExtra("Token")
-        appMainViewModel.initialize(token)
+        lifecycleScope.launch {
+            appMainViewModel.initialize(token)
+        }
+        Log.d("locationpermission", "onCreate")
+
+        when {
+            ContextCompat.checkSelfPermission(
+                this@AppMainActivity,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                Log.d("locationpermission", "already granted")
+                // Permission is granted. Continue the action or workflow in your
+                // app.
+                val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+                fusedLocationClient.lastLocation
+                    .addOnSuccessListener { location ->
+                        if (location != null) {
+                            positionX = location.longitude.toString()
+                            positionY = location.latitude.toString()
+                        }
+                    }
+            }
+            else -> {
+                // You can directly ask for the permission.
+                // The registered ActivityResultCallback gets the result of this request.
+                requestPermissionLauncher.launch(
+                    Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
+
 
         appMainViewModel.uploadStatus.observe(this){message->
             showToast(this,message)
@@ -58,7 +136,7 @@ class AppMainActivity : ComponentActivity() {
 fun AppMain(
     viewModel: AppMainViewModel,
     navController: NavHostController,
-    context: ComponentActivity
+    context: AppMainActivity
 ) {
     // Get current back stack entry
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -83,7 +161,7 @@ fun AppMain(
                 BottomNavBar(
                     onHomeClick = { navigateToDestination(navController, "Home")},
                     onSearchClick = { navigateToDestination(navController, "Search") },
-                    onPlusClick = { navigateToDestination(navController, "Upload") },
+                    onPlusClick = { navigateToDestination(navController, "SearchRest") },
                     onProfileClick = { navigateToDestination(navController, "Profile")},
                 )
         }
@@ -93,7 +171,7 @@ fun AppMain(
 }
 
 @Composable
-fun AppMainNavigate(navController: NavHostController, modifier: Modifier, context: ComponentActivity, viewModel: AppMainViewModel) {
+fun AppMainNavigate(navController: NavHostController, modifier: Modifier, context: AppMainActivity, viewModel: AppMainViewModel) {
     NavHost(
         navController = navController,
         startDestination = "Home"
@@ -104,9 +182,34 @@ fun AppMainNavigate(navController: NavHostController, modifier: Modifier, contex
         composable(route = "Search") {
             SearchScreen(navController,context, viewModel)
         }
-        composable(route = "Upload") {
-            UploadScreen(navController, context, viewModel)
+//        composable(route = "Upload") {
+//            UploadScreen(navController, context, viewModel)
+//        }
+        composable(
+            route = "Upload/{search_id}/{place_name}/{category_name}",
+            arguments = listOf(
+                navArgument("search_id") {
+                    defaultValue = -1
+                    type = NavType.IntType
+                },
+                navArgument("place_name") {
+                    defaultValue = ""
+                    type = NavType.StringType
+                },
+                navArgument("category_name") {
+                    defaultValue = ""
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            val searchId = backStackEntry.arguments?.getInt("search_id")
+            val placeName = backStackEntry.arguments?.getString("place_name")
+            val categoryName = backStackEntry.arguments?.getString("category_name")
+            UploadScreen(navController, context, viewModel, searchId, placeName, categoryName)
+        }
 
+        composable(route = "SearchRest") {
+            SearchRestScreen(navController, context, viewModel)
         }
         composable(route = "Profile") {
             ProfileScreen(context, viewModel, navController)

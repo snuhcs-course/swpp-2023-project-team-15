@@ -45,6 +45,7 @@ class StartViewModel @Inject constructor(private val mainRepository: ApiReposito
 
     }
 
+
     fun registerUser(username: String, password: String, email: String, context: Context){
         viewModelScope.launch {
             val registrationData = RegisterRequest(username, password, email)
@@ -76,6 +77,7 @@ class StartViewModel @Inject constructor(private val mainRepository: ApiReposito
 
             }
 */
+
         }
     }
 

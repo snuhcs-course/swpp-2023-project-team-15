@@ -2,7 +2,15 @@ package com.example.eatandtell.ui.appmain
 
 import android.util.Log
 import androidx.activity.ComponentActivity
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -28,6 +36,10 @@ import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.ui.Post
 import com.example.eatandtell.ui.Profile
+
+import com.example.eatandtell.ui.StarRating
+import com.example.eatandtell.ui.UpButton
+
 import com.example.eatandtell.ui.showToast
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -36,7 +48,11 @@ import kotlinx.coroutines.launch
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
     var feedPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
     var loading by remember { mutableStateOf(true) }
-    var myProfile by remember { mutableStateOf(UserDTO(0, "", "", "", listOf())) }
+    var lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    Log.d("navigateToDestination", "lazylist in Home: ${lazyListState}")
+
 
     LaunchedEffect(loading) {
         try {
@@ -48,12 +64,6 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
                 },
             )
             println("getting posts is fine")
-            viewModel.getMyProfile (
-                onSuccess = { it ->
-                    myProfile = it
-                    println("myProfile: ${myProfile.username}")
-                }
-            )
             loading = false
         }
         catch (e: Exception) {
@@ -81,7 +91,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
     }
     else {
         LazyColumn(
-            state = rememberLazyListState(),
+            state = lazyListState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 20.dp)
@@ -89,42 +99,66 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
             items(feedPosts) { post ->
-                HomePost(post, viewModel = viewModel, navHostController = navHostController,myProfile)
+                HomePost(post, viewModel = viewModel, navHostController = navHostController)
             }
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
             item { Spacer(modifier = Modifier.height(70.dp)) }
         }
 
+        UpButton {
+            coroutineScope.launch {
+                lazyListState.animateScrollToItem(0)
+            }
+        }
     }
 }
 
 @Composable
-fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController,myProfile: UserDTO) {
+fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController, isLikedPost : Boolean = false) {
     val user = post.user
     val coroutinescope = rememberCoroutineScope()
+    var deleted by remember { mutableStateOf(false) }
 
 
-    Profile(
-        user.avatar_url,
-        user.username,
-        user.description,
-        onClick = {
-            if(user.id == myProfile.id)
-                navigateToDestination(navHostController, "Profile")
-            else
-                navigateToDestination(navHostController, "Profile/${user.id}")
-        },
-    );
-    Spacer(modifier = Modifier.height(11.dp))
-    Post(
-        post = post,
-        onHeartClick = {
-            coroutinescope.launch {
-                viewModel.toggleLike(post.id)
-            }
-        },
-    )
+    AnimatedVisibility(
+        visible = !deleted, // Show only when not deleted
+        enter = fadeIn(), // Fade in animation
+        exit = fadeOut() // Fade out animation when deleted
+    ) {
+        Column() {
+            Profile(
+                user.avatar_url,
+                user.username,
+                user.description,
+                onClick = {
+                    if (user.id == viewModel.myProfile.id)
+                        navigateToDestination(navHostController, "Profile")
+                    else
+                        navigateToDestination(navHostController, "Profile/${user.id}")
+                },
+            );
+            Spacer(modifier = Modifier.height(11.dp))
+            Post(
+                post = post,
+                onHeartClick = {
+                    coroutinescope.launch {
+                        viewModel.toggleLike(post.id)
+                        if (isLikedPost) {
+                            deleted = true
+                        }
+                    }
+                },
+                canDelete = (user.id == viewModel.myProfile.id),
+                onDelete = {
+                    coroutinescope.launch {
+                        viewModel.deletePost(post.id)
+                        deleted = true
+                    }
+                }
+            )
+        }
+    }
 }
 
 

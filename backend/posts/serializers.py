@@ -8,7 +8,7 @@ User= get_user_model()
 class RestaurantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restaurant
-        fields = '__all__'
+        fields = ('name', 'search_id', 'category_name')
 
 class PostPhotoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,17 +29,28 @@ class PostSerializer(serializers.ModelSerializer):
     is_liked = serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
+    sentiment = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ('id', 'restaurant', 'photos', 'user', 'rating', 'description', 'created_at', 'is_liked', 'like_count','tags')
+        fields = ('id', 'restaurant', 'photos', 'user', 'rating', 'description', 'created_at', 'is_liked', 'like_count','tags', 'sentiment')
         read_only_fields = ('user',)
 
     def create(self, validated_data):
         restaurant_data = validated_data.pop('restaurant')
         photos_data = validated_data.pop('photos', [])
         # Create or get a restaurant based on the name
-        restaurant, created = Restaurant.objects.get_or_create(**restaurant_data)
+        restaurant = Restaurant.objects.filter(name=restaurant_data['name']).first()
+        if restaurant:
+            if 'search_id' in restaurant_data and restaurant_data['search_id'] is not None:
+                restaurant.search_id = restaurant_data['search_id']
+            
+            if 'category_name' in restaurant_data and restaurant_data['category_name'] is not None:
+                restaurant.category_name = restaurant_data['category_name']
+
+            restaurant.save()
+        else:
+            restaurant, created = Restaurant.objects.get_or_create(**restaurant_data)
         
         post = Post.objects.create(restaurant=restaurant, **validated_data)
 
@@ -60,6 +71,10 @@ class PostSerializer(serializers.ModelSerializer):
     def get_tags(self, obj):
         tags = obj.tags.all()
         return [f"{tag.ko_label}" for tag in tags]
+    
+    def get_sentiment(self, obj):
+        return obj.sentiment
+    
 
 def data_list(serializer):
     class DataListSerializer(serializers.Serializer):
