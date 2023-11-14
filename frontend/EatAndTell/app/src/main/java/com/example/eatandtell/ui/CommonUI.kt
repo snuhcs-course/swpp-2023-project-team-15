@@ -11,30 +11,28 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontVariation.weight
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -54,6 +52,7 @@ import com.example.eatandtell.ui.theme.EatAndTellTheme
 import com.example.eatandtell.ui.theme.Gray
 import com.example.eatandtell.ui.theme.Inter
 import com.example.eatandtell.ui.theme.MainColor
+import com.example.eatandtell.ui.theme.PaleOrange
 import com.example.eatandtell.ui.theme.White
 
 public fun showToast(context: Context, message: String) {
@@ -103,7 +102,7 @@ fun HeartEmpty(onClick: (Int) -> Unit, post_id: Int) {
 
 //text fields
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class,ExperimentalComposeUiApi::class)
 @Composable
 fun CustomTextField(
     value: String,
@@ -115,9 +114,17 @@ fun CustomTextField(
     maxLines : Int = 1,
     enable : Boolean = true,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     TextField(
         value = value,
-        onValueChange = onValueChange,
+        onValueChange = { newValue ->
+            onValueChange(newValue)
+            if (maxLines == 1 && newValue.endsWith("\n")) { // 엔터 키가 눌린 경우
+                keyboardController?.hide() // 키보드 숨기기
+                onValueChange(newValue.trim()) // 엔터 문자 제거
+            }
+        },
         visualTransformation = visualTransformation,
         trailingIcon = {
             Box(modifier = Modifier.clickable { onTrailingIconClick?.invoke() }) {
@@ -165,34 +172,46 @@ fun WhiteTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    modifier : Modifier,
-    width : Dp? = null,
-    height : Dp? = null,
+    modifier: Modifier,
+    width: Dp? = null,
+    height: Dp? = null,
+    textStyle: TextStyle = TextStyle(
+        fontFamily = Inter,
+        fontSize = 14.sp,
+        fontWeight = FontWeight(400),
+        color = Black,
+    )
 ) {
     TextField(
         value = value,
         onValueChange = onValueChange,
         visualTransformation = VisualTransformation.None,
-        modifier = modifier,
+        modifier = modifier
+            .then(
+                if (width != null && height != null) {
+                    Modifier.size(width, height)
+                } else {
+                    Modifier
+                }
+            ),
         colors = TextFieldDefaults.textFieldColors(
             containerColor = White,
             cursorColor = Black,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
         ),
-        placeholder = { Text(placeholder, style = TextStyle(
-            fontFamily = Inter,
-            fontSize = 14.sp,
-            fontWeight = FontWeight(400),
-            color = Gray,
-        ),
-        ) },
-        textStyle = TextStyle(
-            fontFamily = Inter,
-            fontSize = 14.sp,
-            fontWeight = FontWeight(400),
-            color = Black,
-        ),
+        placeholder = {
+            Text(
+                placeholder,
+                style = TextStyle(
+                    fontFamily = Inter,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight(400),
+                    color = Gray,
+                )
+            )
+        },
+        textStyle = textStyle,
     )
 }
 
@@ -255,7 +274,13 @@ fun MainButton(onClick: () -> Unit, text: String, notLoading : Boolean = true, e
     ) {
 
 
-        if (notLoading) Text(text, color = White,
+        if (notLoading) Text(text, color = White, style = TextStyle(
+            fontSize = 16.sp,
+            lineHeight = 18.sp,
+            fontFamily = Inter,
+            fontWeight = FontWeight(700),
+            color = Color.Black,
+        )
         )
         else //show loading
             CircularProgressIndicator(
@@ -306,6 +331,67 @@ fun PreviewMediumWhiteButton() {
 }
 
 @Composable
+fun CustomButton(
+    onClick: () -> Unit,
+    text: String,
+    textColor: Color = Black,
+    fontWeight: Int = 500,
+    containerColor: Color = MainColor, // Pass the container color as a parameter
+    borderColor: Color = White,
+    cornerRadius: Dp = 40.dp, // You can specify the corner radius
+    height: Dp = 36.dp, // You can specify the height
+    widthFraction: Float = 0.9f, // Default to 1f which is full width
+    icon: ImageVector? = null // Icon is optional
+) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = containerColor,
+        ),
+        shape = RoundedCornerShape(cornerRadius),
+        enabled = true,
+        modifier = Modifier
+            .fillMaxWidth(widthFraction)
+            .height(height),
+        border = BorderStroke(3.dp,borderColor),
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        Text(
+            text,
+            color = textColor,
+            style = TextStyle(
+                fontFamily = Inter,
+                fontSize = 16.sp,
+                fontWeight = FontWeight(fontWeight),
+                textAlign = TextAlign.Center,
+            ),
+            modifier = Modifier
+                .padding(0.dp)
+                .align(Alignment.CenterVertically)
+        )
+        // If an icon is provided, display it
+        icon?.let {
+            Spacer(modifier = Modifier.width(10.dp)) // Add space between text and icon
+            Icon(
+                imageVector = Icons.Default.Refresh,
+                contentDescription = "Refresh Icon",
+                tint = White
+            )
+        }
+    }
+}
+
+
+@Preview
+@Composable
+fun PreviewCustomButton() {
+    EatAndTellTheme {
+        CustomButton(onClick = { /**/ }, text = "태그 갱신", containerColor = Gray, borderColor = White)
+    }
+}
+
+
+@Composable
 fun MediumRedButton(onClick: () -> Unit, text: String, enable: Boolean = true) {
     Button(
         onClick = {if (enable) onClick() else { /**/ }},
@@ -348,12 +434,13 @@ fun PreviewMediumRedButton() {
 
 
 @Composable
-fun Tag(text: String) {
+fun Tag(text: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .background(color = White, shape = RoundedCornerShape(size = 18.dp))
+            .background(color = PaleOrange, shape = RoundedCornerShape(size = 18.dp))
             .border(2.dp, MainColor, RoundedCornerShape(size = 18.dp))
-            .padding(horizontal = 12.dp, vertical = 2.dp),
+            .padding(horizontal = 12.dp, vertical = 2.dp)
+            .clickable (onClick=onClick),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -374,7 +461,7 @@ fun Tag(text: String) {
 @Composable
 fun PreviewTag() {
     EatAndTellTheme {
-        Tag(text = "#육식주의자")
+        Tag(text = "#육식주의자",onClick={/**/})
     }
 }
 
@@ -550,7 +637,7 @@ fun ProfileText(
                 color = Color(0xFF848484)
             ),
             modifier = Modifier
-                .width(150.dp),
+                .width(145.dp),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
@@ -575,6 +662,26 @@ fun Profile(
         ProfileText(username = username, userDescription = userDescription)
     }
 }
+@Composable
+fun FollowText(count: Int, label: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = "$count", style = TextStyle(
+            fontSize = 16.sp,
+            lineHeight = 18.sp,
+            fontFamily = Inter,
+            fontWeight = FontWeight(700),
+            color = Color.Black,
+        ))
+        Text(text = label, style = TextStyle(
+            fontSize = 16.sp,
+            lineHeight = 18.sp,
+            fontFamily = Inter,
+            fontWeight = FontWeight(500),
+            color = Color.Black,
+        ))
+    }
+}
+
 
 
 // Post Photos
@@ -602,6 +709,9 @@ fun ImageDialog(imageUrl: String, onClick: () -> Unit) {
 
     ) {
         Box (
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -615,9 +725,11 @@ fun ImageDialog(imageUrl: String, onClick: () -> Unit) {
                     contentDescription = "back",
                     tint = Black,
                     modifier = Modifier
-                        .size(24.dp)
+                        .size(32.dp)
                         .align(Alignment.End)
+                        .background(Color(0x55FFFFF), shape=CircleShape)
                         .clickable { onClick() }
+                        .padding(8.dp)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Image(
@@ -626,6 +738,7 @@ fun ImageDialog(imageUrl: String, onClick: () -> Unit) {
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .border(2.dp, Color.White)
                 )
 
             }
@@ -894,4 +1007,24 @@ fun UpButton(onClick: () -> Unit = {}) {
             .fillMaxSize()
             .wrapContentSize(Alignment.BottomEnd)
     )
+}
+
+@Composable
+fun SearchSelectButton(
+    onClick: () -> Unit,
+    text: String,
+    selected: Boolean,
+) {
+    val buttonSizeModifier = Modifier.size(width = 102.dp, height = 36.dp) // 버튼 크기 조절
+
+    Box(
+        modifier = buttonSizeModifier,
+        contentAlignment = Alignment.Center
+    ) {
+        if (selected) {
+            MediumWhiteButton(onClick = { onClick() }, text = text)
+        } else {
+            MediumRedButton(onClick = { onClick() }, text = text)
+        }
+    }
 }
