@@ -151,6 +151,7 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
 
                 Log.d("register screen", "Username ${username.text}, Password: ${password.text}")
                 viewModel.registerUser(username.text, password.text,email.text,context)
+                viewModel.resetStates()
             },
             email = email.text,
             username = username.text,
@@ -175,6 +176,7 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
                 text = "로그인",
                 modifier = Modifier.clickable {
                     navController.navigate("login")
+                    viewModel.resetStates()
                 }.testTag("go_to_login")
             )
         }

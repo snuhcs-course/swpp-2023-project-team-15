@@ -83,13 +83,12 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
             is LoginState.Success -> {
                 val intent = Intent(context, AppMainActivity::class.java)
                 intent.putExtra("Token", (loginState as LoginState.Success).token)
-                showToast(context,"Login Success")
                 context.startActivity(intent)
                 context.finish()
             }
             is LoginState.Error -> {
                 val errorMessage = (loginState as LoginState.Error).message
-                showToast(context,"Login Failed")
+                showToast(context,"로그인에 실패하였습니다")
 
             }
             // Handle other states if necessary
@@ -138,6 +137,7 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
             onClick = {it->
                 Log.d("login screen", "ID: ${id.text}, Password: ${password.text}")
                 viewModel.loginUser(id.text, password.text,context)
+                viewModel.resetStates()
                 //val intent = Intent(context, AppMainActivity::class.java)
                 //intent.putExtra("Token", token) // 토큰 넘겨주기
                 //context.startActivity(intent)
@@ -180,6 +180,7 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
                 text = "회원가입",
                 modifier = Modifier.clickable {
                     navController.navigate("signup")
+                    viewModel.resetStates()
                 }.testTag("go_to_signup")
             )
 

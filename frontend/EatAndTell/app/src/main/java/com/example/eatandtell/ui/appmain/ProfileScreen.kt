@@ -69,8 +69,6 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
 ) {
     var tags by rememberSaveable { mutableStateOf(userInfo.tags) }
     val coroutinescope = rememberCoroutineScope()
-    var buttonText by remember { mutableStateOf(buttonText) }
-    var follwerCount by remember { mutableStateOf(userInfo.follower_count) }
     var isFollowing by remember { mutableStateOf(userInfo.is_followed) }
 
     Column {

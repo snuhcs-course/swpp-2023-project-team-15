@@ -41,7 +41,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     var myProfile = UserDTO(0, "", "", "", listOf())
 
     var photoUris = mutableStateListOf<Uri>()// store image uri
-    private set
+        private set
     suspend fun initialize(token: String?) {
         this.token = token
         getMyProfile()

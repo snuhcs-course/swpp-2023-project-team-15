@@ -80,6 +80,10 @@ class StartViewModel @Inject constructor(private val mainRepository: ApiReposito
 
         }
     }
+    fun resetStates() {
+        _loginState.value = LoginState.Idle
+        _registerState.value = RegisterState.Idle
+    }
 
 
 }
