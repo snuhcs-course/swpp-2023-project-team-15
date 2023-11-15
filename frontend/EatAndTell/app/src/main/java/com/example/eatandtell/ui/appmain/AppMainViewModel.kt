@@ -17,7 +17,6 @@ import com.example.eatandtell.dto.TopTag
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
-import com.example.eatandtell.ui.showToast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -154,17 +153,17 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                         EditProfileRequest(description = description, avatar_url = url)
                     Log.d("edit profile", profileData.toString())
                     editProfile(profileData)
-                    showToast(context, "프로필이 편집되었습니다")
+                    _editStatus.postValue("프로필이 편집되었습니다")
                 } catch (e: Exception) {
                     // Handle exceptions, e.g., from network calls, here
                     if (e !is CancellationException) {
                         Log.d("edit profile error", e.message ?: "Network error")
-                        //showToast(context, "프로필 편집에 실패했습니다")
+
                         _editStatus.postValue("프로필 편집에 실패했습니다")
                     } else {
                         Log.d("edit profile error", "cancellation exception")
                         _editStatus.postValue("프로필이 편집되었습니다")
-                        //TOOD: navigate을 해버리니까 cancellation 에러가 뜸. 그렇다고 navigate을 코루틴 내에서 화면이 너무 안 넘어가서 버튼을 연타하게 됨
+
                     }
                 }
             }

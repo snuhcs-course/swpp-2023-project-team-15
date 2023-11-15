@@ -108,7 +108,30 @@ class AppMainViewModelTest {
         assertEquals("포스트가 업로드되었습니다", result)
 
     }
+    @Test
+    fun uploadPhotosAndEditProfile_changes_editStatus_to_success() = runTest {
+        @MockK
+        val mockUri: Uri = mockk()
+        val mockContentResolver = mockk<ContentResolver>()
+        val byteArray = "unit_test".toByteArray()
+        val mockInputStream = ByteArrayInputStream(byteArray)
+        val photoPath= listOf(mockUri)
+        val userDTO= UserDTO(1,"test","test","", listOf(""))
 
+
+
+        every { context.contentResolver } returns mockContentResolver
+        every { mockContentResolver.openInputStream(mockUri) } returns mockInputStream
+        coEvery { mockRepository.getImageURL(any(),any()) } returns Result.success(ImageURLResponse(""))
+        coEvery { mockRepository.editProfile(any(),any()) } returns Result.success(userDTO)
+        viewModel.uploadPhotosAndEditProfile(photoPath," ", context, "")
+        advanceUntilIdle()
+        val result= viewModel.editStatus.value
+
+
+        assertEquals("프로필이 편집되었습니다", result)
+
+    }
 
 
 
