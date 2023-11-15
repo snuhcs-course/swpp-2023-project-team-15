@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from posts.views import (get_top_tag_after_translation_only_label,
                          get_top_tags_after_translation)
-from tags.utils import category_name_to_tags, deepl_translate_ko_to_en
+from tags.utils import category_name_to_tags, google_translate_ko_to_en
 
 
 # Create your tests here.
@@ -42,20 +42,35 @@ class TagGenerateTestCase(TestCase):
         self.assert_helper("음식점 > 양식 > 해산물 > 바닷가재", ["양식", "해산물"])
 
 
+
+'''
+30	atmosphere	가족모임	for Family Gathering
+	29	atmosphere	핫플	trending, hot, instagram
+	28	atmosphere	데이트	for date, couple
+	27	atmosphere	고급진	Luxurious, Expensive
+	26	atmosphere	혼밥	Alone
+	25	atmosphere	가성비	Cost-Effective
+24	atmosphere	서비스	friendly service
+	23	atmosphere	조용한	Quiet, Calm
+	22	atmosphere	시끌벅적	Noisy
+	21	atmosphere	술과 함께	Alcohol
+'''
+
+
 class TagInferenceTestCase(TestCase):
     def assert_helper(self, text, expected_tag):
-        translated_description = deepl_translate_ko_to_en(text)        
+        translated_description = google_translate_ko_to_en(text)        
         possible_tags = [
-            'preferes for Family Gathering',
-            'prefers for Group Dining',
-            'prefers for a Date',
-            'prefers Upscale',
-            'prefers Expensive',
-            'prefers Cost-Effective',
-            'prefers Instagrammable',
-            'prefers Quiet',
-            'prefers Lively',
-            'prefers With Alcohol',
+            'for Family Gathering',
+            'trending, hot, instagram',
+            'for date, couple',
+            'Luxurious, Expensive',
+            'Alone',
+            'Cost-Effective',
+            'friendly service',
+            'Quiet, Calm',
+            'Noisy',
+            'Alcohol, Drinking',
         ]
         matching_tag = get_top_tag_after_translation_only_label(
             possible_tags=possible_tags,
@@ -68,11 +83,11 @@ class TagInferenceTestCase(TestCase):
         self.assert_helper('너무 맛없고 비려요!', None)
         
     def test_quite(self):
-        self.assert_helper('고등어구이가 별미입니다. 분위기도 조용하고, 사시미도 맛있어요.', 'prefers Quiet')
+        self.assert_helper('고등어구이가 별미입니다. 분위기도 조용하고, 사시미도 맛있어요.', 'Quiet, Calm')
     
     def test_cost_effective(self):
-        self.assert_helper('개인적으로 이 메뉴 젤 만족! 5000원이에요~', 'prefers Cost-Effective')
+        self.assert_helper('개인적으로 이 메뉴 젤 만족! 5000원이에요~', 'Cost-Effective')
     
     def test_expensive(self):
-        self.assert_helper('가격이 싸진 않지만 맛있어요.', 'prefers Expensive')
+        self.assert_helper('가격이 싸진 않지만 맛있어요.', 'Luxurious, Expensive')
         

@@ -92,7 +92,9 @@ interface ApiService {
     suspend fun getTopTags(@Header("Authorization") authorization: String,
     ): List<TopTag>
 
-
+    @GET("/tags/top-tags") // The tags endpoint
+    suspend fun getTopTags(@Header("Authorization") authorization: String,
+    ): List<TopTag>
 
 
 
