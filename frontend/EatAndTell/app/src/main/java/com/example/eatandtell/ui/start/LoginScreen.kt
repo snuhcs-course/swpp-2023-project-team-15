@@ -4,8 +4,10 @@ package com.example.eatandtell.ui.start
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -66,6 +69,11 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
     }
 
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
+    fun hideKeyboard() {
+        val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(context.currentFocus?.windowToken, 0)
+    }
+
 
     val loginState by viewModel.loginState
 
@@ -93,6 +101,11 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { hideKeyboard() }
+                )
+            }
             .fillMaxSize()
             .padding(horizontal = 20.dp)
     ) {

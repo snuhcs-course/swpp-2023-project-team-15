@@ -2,6 +2,7 @@ package com.example.eatandtell.ui.appmain
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,6 +13,7 @@ import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.SearchedRestDTO
+import com.example.eatandtell.dto.TopTag
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
@@ -39,12 +41,15 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
     var myProfile = UserDTO(0, "", "", "", listOf())
 
+    var photoUris = mutableStateListOf<Uri>()// store image uri
+    private set
     suspend fun initialize(token: String?) {
         this.token = token
-        getMyProfile() // Since it's a suspend function, you can call it directly without launch
+        getMyProfile()
     }
+    private val _tagUpdateStatus = MutableLiveData<String>()
+    val tagUpdateStatus: LiveData<String> = _tagUpdateStatus
 
-    val messageToDisplay = MutableLiveData<String>()
 
 
         //private val apiService = RetrofitClient.retro.create(ApiService::class.java)
@@ -77,9 +82,11 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                         "this_name_does_not_matter.jpg",
                         requestBody
                     )
+
                     try {
                         val imageUrl = getImageURL(fileToUpload)
                         photoUrls.add(imageUrl)
+
                     } catch (e: Exception) {
                         Log.d("Image Upload Error", e.message ?: "Upload failed")
                         _uploadStatus.postValue("이미지 업로드에 실패했습니다.")
@@ -99,6 +106,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                     Log.d("upload photos and post", "success")
                     _uploadStatus.postValue("포스트가 업로드되었습니다")
 
+
                 } catch (e: CancellationException) {
                     Log.d("upload photos and post error", "cancellation exception")
 
@@ -106,6 +114,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                     Log.d("upload photos and post error", e.message ?: "Network error")
                     _uploadStatus.postValue("포스트 업로드에 실패했습니다.")
                 }
+                photoUris.clear()
 
 
             }
@@ -163,14 +172,17 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
         private suspend fun uploadPost(postData: UploadPostRequest) {
             val authorization = "Token $token"
+            val response= apiRepository.uploadPost(authorization, postData)
+            response.onSuccess {
 
-            try {
-                apiRepository.uploadPost(authorization, postData)
-            } catch (e: Exception) {
+            }
+            response.onFailure{e->
                 val errorMessage = e.message ?: "Network error"
                 Log.d("upload post error", errorMessage)
                 throw e // rethrow the exception to be caught in the calling function
+
             }
+
         }
 
         private suspend fun editProfile(profileData: EditProfileRequest) {
@@ -278,13 +290,15 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
         }
 
-        suspend fun toggleFollow(user_id: Int) {
+        suspend fun toggleFollow(user_id: Int):Boolean {
             val authorization = "Token $token"
-            try {
+            return try {
                 val response = apiRepository.toggleFollow(authorization, user_id)
                 Log.d("toggle follow", "success")
+                true
             } catch (e: Exception) {
                 Log.d("toggle follow error", e.message ?: "Network error")
+                false
             }
         }
 
@@ -414,14 +428,29 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                 response.onSuccess { response ->
                     onSuccess(response.user_tags)
                     Log.d("refresh tags", "success")
-                    messageToDisplay.postValue("태그가 업데이트되었습니다")
+                    _tagUpdateStatus.postValue("태그가 업데이트되었습니다")
                 }
                 response.onFailure { e ->
                     Log.d("refresh tags error", e.message ?: "Network error")
-                    messageToDisplay.postValue("태그 업데이트에 실패하였습니다")
+                    _tagUpdateStatus.postValue("태그 업데이트에 실패하였습니다")
                 }
             }
         }
+
+    suspend fun getTopTags(onSuccess: (List<TopTag>) -> Unit, onError: (String) -> Unit) {
+        val authorization = "Token $token"
+        val response = apiRepository.getTopTags(authorization)
+        response.onSuccess{response->
+            onSuccess(response)
+            Log.d("getTopTags", "success")
+        }
+        response.onFailure { e->
+            val errorMessage = e.message ?: "Network error"
+            Log.d("getTopTags error", errorMessage)
+            onError(errorMessage)
+        }
+
+    }
     }
 
 // Event wrapper to handle one-time events

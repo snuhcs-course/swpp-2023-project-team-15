@@ -12,6 +12,7 @@ import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.RegisterRequest
 import com.example.eatandtell.dto.RegisterResponse
 import com.example.eatandtell.dto.TagsDTO
+import com.example.eatandtell.dto.TopTag
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.toggleFollowResponse
@@ -91,6 +92,9 @@ class ApiRepository@Inject constructor(private val apiService: ApiService) {
         apiService.getSearchedRest(authorization,query,x,y)
     }
 
+    suspend fun getTopTags( authorization: String,): Result<List<TopTag>> = runCatching{
+        apiService.getTopTags(authorization)
+    }
 
 
 

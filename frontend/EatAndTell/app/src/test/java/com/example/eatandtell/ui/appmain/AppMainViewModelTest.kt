@@ -2,8 +2,9 @@ package com.example.eatandtell.ui.appmain
 import android.content.ContentResolver
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.Observer
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.eatandtell.data.repository.ApiRepository
+import com.example.eatandtell.dto.ImageURLResponse
 import com.example.eatandtell.dto.PhotoDTO
 import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.RestReqDTO
@@ -28,11 +29,13 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayInputStream
-import java.util.concurrent.CountDownLatch
 
 //class MainCoroutineRule:MainCoroutineRule
 @ExtendWith(MockKExtension::class)
+@RunWith(RobolectricTestRunner::class)
 class AppMainViewModelTest {
     @MockK
     private val context: AppMainActivity = mockk(relaxed = true)
@@ -41,6 +44,9 @@ class AppMainViewModelTest {
     @ExperimentalCoroutinesApi
     @get:Rule
     val mainRule = MainCoroutineRule()
+    @get:Rule
+    var instantTaskExecutorRule = InstantTaskExecutorRule()
+
     private lateinit var viewModel: AppMainViewModel
 
     @Before
@@ -49,13 +55,14 @@ class AppMainViewModelTest {
         viewModel= AppMainViewModel(mockRepository)
         mockkStatic(Log::class)
         every { Log.d(any(), any()) } returns 0
+
         //mockkStatic(::showToast)
         //every {showToast(context,any())} returns
     }
 
     @Test
     fun prepareFileData_returnsBytes() = runTest {
-        val mockUri: Uri = mockk()
+        val mockUri = Uri.parse("file:///path/to/resource")
         val mockContentResolver = mockk<ContentResolver>()
         val byteArray = "unit_test".toByteArray()
         val mockInputStream = ByteArrayInputStream(byteArray)
@@ -70,6 +77,7 @@ class AppMainViewModelTest {
         assertArrayEquals(byteArray, bytes)
     }
     // use RunTest to test suspend functions. See https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-test/
+
     @Test
     fun uploadPhotosAndPost_changes_uploadStatus_to_success() = runTest {
         @MockK
@@ -86,23 +94,22 @@ class AppMainViewModelTest {
             listOf(PhotoDTO(1,"",1,)),"",true,0,
             listOf("")
         )
-        val latch = CountDownLatch(1)
-        val observer = Observer<String> { _ ->
-            latch.countDown()  // Count down the latch when LiveData changes
-        }
+
 
         every { context.contentResolver } returns mockContentResolver
         every { mockContentResolver.openInputStream(mockUri) } returns mockInputStream
-
+        coEvery { mockRepository.getImageURL(any(),any()) } returns Result.success(ImageURLResponse(""))
         coEvery { mockRepository.uploadPost(any(),any()) } returns Result.success(postDTO)
         viewModel.uploadPhotosAndPost(photoPath,restaurant, rating,description,context)
         advanceUntilIdle()
+        val result= viewModel.uploadStatus.value
 
-        assertEquals("포스트가 업로드되었습니다", viewModel.uploadStatus.value)
+
+        assertEquals("포스트가 업로드되었습니다", result)
 
     }
 
-    @Test
+
 
 
 
@@ -110,6 +117,10 @@ class AppMainViewModelTest {
     fun tearDown() {
         unmockkStatic(Log::class)
     }
+
+
+
+
 
 
 

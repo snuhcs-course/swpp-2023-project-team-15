@@ -2,13 +2,9 @@ package com.example.eatandtell.ui.appmain
 
 import android.util.Log
 import androidx.activity.ComponentActivity
-
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
-
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +19,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,20 +30,16 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.eatandtell.dto.PostDTO
-import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.ui.Post
 import com.example.eatandtell.ui.Profile
-
-import com.example.eatandtell.ui.StarRating
 import com.example.eatandtell.ui.UpButton
-
 import com.example.eatandtell.ui.showToast
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
-    var feedPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
+    var feedPosts = remember { mutableStateListOf<PostDTO>() }
     var loading by remember { mutableStateOf(true) }
     var lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -59,7 +52,8 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
             println("trying to load home feed")
             viewModel.getAllPosts(
                 onSuccess = { posts ->
-                    feedPosts = posts
+                    feedPosts.clear()
+                    feedPosts.addAll(posts)
                     println("feedPosts: ${feedPosts.size}")
                 },
             )
@@ -98,8 +92,27 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
                 .testTag("feed"),
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
-            items(feedPosts) { post ->
-                HomePost(post, viewModel = viewModel, navHostController = navHostController)
+            items(items = feedPosts, key = { it.id }) { post ->
+                HomePost(
+                    post = post,
+                    viewModel = viewModel,
+                    navHostController = navHostController,
+                    onDelete = { postToDelete ->
+                        feedPosts.remove(postToDelete)
+                    }
+                ) { postToLike ->
+                    val index = feedPosts.indexOf(postToLike)
+                    if (index != -1) {
+                        // Determine the new like count based on the current is_liked state
+                        val newLikeCount =
+                            if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
+                        // Update the post with the new like state and count
+                        feedPosts[index] = postToLike.copy(
+                            is_liked = !postToLike.is_liked,
+                            like_count = newLikeCount
+                        )
+                    }
+                }
             }
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
@@ -115,7 +128,13 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
 }
 
 @Composable
-fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHostController, isLikedPost : Boolean = false) {
+fun HomePost(
+    post: PostDTO,
+    viewModel: AppMainViewModel,
+    navHostController: NavHostController,
+    onDelete: (PostDTO) -> Unit,
+    onLike: (PostDTO) -> Unit
+) {
     val user = post.user
     val coroutinescope = rememberCoroutineScope()
     var deleted by remember { mutableStateOf(false) }
@@ -142,18 +161,19 @@ fun HomePost(post: PostDTO, viewModel: AppMainViewModel,navHostController: NavHo
             Post(
                 post = post,
                 onHeartClick = {
+                    onLike(post)
                     coroutinescope.launch {
                         viewModel.toggleLike(post.id)
-                        if (isLikedPost) {
-                            deleted = true
-                        }
+
                     }
                 },
                 canDelete = (user.id == viewModel.myProfile.id),
                 onDelete = {
+                    deleted = true
+                    onDelete(post)
                     coroutinescope.launch {
                         viewModel.deletePost(post.id)
-                        deleted = true
+
                     }
                 }
             )

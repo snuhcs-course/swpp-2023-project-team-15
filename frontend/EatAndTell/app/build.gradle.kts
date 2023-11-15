@@ -109,7 +109,7 @@ dependencies {
     kaptTest("com.google.dagger:hilt-android-compiler:2.44")
     // ...with Java.
     testAnnotationProcessor("com.google.dagger:hilt-android-compiler:2.44")
-
+    testImplementation ("org.robolectric:robolectric:4.10")
 
     // For instrumented tests.
     androidTestImplementation("com.google.dagger:hilt-android-testing:2.44")
