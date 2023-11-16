@@ -93,20 +93,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
         }
     }
 
-    if(loading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .testTag("loading"),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                //로딩 화면
-                modifier = Modifier
-                    .size(70.dp)
-            )
-        }
-    }
+    
     LazyColumn(
         state = lazyListState,
         modifier = Modifier
