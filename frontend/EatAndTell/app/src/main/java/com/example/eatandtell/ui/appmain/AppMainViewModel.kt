@@ -17,6 +17,7 @@ import com.example.eatandtell.dto.TopTag
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
+import com.example.eatandtell.ui.showToast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -41,25 +42,28 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     var myProfile = UserDTO(0, "", "", "", listOf())
 
     var photoUris = mutableStateListOf<Uri>()// store image uri
+
         private set
     suspend fun initialize(token: String?) {
+
         this.token = token
-        getMyProfile()
+        viewModelScope.launch {
+            getMyProfile()
+        }
     }
     private val _tagUpdateStatus = MutableLiveData<String>()
     val tagUpdateStatus: LiveData<String> = _tagUpdateStatus
 
 
-
-        //private val apiService = RetrofitClient.retro.create(ApiService::class.java)
-
-        fun prepareFileData(photoPath: Uri, context: Context): ByteArray? {
+    fun prepareFileData(photoPath: Uri, context: Context): ByteArray? {
             val contentResolver = context.contentResolver
             contentResolver.openInputStream(photoPath)?.use { inputStream ->
                 return inputStream.readBytes()
             }
             return null
         }
+        //private val apiService = RetrofitClient.retro.create(ApiService::class.java)
+
 
         suspend fun uploadPhotosAndPost(
             photoPaths: List<Uri>,
@@ -119,7 +123,9 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
         }
 
+
         suspend fun uploadPhotosAndEditProfile(
+
             photoPaths: List<Uri>, //실제로는 length 1짜리
             description: String,
             context: Context,
@@ -138,11 +144,15 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                         "this_name_does_not_matter.jpg",
                         requestBody
                     )
-                    val imageUrl = getImageURL(fileToUpload)
-                    photoUrls.add(imageUrl)
+                    try {
+                        val imageUrl = getImageURL(fileToUpload)
+                        photoUrls.add(imageUrl)
+                    } catch (e: Exception) {
+                        Log.d("Image Upload Error", e.message ?: "Upload failed")
+                        _editStatus.postValue("프로필 편집에 실패했습니다")
+
+                    }
                 }
-
-
 
                 try {
                     Log.d("edit profile", description)
@@ -163,7 +173,8 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                         _editStatus.postValue("프로필 편집에 실패했습니다")
                     } else {
                         Log.d("edit profile error", "cancellation exception")
-                        _editStatus.postValue("프로필이 편집되었습니다")
+//                        _editStatus.postValue("프로필이 편집되었습니다")
+                        _editStatus.postValue("프로필 편집에 실패했습니다")
 
                     }
                 }
