@@ -93,6 +93,13 @@ interface ApiService {
     ): List<TopTag>
 
 
+    @GET("posts/recommend") // The posts endpoint
+    suspend fun getPersonalizedPosts(@Header("Authorization") authorization: String,
+    ): GetAllPostsResponse
+
+    @GET("posts/following") // The posts endpoint
+    suspend fun getFollwingPosts(@Header("Authorization") authorization: String,
+    ): GetAllPostsResponse
 
 
 }

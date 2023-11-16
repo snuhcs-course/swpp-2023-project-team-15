@@ -244,6 +244,30 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
         }
 
+    suspend fun getPersonalizedPosts(onSuccess: (List<PostDTO>) -> Unit) {
+        val authorization = "Token $token"
+        val response = apiRepository.getPersonalizedPosts(authorization)
+        response.onSuccess { response ->
+            onSuccess(response.data)
+
+        }
+        response.onFailure { message ->
+            throw message
+        }
+    }
+
+    suspend fun getFollowingPosts(onSuccess: (List<PostDTO>) -> Unit) {
+        val authorization = "Token $token"
+        val response = apiRepository.getFollowingPosts(authorization)
+        response.onSuccess { response ->
+            onSuccess(response.data)
+
+        }
+        response.onFailure { message ->
+            throw message
+        }
+    }
+
         suspend fun getLikedFeed(onSuccess: (List<PostDTO>) -> Unit) {
             val authorization = "Token $token"
             val response = apiRepository.getLikedFeed(authorization)
