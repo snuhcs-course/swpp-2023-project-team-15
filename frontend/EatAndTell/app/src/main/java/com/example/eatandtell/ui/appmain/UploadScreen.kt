@@ -1,24 +1,17 @@
 // SignUpScreen.kt
 package com.example.eatandtell.ui.appmain
 
+import android.R.attr.path
+import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -26,27 +19,27 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.RestReqDTO
+import com.example.eatandtell.dto.SearchedRestDTO
+import com.example.eatandtell.dto.UploadPostRequest
+import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.ui.DraggableStarRating
 import com.example.eatandtell.ui.ImageDialog
 import com.example.eatandtell.ui.MainButton
@@ -57,7 +50,17 @@ import com.example.eatandtell.ui.WhiteTextField
 import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.theme.Black
 import com.example.eatandtell.ui.theme.MainColor
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import java.io.File
+import java.io.InputStream
 
 
 @Composable
@@ -83,22 +86,37 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
             viewModel.photoUris.clear()
             viewModel.photoUris.addAll(uris)
         }
-
     var clickedImageIndex by remember { mutableStateOf(-1) }
 
-    val context = LocalContext.current
 
 
     var loading by remember { mutableStateOf(false) }
     var myProfile = viewModel.myProfile
+
     // Handle navigation result from SearchRestScreen
     LaunchedEffect(key1 = navController.currentBackStackEntryAsState()) {
         navController.currentBackStackEntry?.arguments?.getString("place_name")?.let {
             restaurantName = TextFieldValue(it)
         }
     }
-
-
+//    LaunchedEffect(loading) {
+//        try {
+//            viewModel.getMyProfile (
+//                onSuccess = { it ->
+//                    myProfile = it
+//                    println("myProfile: ${myProfile.username}")
+//                }
+//            )
+//            loading = false
+//        }
+//        catch (e: Exception) {
+//            if (e !is CancellationException) { // 유저가 너무 빨리 화면을 옮겨다니는 경우에는 CancellationException이 발생할 수 있지만, 서버 에러가 아니라서 패스
+//                loading = false
+//                println("get my profile load error")
+//                showToast(context, "프로필 로딩에 실패하였습니다")
+//            }
+//        }
+//    }
 
     if(loading) {
         Box(
@@ -161,6 +179,7 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
+
                 // Restaurant Name or Button
                 if (restaurantName.text.isEmpty()) {
                     MediumWhiteButton(
@@ -282,7 +301,6 @@ fun UploadButton(viewModel: AppMainViewModel,
                         )
                         onClickNav() //Navigation을 먼저 해버리니까
                     }
-
                 } catch (e: Exception) {
                     // Handle exceptions, e.g., from network calls, here
                     showToast(context, "An error occurred: ${e.message}")
