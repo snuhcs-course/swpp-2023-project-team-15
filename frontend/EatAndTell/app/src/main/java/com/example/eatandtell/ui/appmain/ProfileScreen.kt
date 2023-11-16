@@ -73,7 +73,7 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
     var isFollowing by remember { mutableStateOf(userInfo.is_followed) }
 
     Column {
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         // First row with profile image, follower, and following
         Row(
             modifier = Modifier
@@ -149,6 +149,7 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                 }
             }
         }
+        Spacer(modifier = Modifier.height(15.dp))
             //refresh button
             if (itsMe) {
                 Row(
