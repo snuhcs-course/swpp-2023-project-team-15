@@ -182,6 +182,28 @@ class AppMainViewModel() : ViewModel() {
         }
     }
 
+    suspend fun getPersonalizedPosts(onSuccess: (List<PostDTO>) -> Unit) {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.getPersonalizedPosts(authorization)
+            onSuccess(response.data)
+        } catch (e: Exception) {
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
+    suspend fun getFollowingPosts(onSuccess: (List<PostDTO>) -> Unit) {
+        val authorization = "Token $token"
+        try {
+            val response = apiService.getFollwingPosts(authorization)
+            onSuccess(response.data)
+        } catch (e: Exception) {
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
+
+
     suspend fun getLikedFeed(onSuccess: (List<PostDTO>) -> Unit) {
         val authorization = "Token $token"
         try {
