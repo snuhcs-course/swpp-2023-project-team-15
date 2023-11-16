@@ -98,6 +98,22 @@ class StartViewModelTest {
         assertTrue(viewModel.loginState.value is LoginState.Success)
     }
 
+    @Test
+    fun loginUser_error_updates_state_to_Error() = runTest {
+        val viewModel = StartViewModel(mockRepository, mockTokenRepository)
+        val loginRequestData = LoginRequest("username", "wrongpassword")
+
+        val fakeException = Exception("Login failed")
+        coEvery { mockRepository.loginUser(loginRequestData) } returns Result.failure(fakeException)
+
+        viewModel.loginUser("username", "wrongpassword", context)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.loginState.value is LoginState.Error)
+        assertEquals("Login failed", (viewModel.loginState.value as LoginState.Error).message)
+    }
+
+
     //testing registerUser on a unit level can have side effects so mock API
     @Test
     fun registerUser_meme_returnsTrue() = runTest {
@@ -117,6 +133,22 @@ class StartViewModelTest {
 
         assert(viewModel.registerState.value is RegisterState.Success)
     }
+
+    @Test
+    fun registerUser_error_updates_state_to_Error() = runTest {
+        val viewModel = StartViewModel(mockRepository, mockTokenRepository)
+        val registerRequestData = RegisterRequest("username", "password", "email")
+
+        val fakeException = Exception("Registration failed")
+        coEvery { mockRepository.registerUser(registerRequestData) } returns Result.failure(fakeException)
+
+        viewModel.registerUser("username", "password", "email", context)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.registerState.value is RegisterState.Error)
+        assertEquals("Registration failed", (viewModel.registerState.value as RegisterState.Error).message)
+    }
+
     @After
     fun tearDown() {
         unmockkStatic(Log::class)
