@@ -111,6 +111,7 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                 }, text = buttonText, containerColor = White, borderColor = PaleGray)
             }
         }
+
         Spacer(modifier = Modifier.height(11.dp))
 
         //Tags
@@ -145,7 +146,7 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                     }
                 }
             }
-
+        }
             //refresh button
             if (itsMe) {
                 Row(
@@ -188,7 +189,6 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
             Spacer(modifier = Modifier.height(15.dp))
         }
 
-    }
 }
 
 
