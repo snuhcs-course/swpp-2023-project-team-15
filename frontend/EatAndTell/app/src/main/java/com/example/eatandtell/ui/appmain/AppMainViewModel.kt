@@ -3,6 +3,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -42,8 +43,8 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     var myProfile = UserDTO(0, "", "", "", listOf())
 
     var photoUris = mutableStateListOf<Uri>()// store image uri
-
         private set
+    val reviewDescription = mutableStateOf("")
     suspend fun initialize(token: String?) {
 
         this.token = token
@@ -118,8 +119,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                     _uploadStatus.postValue("포스트 업로드에 실패했습니다.")
                 }
                 photoUris.clear()
-
-
+                reviewDescription.value = ""
 
         }
 

@@ -69,11 +69,12 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
     var restaurantName by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(placeName ?: ""))
     }
+//
+//    var reviewDescription by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+//        mutableStateOf(TextFieldValue(""))
+//    }
 
-    var reviewDescription by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue(""))
-    }
-
+    var reviewDescription by viewModel.reviewDescription
     var myRating by rememberSaveable { mutableStateOf("0") }
 
 
@@ -187,26 +188,17 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                         text = "식당 검색"
                     )
                 } else {
-                    WhiteTextField(
-                        value = restaurantName.text,
-                        onValueChange = { newText ->
-                            restaurantName = TextFieldValue(newText)
-                        },
-                        placeholder = "식당 이름",
-                        textStyle = TextStyle(
+                    Text(text = restaurantName.text,
+                        style = TextStyle(
                             fontSize = 16.sp,
                             lineHeight = 21.sp,
                             fontWeight = FontWeight(700),
                             color = Black
                         ),
                         modifier = Modifier
-                            .weight(1f)
-                            .border(
-                                width = 0.5.dp,
-                                color = Color(0xFFC5C5C5),
-                                shape = RoundedCornerShape(4.dp)
-                            )
-                    )
+                            .weight(1f) .height(22.dp),
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+
                     IconButton(
                         onClick = { navController.navigate("SearchRest") },
                         modifier = Modifier.align(Alignment.CenterVertically)
@@ -227,8 +219,8 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
             // Review Text Field
             Spacer(modifier = Modifier.height(12.dp))
             WhiteTextField(
-                value = reviewDescription.text,
-                onValueChange = { reviewDescription = TextFieldValue(it) },
+                value = reviewDescription,
+                onValueChange = { viewModel.reviewDescription.value = it },
                 placeholder = "리뷰를 작성해 주세요",
                 modifier = Modifier
                     .border(
@@ -248,7 +240,7 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                 restaurant = RestReqDTO(name = restaurantName.text, search_id = searchId, category_name = categoryName),
                 photoPaths = photoPaths,
                 rating = myRating,
-                description = reviewDescription.text,
+                description = reviewDescription,
                 context = context,
                 onClickNav = {
                     navigateToDestination(navController, "Home")

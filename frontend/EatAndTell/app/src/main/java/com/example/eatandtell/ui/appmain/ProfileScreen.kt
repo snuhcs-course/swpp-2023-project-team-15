@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -72,19 +73,20 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
     var isFollowing by remember { mutableStateOf(userInfo.is_followed) }
 
     Column {
-
+        Spacer(modifier = Modifier.height(15.dp))
         // First row with profile image, follower, and following
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(0.dp), // Add padding as needed
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(vertical = 11.dp, horizontal = 8.dp), // Add padding as needed
             verticalAlignment = Alignment.CenterVertically
         ) {
             ProfileImage(profileUrl = userInfo.avatar_url, size = 60.dp)
+            Spacer(modifier = Modifier.width(95.dp))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 FollowText(count = userInfo.following_count, label = "팔로잉")
             }
+            Spacer(modifier = Modifier.width(50.dp))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 FollowText(count = userInfo.follower_count, label = "팔로워")
             }
@@ -104,7 +106,7 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
             else if (buttonText == "팔로우하기") {
                 CustomButton(onClick = {
                     onClick()
-                }, text = buttonText, containerColor = PaleGray)
+                }, text = buttonText, containerColor = PaleGray, borderColor = PaleGray)
             } else {
                 CustomButton(onClick = {
                     onClick()
