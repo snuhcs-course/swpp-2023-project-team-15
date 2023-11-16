@@ -235,6 +235,11 @@ class PostOrderingTestCase(TestCase):
             name='Test Restaurant')
         self.tag = Tag.objects.create(ko_label='한식', en_label='Korean', type='from_category')
 
+                
+        # add tag to user_viewer
+        self.user_viewer.tags.add(self.tag)
+
+
         now = datetime.datetime.now()
         # post 1
         post_1 = Post.objects.create(
@@ -244,8 +249,7 @@ class PostOrderingTestCase(TestCase):
             description=f'Test Description Followed',
             created_at=now - timedelta(days=1)
         )
-        post_1.tags.add(self.tag)
-        
+
         # post 2
         post_2 = Post.objects.create(
             user=self.user_unfollowed,
@@ -255,6 +259,8 @@ class PostOrderingTestCase(TestCase):
             created_at=now - timedelta(days=2)
         )
         post_2.tags.add(self.tag)
+
+        
 
     def test_post_following(self):
         self.client.force_authenticate(user=self.user_viewer)
@@ -281,7 +287,11 @@ class PostOrderingTestCase(TestCase):
 
         # Check ordering
         self.assertTrue(
-            all(results[i]['created_at'] >= results[i + 1]['created_at']
+            all(results[i]['like_count'] >= results[i + 1]['like_count']
                 for i in range(len(results) - 1)),
-            "Posts are not ordered in reversed chronological order"
+            "Posts are not ordered in reverse like order"
         )
+        
+        # Check filtering
+        self.assertTrue(len(results['data']) == 1)
+        self.assertTrue(results['data'][0]['description'] == 'Test Description Unfollowed') # post 2
