@@ -17,6 +17,7 @@ import com.example.eatandtell.dto.TopTag
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
+import com.example.eatandtell.ui.showToast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -53,13 +54,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
         //private val apiService = RetrofitClient.retro.create(ApiService::class.java)
 
-        fun prepareFileData(photoPath: Uri, context: Context): ByteArray? {
-            val contentResolver = context.contentResolver
-            contentResolver.openInputStream(photoPath)?.use { inputStream ->
-                return inputStream.readBytes()
-            }
-            return null
-        }
+
 
         fun uploadPhotosAndPost(
             photoPaths: List<Uri>,
@@ -68,6 +63,13 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             description: String,
             context: Context
         ) {
+            fun prepareFileData(photoPath: Uri, context: Context): ByteArray? {
+                val contentResolver = context.contentResolver
+                contentResolver.openInputStream(photoPath)?.use { inputStream ->
+                    return inputStream.readBytes()
+                }
+                return null
+            }
 
 
             viewModelScope.launch {
@@ -118,6 +120,8 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
             }
         }
+
+
 
         fun uploadPhotosAndEditProfile(
             photoPaths: List<Uri>, //실제로는 length 1짜리
