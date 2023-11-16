@@ -133,6 +133,28 @@ class PostViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True, context={"request": request})
         return Response({"data": serializer.data})
+    
+    @action(detail=False, methods=['get'], url_path='following', permission_classes=[permissions.IsAuthenticated], serializer_class=PostSerializer)
+    def list_following(self, request):
+        user = request.user
+        following = user.following.all()
+        posts = Post.objects.filter(user__in=following)
+        serializer = self.get_serializer(posts, many=True, context={"request": request})
+        return Response({"data": serializer.data})
+    
+    '''
+    select * from posts; -> Post.objects.all()
+    select * from posts where id = 1 -> Post.objects.filter(id=1)
+    '''
+
+    @action(detail=False, methods=['get'], url_path='recommend', permission_classes=[permissions.IsAuthenticated], serializer_class=PostSerializer)
+    def list_recommend(self, request):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(
+            queryset, many=True, context={"request": request})
+        return Response({"data": serializer.data})
+
+
 
     @action(detail=True, methods=['put'], url_path='likes', permission_classes=[permissions.IsAuthenticated], serializer_class=None)
     def like_post(self, request, pk=None):
