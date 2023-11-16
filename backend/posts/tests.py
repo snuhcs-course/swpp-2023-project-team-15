@@ -255,12 +255,40 @@ class PostOrderingTestCase(TestCase):
             user=self.user_unfollowed,
             restaurant=self.restaurant,
             rating=4.5,
-            description=f'Test Description Unfollowed',
+            description=f'Test Description Unfollowed, but has tag',
             created_at=now - timedelta(days=2)
         )
         post_2.tags.add(self.tag)
 
+        # post 3
+        post_3 = Post.objects.create(
+            user=self.user_unfollowed,
+            restaurant=self.restaurant,
+            rating=4.5,
+            description=f'Test Description Unfollowed, but has tag and like from user_viewer',
+            created_at=now - timedelta(days=2)
+        )
+        post_3.tags.add(self.tag)
+        post_3.likes.add(self.user_viewer)
+
+        # post 4
+        post_4 = Post.objects.create(
+            user=self.user_unfollowed,
+            restaurant=self.restaurant,
+            rating=4.5,
+            description=f'Test Description Unfollowed, but like from user_viewer',
+            created_at=now - timedelta(days=2)
+        )
+        post_4.likes.add(self.user_viewer)
+
+        '''
+        posts/following: 1번만
+        post/recommend: 3, 2, 4번 (1번은 안 나옴)
         
+        '''
+
+
+
 
     def test_post_following(self):
         self.client.force_authenticate(user=self.user_viewer)
@@ -284,14 +312,9 @@ class PostOrderingTestCase(TestCase):
         response = self.client.get('/posts/recommend/')
         self.assertEqual(response.status_code, 200)
         results = response.json()
-
-        # Check ordering
-        self.assertTrue(
-            all(results[i]['like_count'] >= results[i + 1]['like_count']
-                for i in range(len(results) - 1)),
-            "Posts are not ordered in reverse like order"
-        )
         
         # Check filtering
-        self.assertTrue(len(results['data']) == 1)
-        self.assertTrue(results['data'][0]['description'] == 'Test Description Unfollowed') # post 2
+        self.assertTrue(len(results['data']) == 3)
+        self.assertTrue(results['data'][0]['description'] == 'Test Description Unfollowed, but has tag and like from user_viewer')
+        self.assertTrue(results['data'][1]['description'] == 'Test Description Unfollowed, but has tag')
+        self.assertTrue(results['data'][2]['description'] == 'Test Description Unfollowed, but like from user_viewer')
