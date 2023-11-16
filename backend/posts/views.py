@@ -2,7 +2,7 @@ import threading
 
 import requests
 from decouple import config
-from django.db.models import Q
+from django.db.models import Q, Count 
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
@@ -124,6 +124,31 @@ class PostViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(combined_query)
 
         return queryset
+    
+
+    def get_queryset_recommend(self):
+        # get request user's tags
+        user = self.request.user
+        user_tags = user.tags.all()
+
+        queryset = Post.objects.all().exclude(user=user)
+
+        # Counting intersecting tags and like_count annotating it
+        queryset = queryset.annotate(
+            intersecting_tags_count=Count('tags', filter=Q(tags__in=user_tags)),
+            like_count=Count('likes')
+        )
+
+
+        # Filtering out posts with no intersecting tags and zero like_count
+        queryset = queryset.filter(
+            Q(intersecting_tags_count__gt=0) | Q(like_count__gt=0)
+        )
+
+        # Ordering by intersecting tags count and like_count
+        queryset = queryset.order_by('-intersecting_tags_count', '-like_count')
+
+        return queryset
 
     @swagger_auto_schema(
         operation_description="List all posts",
@@ -133,6 +158,27 @@ class PostViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True, context={"request": request})
         return Response({"data": serializer.data})
+    
+    @action(detail=False, methods=['get'], url_path='following', permission_classes=[permissions.IsAuthenticated], serializer_class=PostSerializer)
+    def list_following(self, request):
+        user = request.user
+        following = user.following.all()
+        posts = Post.objects.filter(user__in=following)
+        serializer = self.get_serializer(posts, many=True, context={"request": request})
+        return Response({"data": serializer.data})
+    
+    '''
+    select * from posts; -> Post.objects.all()
+    select * from posts where id = 1 -> Post.objects.filter(id=1)
+    '''
+
+    @action(detail=False, methods=['get'], url_path='recommend', permission_classes=[permissions.IsAuthenticated], serializer_class=PostSerializer)
+    def list_recommend(self, request):
+        queryset = self.get_queryset_recommend()
+        serializer = self.get_serializer(
+            queryset, many=True, context={"request": request})
+        return Response({"data": serializer.data})
+
 
     @action(detail=True, methods=['put'], url_path='likes', permission_classes=[permissions.IsAuthenticated], serializer_class=None)
     def like_post(self, request, pk=None):

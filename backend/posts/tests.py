@@ -1,11 +1,15 @@
+import datetime
+from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
+from django.contrib.auth import get_user_model
+from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
 from tags.models import Tag
-from users.models import User
+from users.models import Follow, User
 
 from .models import Post, PostPhoto, Restaurant
 
@@ -204,3 +208,113 @@ class PostCreateTestCase(APITestCase):
         Tag.objects.all().delete()
         Restaurant.objects.all().delete()
         User.objects.all().delete()
+
+
+class PostOrderingTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user_followed = get_user_model().objects.create_user(
+            username='testuser', password='12345')
+        
+        self.user_unfollowed = get_user_model().objects.create_user(
+            username='testuser2', password='12345')
+        
+        self.user_viewer = get_user_model().objects.create_user(
+            username='testuser3', password='12345')
+        
+        Follow.objects.create(follower=self.user_viewer, followee=self.user_followed)
+        
+        '''
+        Post 1 -> 내가 팔로우하고 있는 유저가 만들었고
+        Post 2 -> 그렇지 않음
+        
+        조회할 때는  -> Post 1만 내려와야 함.
+        '''
+        
+        self.restaurant = Restaurant.objects.create(
+            name='Test Restaurant')
+        self.tag = Tag.objects.create(ko_label='한식', en_label='Korean', type='from_category')
+
+                
+        # add tag to user_viewer
+        self.user_viewer.tags.add(self.tag)
+
+
+        now = datetime.datetime.now()
+        # post 1
+        post_1 = Post.objects.create(
+            user=self.user_followed,
+            restaurant=self.restaurant,
+            rating=4.5,
+            description=f'Test Description Followed',
+            created_at=now - timedelta(days=1)
+        )
+
+        # post 2
+        post_2 = Post.objects.create(
+            user=self.user_unfollowed,
+            restaurant=self.restaurant,
+            rating=4.5,
+            description=f'Test Description Unfollowed, but has tag',
+            created_at=now - timedelta(days=2)
+        )
+        post_2.tags.add(self.tag)
+
+        # post 3
+        post_3 = Post.objects.create(
+            user=self.user_unfollowed,
+            restaurant=self.restaurant,
+            rating=4.5,
+            description=f'Test Description Unfollowed, but has tag and like from user_viewer',
+            created_at=now - timedelta(days=2)
+        )
+        post_3.tags.add(self.tag)
+        post_3.likes.add(self.user_viewer)
+
+        # post 4
+        post_4 = Post.objects.create(
+            user=self.user_unfollowed,
+            restaurant=self.restaurant,
+            rating=4.5,
+            description=f'Test Description Unfollowed, but like from user_viewer',
+            created_at=now - timedelta(days=2)
+        )
+        post_4.likes.add(self.user_viewer)
+
+        '''
+        posts/following: 1번만
+        post/recommend: 3, 2, 4번 (1번은 안 나옴)
+        
+        '''
+
+
+
+
+    def test_post_following(self):
+        self.client.force_authenticate(user=self.user_viewer)
+        response = self.client.get('/posts/following/')
+        self.assertEqual(response.status_code, 200)
+        results = response.json()
+
+        # Check ordering
+        self.assertTrue(
+            all(results[i]['created_at'] >= results[i + 1]['created_at']
+                for i in range(len(results) - 1)),
+            "Posts are not ordered in reversed chronological order"
+        )
+        
+        # Check filtering
+        self.assertTrue(len(results['data']) == 1)
+        self.assertTrue(results['data'][0]['description'] == 'Test Description Followed')
+        
+    def test_post_recommend(self):
+        self.client.force_authenticate(user=self.user_viewer)
+        response = self.client.get('/posts/recommend/')
+        self.assertEqual(response.status_code, 200)
+        results = response.json()
+        
+        # Check filtering
+        self.assertTrue(len(results['data']) == 3)
+        self.assertTrue(results['data'][0]['description'] == 'Test Description Unfollowed, but has tag and like from user_viewer')
+        self.assertTrue(results['data'][1]['description'] == 'Test Description Unfollowed, but has tag')
+        self.assertTrue(results['data'][2]['description'] == 'Test Description Unfollowed, but like from user_viewer')
