@@ -18,6 +18,7 @@ pillow = "^10.0.1"
 requests = "^2.31.0"
 coverage = "^7.3.2"
 sentry-sdk = {extras = ["django"], version = "^1.32.0"}
+moto = "^4.2.8"
 
 
 [build-system]

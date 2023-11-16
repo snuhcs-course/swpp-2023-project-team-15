@@ -35,31 +35,22 @@ def register(request):
 
         # If not blank errors, return the specific errors for the fields
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    try:
-        user = serializer.save()
-        token = Token.objects.create(user=user)
-        return Response({'token': token.key}, status=status.HTTP_201_CREATED)
-    except Exception as e:
-        print(e)
-        return Response({'error': 'An error occurred while creating the user'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    user = serializer.save()
+    token = Token.objects.create(user=user)
+    return Response({'token': token.key}, status=status.HTTP_201_CREATED)
+
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def profile_update(request):
-    try:
-        user_instance = request.user
-    except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+    user_instance = request.user
 
-    # Check if the user is trying to update their own profile
-    if request.user != user_instance:
-        return Response(status=status.HTTP_403_FORBIDDEN)
-    if request.method == 'PATCH':
-        serializer = UserSerializer(user_instance, data=request.data, partial=True, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer = UserSerializer(user_instance, data=request.data, partial=True, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -72,8 +63,7 @@ def get_my_profile(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_my_liked_posts(request):
-    user = request.user
-    liked_posts = user.liked_posts.all()
+    liked_posts = request.user.liked_posts.all()
     serializer = PostSerializer(liked_posts, many=True, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -170,6 +160,7 @@ def refresh_user_tags(request):
         (get_review_gourmet, '고든램지'),
     ]
     for candidate_function, tag_ko_label in non_ml_related_tags:
+        print(f'tag_ko_label: {tag_ko_label}, candidate_function result: {candidate_function()}')
         if user.id in candidate_function():
             tag_ko_label_candidates.append(tag_ko_label)
     

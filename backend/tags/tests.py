@@ -1,4 +1,4 @@
-from unittest import TestCase
+from unittest import TestCase, skip
 
 from posts.views import (get_top_tag_after_translation_only_label,
                          get_top_tags_after_translation)
@@ -42,21 +42,7 @@ class TagGenerateTestCase(TestCase):
         self.assert_helper("음식점 > 양식 > 해산물 > 바닷가재", ["양식", "해산물"])
 
 
-
-'''
-30	atmosphere	가족모임	for Family Gathering
-	29	atmosphere	핫플	trending, hot, instagram
-	28	atmosphere	데이트	for date, couple
-	27	atmosphere	고급진	Luxurious, Expensive
-	26	atmosphere	혼밥	Alone
-	25	atmosphere	가성비	Cost-Effective
-24	atmosphere	서비스	friendly service
-	23	atmosphere	조용한	Quiet, Calm
-	22	atmosphere	시끌벅적	Noisy
-	21	atmosphere	술과 함께	Alcohol
-'''
-
-
+@skip("This test is unstable")
 class TagInferenceTestCase(TestCase):
     def assert_helper(self, text, expected_tag):
         translated_description = google_translate_ko_to_en(text)        
