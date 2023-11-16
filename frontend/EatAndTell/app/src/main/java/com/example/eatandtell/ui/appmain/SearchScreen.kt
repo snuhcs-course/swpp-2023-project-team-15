@@ -49,6 +49,7 @@ import com.example.eatandtell.ui.Tag
 import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.theme.MainColor
 import com.google.accompanist.flowlayout.FlowRow
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -203,9 +204,12 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                             userLists = emptyList() // Reset user lists
                             userListsByTags = emptyList()
                         }
+                    } catch (e: CancellationException) {
+                        // 코루틴이 취소되었을 때의 예외 처리. (검색 text 빠르게 바꿔 이전 작업 취소는 경우)
+                        println("검색 작업이 취소되었습니다.")
                     } catch (e: Exception) {
                         println("searchload error")
-//                        showToast(context, "search 로딩에 실패하였습니다")
+                        showToast(context, "search 로딩에 실패하였습니다")
                         loading = false
                     }
                     triggerSearch = false // reset the trigger
