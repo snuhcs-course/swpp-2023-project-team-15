@@ -61,7 +61,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             return null
         }
 
-        fun uploadPhotosAndPost(
+        suspend fun uploadPhotosAndPost(
             photoPaths: List<Uri>,
             restaurant: RestReqDTO,
             rating: String,
@@ -70,7 +70,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         ) {
 
 
-            viewModelScope.launch {
+
                 val photoUrls = mutableListOf<String>()
                 val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it, context) }
                 for (byteArray in photoByteArrays) {
@@ -89,7 +89,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                     } catch (e: Exception) {
                         Log.d("Image Upload Error", e.message ?: "Upload failed")
                         _uploadStatus.postValue("이미지 업로드에 실패했습니다.")
-                        return@launch
+
                     }
                 }
                 try {
@@ -116,16 +116,16 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                 photoUris.clear()
 
 
-            }
+
         }
 
-        fun uploadPhotosAndEditProfile(
+        suspend fun uploadPhotosAndEditProfile(
             photoPaths: List<Uri>, //실제로는 length 1짜리
             description: String,
             context: Context,
             org_avatar_url: String,
         ) {
-            viewModelScope.launch {
+
 
                 Log.d("edit profile photoPaths: ", photoPaths.toString())
                 val photoUrls = mutableListOf<String>()
@@ -154,6 +154,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                     Log.d("edit profile", profileData.toString())
                     editProfile(profileData)
                     _editStatus.postValue("프로필이 편집되었습니다")
+                    myProfile = UserDTO(myProfile.id, myProfile.username, description, url, myProfile.tags) //프로필 편집 후 myProfile 업데이트
                 } catch (e: Exception) {
                     // Handle exceptions, e.g., from network calls, here
                     if (e !is CancellationException) {
@@ -166,7 +167,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
                     }
                 }
-            }
+
         }
 
         private suspend fun uploadPost(postData: UploadPostRequest) {
