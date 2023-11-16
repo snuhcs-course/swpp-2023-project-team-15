@@ -1,5 +1,6 @@
 // SignUpScreen.kt
 package com.example.eatandtell.ui.start
+
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -7,33 +8,42 @@ import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.dp
-import com.example.eatandtell.R
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.eatandtell.ui.appmain.AppMainActivity
-
+import com.example.eatandtell.R
 import com.example.eatandtell.ui.BlackSmallText
 import com.example.eatandtell.ui.CustomTextField
 import com.example.eatandtell.ui.GraySmallText
 import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.MainButton
+import com.example.eatandtell.ui.appmain.AppMainActivity
 import com.example.eatandtell.ui.showToast
-import kotlinx.coroutines.launch
 
 @Composable
 fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
@@ -59,12 +69,32 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
     }
 
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
-
     fun hideKeyboard() {
         val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(context.currentFocus?.windowToken, 0)
     }
 
+
+    val loginState by viewModel.loginState
+
+    // Handle side-effects like navigation based on the login state
+    LaunchedEffect(loginState) {
+        when (loginState) {
+            is LoginState.Success -> {
+                val intent = Intent(context, AppMainActivity::class.java)
+                intent.putExtra("Token", (loginState as LoginState.Success).token)
+                context.startActivity(intent)
+                context.finish()
+            }
+            is LoginState.Error -> {
+                val errorMessage = (loginState as LoginState.Error).message
+                showToast(context,"로그인에 실패하였습니다")
+
+            }
+            // Handle other states if necessary
+            else -> Unit
+        }
+    }
     // Main content
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -84,6 +114,7 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
             value = id.text,
             onValueChange = { id = TextFieldValue(it) },
             placeholder = "아이디를 입력하세요",
+
         )
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -103,12 +134,14 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
         Spacer(modifier = Modifier.height(12.dp))
 
         LoginButton(
-            onClick = { token ->
+            onClick = {it->
                 Log.d("login screen", "ID: ${id.text}, Password: ${password.text}")
-                val intent = Intent(context, AppMainActivity::class.java)
-                intent.putExtra("Token", token) // 토큰 넘겨주기
-                context.startActivity(intent)
-                context.finish()
+                viewModel.loginUser(id.text, password.text,context)
+                viewModel.resetStates()
+                //val intent = Intent(context, AppMainActivity::class.java)
+                //intent.putExtra("Token", token) // 토큰 넘겨주기
+                //context.startActivity(intent)
+                //context.finish()
             },
             id = id.text,
             password = password.text,
@@ -147,7 +180,8 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
                 text = "회원가입",
                 modifier = Modifier.clickable {
                     navController.navigate("signup")
-                }
+                    viewModel.resetStates()
+                }.testTag("go_to_signup")
             )
 
         }
@@ -161,11 +195,7 @@ fun LoginButton(viewModel: StartViewModel, id: String, password: String, context
     MainButton(
         text = "로그인",
         onClick = {
-            coroutineScope.launch {
-                val token = viewModel.loginUser(id, password, context)
-                if (token != null)
-                    onClick(token)
-            }
+            onClick(null)
         }
     )
 }

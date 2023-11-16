@@ -26,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.eatandtell.dto.PostDTO
@@ -33,18 +34,15 @@ import com.example.eatandtell.ui.Post
 import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.UpButton
 import com.example.eatandtell.ui.showToast
-import com.example.eatandtell.ui.theme.MainColor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
-//    var feedPosts by remember { mutableStateOf(emptyList<PostDTO>()) }
+    var feedPosts = remember { mutableStateListOf<PostDTO>() }
     var loading by remember { mutableStateOf(true) }
     var lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-    val feedPosts = remember { mutableStateListOf<PostDTO>() }
-
 
     Log.d("navigateToDestination", "lazylist in Home: ${lazyListState}")
 
@@ -54,7 +52,6 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
             println("trying to load home feed")
             viewModel.getAllPosts(
                 onSuccess = { posts ->
-// Instead of reassigning, we clear and add all to mutate the list's contents
                     feedPosts.clear()
                     feedPosts.addAll(posts)
                     println("feedPosts: ${feedPosts.size}")
@@ -75,14 +72,14 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
     if(loading) {
         Box(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .testTag("loading"),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
                 //로딩 화면
                 modifier = Modifier
-                    .size(70.dp),
-                color = MainColor
+                    .size(70.dp)
             )
         }
     }
@@ -91,13 +88,10 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
             state = lazyListState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = 20.dp)
+                .testTag("feed"),
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
-//            items(feedPosts) { post ->
-//                HomePost(post, viewModel = viewModel, navHostController = navHostController)
-//            }
-
             items(items = feedPosts, key = { it.id }) { post ->
                 HomePost(
                     post = post,
@@ -120,7 +114,6 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
                     }
                 }
             }
-
 
             // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
             item { Spacer(modifier = Modifier.height(70.dp)) }
@@ -171,6 +164,7 @@ fun HomePost(
                     onLike(post)
                     coroutinescope.launch {
                         viewModel.toggleLike(post.id)
+
                     }
                 },
                 canDelete = (user.id == viewModel.myProfile.id),
@@ -179,15 +173,12 @@ fun HomePost(
                     onDelete(post)
                     coroutinescope.launch {
                         viewModel.deletePost(post.id)
+
                     }
                 }
             )
-
-
         }
     }
-
-
 }
 
 

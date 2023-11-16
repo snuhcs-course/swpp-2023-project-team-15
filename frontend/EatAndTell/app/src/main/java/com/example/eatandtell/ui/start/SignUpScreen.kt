@@ -2,16 +2,31 @@
 package com.example.eatandtell.ui.start
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
@@ -24,7 +39,6 @@ import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.appmain.AppMainActivity
 import com.example.eatandtell.ui.showToast
-import kotlinx.coroutines.launch
 
 @Composable
 fun SignupScreen(navController: NavController, context: ComponentActivity, viewModel: StartViewModel) {
@@ -47,9 +61,30 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
 
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
 
+    val registerState by viewModel.registerState
+
     fun hideKeyboard() {
         val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(context.currentFocus?.windowToken, 0)
+    }
+
+    LaunchedEffect(registerState) {
+        when (registerState) {
+            is RegisterState.Success -> {
+                val intent = Intent(context, AppMainActivity::class.java)
+                intent.putExtra("Token", (registerState as RegisterState.Success).token)
+                showToast(context,"Register Success")
+                context.startActivity(intent)
+                context.finish()
+            }
+            is RegisterState.Error -> {
+                val errorMessage = (registerState as RegisterState.Error).message
+                showToast(context,"Register Failed")
+
+            }
+            // Handle other states if necessary
+            else -> Unit
+        }
     }
 
     // Main content of SignupActivity
@@ -112,11 +147,11 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
         Spacer(modifier = Modifier.height(12.dp))
 
         SignupButton(
-            onClick =  { token ->
-                val intent = Intent(context, AppMainActivity::class.java)
-                intent.putExtra("Token", token) // 토큰 넘겨주기
-                context.startActivity(intent)
-                context.finish()
+            onClick =  {it->
+
+                Log.d("register screen", "Username ${username.text}, Password: ${password.text}")
+                viewModel.registerUser(username.text, password.text,email.text,context)
+                viewModel.resetStates()
             },
             email = email.text,
             username = username.text,
@@ -141,7 +176,8 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
                 text = "로그인",
                 modifier = Modifier.clickable {
                     navController.navigate("login")
-                }
+                    viewModel.resetStates()
+                }.testTag("go_to_login")
             )
         }
     }
@@ -166,25 +202,34 @@ fun SignupButton(
         return emailRegex.matches(email)
     }
 
-    val onClickReal: () -> Unit = {
-        when {
-            email.isBlank() -> showToast(context, "이메일을 입력하세요")
-            !isEmailValid(email) -> showToast(context, "이메일 주소가 올바르지 않습니다")
-            username.isBlank() -> showToast(context, "아이디를 입력하세요")
-            username.length !in 4..20 -> showToast(context, "아이디가 올바르지 않습니다")
-            password.isBlank() -> showToast(context, "비밀번호를 입력하세요")
-            password.length !in 4..20 -> showToast(context, "비밀번호가 올바르지 않습니다")
-            confirmPassword.isBlank() -> showToast(context, "비밀번호 확인을 입력하세요")
-            password != confirmPassword -> showToast(context, "비밀번호 확인이 틀립니다")
-            else -> {
-                coroutineScope.launch {
-                    val token = viewModel.registerUser(username, password, email, context)
-                    if (token != null)
-                        onClick(token)
+
+    MainButton(text = "회원가입",
+        onClick={
+            when {
+                /*email.isBlank() -> "이메일을 입력하세요"
+                !isEmailValid(email) -> "이메일 주소가 올바르지 않습니다"
+                username.isBlank() -> "아이디를 입력하세요"
+                username.length !in 4..20 -> "아이디가 올바르지 않습니다"
+                password.isBlank() ->  "비밀번호를 입력하세요"
+                password.length !in 4..20 ->"비밀번호가 올바르지 않습니다"
+                confirmPassword.isBlank() -> "비밀번호 확인을 입력하세요"
+                password != confirmPassword ->  "비밀번호 확인이 틀립니다"*/
+                email.isBlank() -> showToast(context, "이메일을 입력하세요")
+                !isEmailValid(email) -> showToast(context, "이메일 주소가 올바르지 않습니다")
+                username.isBlank() -> showToast(context, "아이디를 입력하세요")
+                username.length !in 4..20 -> showToast(context, "아이디가 올바르지 않습니다")
+                password.isBlank() -> showToast(context, "비밀번호를 입력하세요")
+                password.length !in 4..20 -> showToast(context, "비밀번호가 올바르지 않습니다")
+                confirmPassword.isBlank() -> showToast(context, "비밀번호 확인을 입력하세요")
+                password != confirmPassword -> showToast(context, "비밀번호 확인이 틀립니다")
+                else -> {
+                    onClick(null)
                 }
             }
-        }
-    }
 
-    MainButton(onClick = onClickReal, text = "회원가입")
+
+
+        })
+
+
 }

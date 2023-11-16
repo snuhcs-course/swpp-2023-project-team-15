@@ -35,10 +35,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.TopTag
 import com.example.eatandtell.dto.UserDTO
@@ -81,7 +79,6 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
         val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(context.currentFocus?.windowToken, 0)
     }
-
 
     //searchBar
     Column (
@@ -160,6 +157,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                 triggerSearch = true
             }
         }
+
         //search for userLists
         LaunchedEffect(triggerSearch) {
             println("search screen "+searchText.text + " " + triggerSearch)
@@ -207,12 +205,15 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                         println("searchload error")
                         showToast(context, "search 로딩에 실패하였습니다")
                         loading = false
+
                     }
                     triggerSearch = false // reset the trigger
                 }
-            }
+                }
             triggerSearch = false
-        }
+
+            }
+
 
         if(loading) {
             Box(
@@ -224,7 +225,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                     //로딩 화면
                     modifier = Modifier
                         .size(70.dp),
-                    color = MainColor
+                    color= MainColor
                 )
             }
         }
@@ -332,14 +333,14 @@ fun DefaultTagView(tags: List<String>, onTagClick: (String) -> Unit = {}) {
             }
         }
         Spacer(modifier = Modifier.height(11.dp))
+
 }
-
-
+/*
 @Preview
 @Composable
 fun SearchScreenPreview() {
-    SearchScreen(navController = rememberNavController(), context = ComponentActivity(), viewModel = AppMainViewModel())
-}
+    SearchScreen(navController = rememberNavController(), context = ComponentActivity(), viewModel = AppMainViewModel(null))
+}*/
 
 
 

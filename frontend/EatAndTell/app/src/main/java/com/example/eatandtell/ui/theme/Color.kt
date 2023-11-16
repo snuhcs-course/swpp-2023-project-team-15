@@ -1,6 +1,5 @@
 package com.example.eatandtell.ui.theme
 
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
 val Gray = Color(0xFF6D6D6D)

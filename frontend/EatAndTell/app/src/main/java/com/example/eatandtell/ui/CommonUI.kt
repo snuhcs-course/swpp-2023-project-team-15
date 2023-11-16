@@ -15,12 +15,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.twotone.Face
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -103,7 +102,7 @@ fun HeartEmpty(onClick: (Int) -> Unit, post_id: Int) {
 
 //text fields
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class,ExperimentalComposeUiApi::class)
 @Composable
 fun CustomTextField(
     value: String,
@@ -216,7 +215,6 @@ fun WhiteTextField(
     )
 }
 
-
 @Preview
 @Composable
 fun PreviewWhiteTextField() {
@@ -282,7 +280,7 @@ fun MainButton(onClick: () -> Unit, text: String, notLoading : Boolean = true, e
             fontFamily = Inter,
             fontWeight = FontWeight(700),
             color = Color.Black,
-            )
+        )
         )
         else //show loading
             CircularProgressIndicator(
@@ -323,6 +321,7 @@ fun MediumWhiteButton(onClick: () -> Unit, text: String) {
         )
     }
 }
+
 @Preview
 @Composable
 fun PreviewMediumWhiteButton() {
@@ -391,6 +390,7 @@ fun PreviewCustomButton() {
     }
 }
 
+
 @Composable
 fun MediumRedButton(onClick: () -> Unit, text: String, enable: Boolean = true) {
     Button(
@@ -440,9 +440,8 @@ fun Tag(text: String, onClick: () -> Unit) {
             .background(color = PaleOrange, shape = RoundedCornerShape(size = 18.dp))
             .border(2.dp, MainColor, RoundedCornerShape(size = 18.dp))
             .padding(horizontal = 12.dp, vertical = 2.dp)
-            .clickable(onClick = onClick),
-
-    contentAlignment = Alignment.Center
+            .clickable (onClick=onClick),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
@@ -462,7 +461,7 @@ fun Tag(text: String, onClick: () -> Unit) {
 @Composable
 fun PreviewTag() {
     EatAndTellTheme {
-        Tag(text = "#육식주의자", onClick = { /**/ })
+        Tag(text = "#육식주의자",onClick={/**/})
     }
 }
 
@@ -661,14 +660,11 @@ fun Profile(
     ) {
         ProfileImage(profileUrl = profileUrl)
         ProfileText(username = username, userDescription = userDescription)
-
     }
 }
-
-
 @Composable
 fun FollowText(count: Int, label: String) {
-   Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = "$count", style = TextStyle(
             fontSize = 16.sp,
             lineHeight = 18.sp,
@@ -685,6 +681,8 @@ fun FollowText(count: Int, label: String) {
         ))
     }
 }
+
+
 
 // Post Photos
 @Composable
@@ -729,7 +727,7 @@ fun ImageDialog(imageUrl: String, onClick: () -> Unit) {
                     modifier = Modifier
                         .size(32.dp)
                         .align(Alignment.End)
-                        .background(Color(0x55FFFFFF), shape = CircleShape)
+                        .background(Color(0x55FFFFF), shape=CircleShape)
                         .clickable { onClick() }
                         .padding(8.dp)
                 )
@@ -907,7 +905,7 @@ fun MenuWithDropDown(modifier: Modifier, onClick: () -> Unit = { /**/ }) {
             .height(18.dp)
             .clickable(onClick = {
                 isDropDownExpanded = !isDropDownExpanded
-            })
+                })
     )
 
     DropdownMenu(
@@ -936,7 +934,8 @@ fun Home(onClick: () -> Unit) {
             .padding(1.dp)
             .width(24.dp)
             .height(24.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .testTag("go_to_Home"),
 
         contentDescription = "Home",
         tint = Black
@@ -951,7 +950,8 @@ fun PlusCircle(onClick: () -> Unit) {
             .padding(1.dp)
             .width(24.dp)
             .height(24.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .testTag("go_to_upload"),
     contentDescription = "plus_circle",
         tint = Black
     )
@@ -964,7 +964,8 @@ fun SearchRefraction(onClick: () -> Unit) {
             .padding(1.dp)
             .width(24.dp)
             .height(24.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .testTag("go_to_search"),
         contentDescription = "search_refraction",
         tint = Black
     )
@@ -978,7 +979,8 @@ fun MyIcon(onClick: () -> Unit) {
             .padding(1.dp)
             .width(24.dp)
             .height(24.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .testTag("go_to_profile"),
         contentDescription = "my_home",
         tint = Black
     )

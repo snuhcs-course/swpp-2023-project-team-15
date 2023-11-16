@@ -10,12 +10,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.Saver
@@ -26,6 +25,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -33,14 +33,18 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+
+import com.example.eatandtell.ui.showToast
+import dagger.hilt.android.AndroidEntryPoint
 import com.example.eatandtell.dto.SearchedRestDTO
 import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.start.StartViewModel
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.launch
 
-//import com.example.eatandtell.ui.AppNavigation
 
+//import com.example.eatandtell.ui.AppNavigation
+@AndroidEntryPoint
 class AppMainActivity : ComponentActivity() {
     private val appMainViewModel: AppMainViewModel by viewModels()
 
@@ -104,6 +108,15 @@ class AppMainActivity : ComponentActivity() {
                     Manifest.permission.ACCESS_FINE_LOCATION)
             }
         }
+
+
+        appMainViewModel.uploadStatus.observe(this){message->
+            showToast(this,message)
+        }
+        appMainViewModel.editStatus.observe(this){message->
+            showToast(this,message)
+        }
+
 
 
         setContent {

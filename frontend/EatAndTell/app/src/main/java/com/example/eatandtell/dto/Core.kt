@@ -1,9 +1,5 @@
 package com.example.eatandtell.dto
 
-import android.media.Image
-import retrofit2.http.Url
-import java.net.URL
-
 data class UserDTO(
     val id: Int,
     val username: String,
@@ -65,12 +61,8 @@ data class TagsDTO(
     val user_tags : List<String>
 )
 
-
-
-// Data class to match the JSON structure for each tag
 data class TopTag(
     val ko_label: String,
     val en_label: String,
     val type: String
 )
-
