@@ -55,6 +55,13 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         //private val apiService = RetrofitClient.retro.create(ApiService::class.java)
 
 
+        fun prepareFileData(photoPath: Uri, context: Context): ByteArray? {
+            val contentResolver = context.contentResolver
+            contentResolver.openInputStream(photoPath)?.use { inputStream ->
+                return inputStream.readBytes()
+            }
+            return null
+        }
 
         fun uploadPhotosAndPost(
             photoPaths: List<Uri>,
@@ -63,13 +70,6 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             description: String,
             context: Context
         ) {
-            fun prepareFileData(photoPath: Uri, context: Context): ByteArray? {
-                val contentResolver = context.contentResolver
-                contentResolver.openInputStream(photoPath)?.use { inputStream ->
-                    return inputStream.readBytes()
-                }
-                return null
-            }
 
 
             viewModelScope.launch {
