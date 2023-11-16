@@ -205,7 +205,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                         }
                     } catch (e: Exception) {
                         println("searchload error")
-                        showToast(context, "search 로딩에 실패하였습니다")
+//                        showToast(context, "search 로딩에 실패하였습니다")
                         loading = false
                     }
                     triggerSearch = false // reset the trigger
