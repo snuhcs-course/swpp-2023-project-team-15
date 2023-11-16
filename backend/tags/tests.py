@@ -1,6 +1,6 @@
 from unittest import TestCase, skip
 
-from posts.views import (get_top_tag_after_translation_only_label,
+from posts.utils import (get_top_tag_after_translation_only_label,
                          get_top_tags_after_translation)
 from tags.utils import category_name_to_tags, google_translate_ko_to_en
 

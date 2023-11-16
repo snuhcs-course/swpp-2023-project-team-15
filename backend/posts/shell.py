@@ -14,7 +14,7 @@ from tags.utils import (category_name_to_tags, google_translate_ko_to_en,
 from .models import Post
 from .serializers import PostSerializer, data_list
 
-from posts.views import create_tags_on_thread
+from posts.utils import create_tags_on_thread
 
 # ----------------- helper functions for data administration -----------------
 # for all posts, clear tags and sentiment, and create tags and sentiment again
