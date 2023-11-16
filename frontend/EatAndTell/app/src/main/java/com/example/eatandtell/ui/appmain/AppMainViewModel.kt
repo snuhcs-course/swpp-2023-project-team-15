@@ -3,6 +3,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -42,10 +43,9 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     var myProfile = UserDTO(0, "", "", "", listOf())
 
     var photoUris = mutableStateListOf<Uri>()// store image uri
-
         private set
-    suspend fun initialize(token: String?) {
-
+    val reviewDescription = mutableStateOf("")
+    fun initialize(token: String?) {
         this.token = token
         viewModelScope.launch {
             getMyProfile()
@@ -56,72 +56,77 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
 
     fun prepareFileData(photoPath: Uri, context: Context): ByteArray? {
-            val contentResolver = context.contentResolver
+        val contentResolver = context.contentResolver
+        return try {
             contentResolver.openInputStream(photoPath)?.use { inputStream ->
-                return inputStream.readBytes()
+                inputStream.readBytes()
             }
-            return null
+        } catch (e: Exception) {
+            // Log the exception or handle it as needed
+            null
         }
+    }
         //private val apiService = RetrofitClient.retro.create(ApiService::class.java)
 
 
-        suspend fun uploadPhotosAndPost(
-            photoPaths: List<Uri>,
-            restaurant: RestReqDTO,
-            rating: String,
-            description: String,
-            context: Context
-        ) {
+    fun uploadPhotosAndPost(
+        photoPaths: List<Uri>,
+        restaurant: RestReqDTO,
+        rating: String,
+        description: String,
+        context: Context
+    ) {
 
 
+        viewModelScope.launch {
+            val photoUrls = mutableListOf<String>()
+            val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it, context) }
+            for (byteArray in photoByteArrays) {
+                val requestBody: RequestBody =
+                    byteArray.toRequestBody("image/*".toMediaTypeOrNull())
+                val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData(
+                    "image",
+                    "this_name_does_not_matter.jpg",
+                    requestBody
+                )
 
-                val photoUrls = mutableListOf<String>()
-                val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it, context) }
-                for (byteArray in photoByteArrays) {
-                    val requestBody: RequestBody =
-                        byteArray.toRequestBody("image/*".toMediaTypeOrNull())
-                    val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData(
-                        "image",
-                        "this_name_does_not_matter.jpg",
-                        requestBody
-                    )
-
-                    try {
-                        val imageUrl = getImageURL(fileToUpload)
-                        photoUrls.add(imageUrl)
-
-                    } catch (e: Exception) {
-                        Log.d("Image Upload Error", e.message ?: "Upload failed")
-                        _uploadStatus.postValue("이미지 업로드에 실패했습니다.")
-
-                    }
-                }
                 try {
-                    Log.d("upload photos and post", "trying")
-                    val photos = photoUrls.map { PhotoReqDTO(it) }
-                    val postData = UploadPostRequest(
-                        restaurant = restaurant,
-                        photos = photos,
-                        rating = rating,
-                        description = description
-                    )
-                    uploadPost(postData)
-                    Log.d("upload photos and post", "success")
-                    _uploadStatus.postValue("포스트가 업로드되었습니다")
-
-
-                } catch (e: CancellationException) {
-                    Log.d("upload photos and post error", "cancellation exception")
+                    val imageUrl = getImageURL(fileToUpload)
+                    photoUrls.add(imageUrl)
 
                 } catch (e: Exception) {
-                    Log.d("upload photos and post error", e.message ?: "Network error")
-                    _uploadStatus.postValue("포스트 업로드에 실패했습니다.")
+                    Log.d("Image Upload Error", e.message ?: "Upload failed")
+                    _uploadStatus.postValue("이미지 업로드에 실패했습니다.")
+                    return@launch
                 }
-                photoUris.clear()
+            }
+            try {
+                Log.d("upload photos and post", "trying")
+                val photos = photoUrls.map { PhotoReqDTO(it) }
+                val postData = UploadPostRequest(
+                    restaurant = restaurant,
+                    photos = photos,
+                    rating = rating,
+                    description = description
+                )
+                uploadPost(postData)
+                Log.d("upload photos and post", "success")
+                _uploadStatus.postValue("포스트가 업로드되었습니다")
 
+
+            } catch (e: CancellationException) {
+                Log.d("upload photos and post error", "cancellation exception")
+
+            } catch (e: Exception) {
+                Log.d("upload photos and post error", e.message ?: "Network error")
+                _uploadStatus.postValue("포스트 업로드에 실패했습니다.")
+            }
+            photoUris.clear()
+            reviewDescription.value = ""
 
 
         }
+    }
 
 
         suspend fun uploadPhotosAndEditProfile(
@@ -238,6 +243,30 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             }
 
         }
+
+    suspend fun getPersonalizedPosts(onSuccess: (List<PostDTO>) -> Unit) {
+        val authorization = "Token $token"
+        val response = apiRepository.getPersonalizedPosts(authorization)
+        response.onSuccess { response ->
+            onSuccess(response.data)
+
+        }
+        response.onFailure { message ->
+            throw message
+        }
+    }
+
+    suspend fun getFollowingPosts(onSuccess: (List<PostDTO>) -> Unit) {
+        val authorization = "Token $token"
+        val response = apiRepository.getFollowingPosts(authorization)
+        response.onSuccess { response ->
+            onSuccess(response.data)
+
+        }
+        response.onFailure { message ->
+            throw message
+        }
+    }
 
         suspend fun getLikedFeed(onSuccess: (List<PostDTO>) -> Unit) {
             val authorization = "Token $token"

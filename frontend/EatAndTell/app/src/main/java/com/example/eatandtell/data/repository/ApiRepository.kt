@@ -96,6 +96,13 @@ class ApiRepository@Inject constructor(private val apiService: ApiService) {
         apiService.getTopTags(authorization)
     }
 
+    suspend fun getPersonalizedPosts(authorization: String): Result<GetAllPostsResponse> = runCatching {
+        apiService.getPersonalizedPosts(authorization)
+    }
+
+    suspend fun getFollowingPosts(authorization: String): Result<GetAllPostsResponse> = runCatching {
+        apiService.getFollwingPosts(authorization)
+    }
 
 
 }
