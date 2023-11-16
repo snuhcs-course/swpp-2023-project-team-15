@@ -320,13 +320,6 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             val response = apiRepository.getMyFeed(authorization)
 
             response.onSuccess { response ->
-                val myInfo = UserDTO(
-                    response.id,
-                    response.username,
-                    response.description,
-                    response.avatar_url,
-                    listOf()
-                )
 
                 val myProf = UserDTO(
                     response.id,

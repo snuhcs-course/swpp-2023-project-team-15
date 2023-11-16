@@ -236,6 +236,7 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                 viewModel.getUserFeed(
                     userId = userId,
                     onSuccess = { info, posts ->
+                        userInfo= info
                         userPosts.clear()
                         userPosts.addAll(posts)
                     }
