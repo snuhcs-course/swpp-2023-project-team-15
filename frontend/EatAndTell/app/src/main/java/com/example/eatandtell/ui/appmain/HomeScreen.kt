@@ -94,21 +94,6 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
         }
     }
 
-    if(loading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                //로딩 화면
-                modifier = Modifier
-                    .size(70.dp),
-                color = MainColor
-            )
-        }
-    }
-    else {
         LazyColumn(
             state = lazyListState,
             modifier = Modifier
@@ -151,25 +136,46 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
                 }
             }
 
-            items(items = feedPosts, key = { it.id }) { post ->
-                HomePost(
-                    post = post,
-                    viewModel = viewModel,
-                    navHostController = navHostController,
-                    onDelete = { postToDelete ->
-                        feedPosts.remove(postToDelete)
-                    }
-                ) { postToLike ->
-                    val index = feedPosts.indexOf(postToLike)
-                    if (index != -1) {
-                        // Determine the new like count based on the current is_liked state
-                        val newLikeCount =
-                            if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
-                        // Update the post with the new like state and count
-                        feedPosts[index] = postToLike.copy(
-                            is_liked = !postToLike.is_liked,
-                            like_count = newLikeCount
+            item {Spacer(modifier = Modifier.height(14.dp))}
+
+            if(loading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            //로딩 화면
+                            modifier = Modifier
+                                .size(70.dp),
+                            color = MainColor
                         )
+                    }
+                }
+            }
+            else {
+                items(items = feedPosts, key = { it.id }) { post ->
+                    HomePost(
+                        post = post,
+                        viewModel = viewModel,
+                        navHostController = navHostController,
+                        onDelete = { postToDelete ->
+                            feedPosts.remove(postToDelete)
+                        }
+                    ) { postToLike ->
+                        val index = feedPosts.indexOf(postToLike)
+                        if (index != -1) {
+                            // Determine the new like count based on the current is_liked state
+                            val newLikeCount =
+                                if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
+                            // Update the post with the new like state and count
+                            feedPosts[index] = postToLike.copy(
+                                is_liked = !postToLike.is_liked,
+                                like_count = newLikeCount
+                            )
+                        }
                     }
                 }
             }
@@ -185,7 +191,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
             }
         }
     }
-}
+
 
 @Composable
 fun HomePost(
