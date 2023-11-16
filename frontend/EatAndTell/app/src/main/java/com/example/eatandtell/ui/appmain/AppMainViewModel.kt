@@ -33,7 +33,8 @@ class AppMainViewModel() : ViewModel() {
     private var token: String? = null
     var myProfile = UserDTO(0, "", "", "", listOf())
     var photoUris = mutableStateListOf<Uri>()// store image uri
-        private set 
+        private set
+    val reviewDescription = mutableStateOf("")
     suspend fun initialize(token: String?) {
         this.token = token
         getMyProfile()
@@ -83,6 +84,7 @@ class AppMainViewModel() : ViewModel() {
             }
         }
         photoUris.clear()
+        reviewDescription.value = ""
     }
 
     suspend fun uploadPhotosAndEditProfile(photoPaths: List<Uri>, //실제로는 length 1짜리
