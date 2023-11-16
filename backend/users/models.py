@@ -1,5 +1,6 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
+
 
 class User(AbstractUser):
     description = models.TextField(default='')
@@ -16,6 +17,9 @@ class User(AbstractUser):
         symmetrical=False, 
         blank=True
     )
+    
+    def __str__(self):
+        return f"<User {self.id}: {self.username}>"
 
 class Follow(models.Model):
     follower = models.ForeignKey(User, related_name='following_relation', on_delete=models.CASCADE)

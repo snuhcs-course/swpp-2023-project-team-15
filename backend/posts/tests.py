@@ -318,3 +318,16 @@ class PostOrderingTestCase(TestCase):
         self.assertTrue(results['data'][0]['description'] == 'Test Description Unfollowed, but has tag and like from user_viewer')
         self.assertTrue(results['data'][1]['description'] == 'Test Description Unfollowed, but has tag')
         self.assertTrue(results['data'][2]['description'] == 'Test Description Unfollowed, but like from user_viewer')
+
+class PostSearchTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()        
+        self.user = get_user_model().objects.create_user(
+            username='testuser', password='12345')
+
+    def test_search(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get('/posts/restaurant-search/?query=김촌')
+        self.assertEqual(response.status_code, 200)
+        results = response.json()
+        print (results)
