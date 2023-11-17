@@ -89,6 +89,8 @@ class RefreshUserTagsTest(TestCase):
         # Check the response data
         expected_tags = ['한식', '리뷰왕', '인플루언서', '리뷰천사', '고든램지']
         self.assertListEqual(sorted(response.data['user_tags']), sorted(expected_tags))
+        self.assertListEqual(sorted(response.data['added']), sorted(expected_tags))
+        self.assertListEqual(response.data['removed'], [])
 
     def tearDown(self):
         pass
