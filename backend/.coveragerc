@@ -2,3 +2,4 @@
 omit =
     */migrations/*
     */tests.py
+    */__init__.py
