@@ -3,7 +3,7 @@ from django.db import models
 
 
 class User(AbstractUser):
-    description = models.TextField(default='')
+    description = models.TextField(default='', blank=True)
     avatar_url = models.URLField(default='https://default-avatar.com')
     # Remove follower_count and following_count, as they can be derived from the relationships.
     
