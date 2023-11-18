@@ -236,7 +236,7 @@ fun GraySmallText(text: String) {
         text = text,
         style = TextStyle(
             fontFamily = FontFamily.Default,
-            fontSize = 10.sp,
+            fontSize = 12.sp,
             fontWeight = FontWeight(400),
             color = Gray,
         ),
@@ -249,7 +249,7 @@ fun BlackSmallText(text: String, modifier: Modifier?) {
         text = text,
         style = TextStyle(
             fontFamily = FontFamily.Default,
-            fontSize = 10.sp,
+            fontSize = 12.sp,
             fontWeight = FontWeight(500),
             color = Black,
         ),
