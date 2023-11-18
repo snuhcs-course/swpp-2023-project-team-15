@@ -17,12 +17,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -40,8 +43,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -71,6 +77,7 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
     var tags by rememberSaveable { mutableStateOf(userInfo.tags) }
     val coroutinescope = rememberCoroutineScope()
     var isFollowing by remember { mutableStateOf(userInfo.is_followed) }
+    var expanded by remember { mutableStateOf(false) }
 
     Column {
         Spacer(modifier = Modifier.height(10.dp))
@@ -107,10 +114,28 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                 CustomButton(onClick = {
                     onClick()
                 }, text = buttonText, containerColor = PaleGray, borderColor = PaleGray)
+
             } else {
-                CustomButton(onClick = {
-                    onClick()
-                }, text = buttonText, containerColor = White, borderColor = PaleGray)
+                Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
+                    CustomButton(
+                        onClick = { expanded = true },
+                        text = buttonText,
+                        containerColor = White,
+                        borderColor = PaleGray
+                    )
+
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        offset = DpOffset(x = 0.dp, y = with(LocalDensity.current) { 6.dp })
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("팔로우 취소", modifier = Modifier.fillMaxWidth(),textAlign = TextAlign.Center)},
+                            onClick = { onClick(); expanded = false },
+                            modifier = Modifier.height(28.dp).width(100.dp)
+                        )
+                    }
+                }
             }
         }
 
