@@ -917,8 +917,9 @@ fun MenuWithDropDown(modifier: Modifier, onClick: () -> Unit = { /**/ }) {
             .padding(0.dp)
     ) {
         DropdownMenuItem(
-            text = { Text("삭제") },
-            onClick = { onClick(); isDropDownExpanded = false }
+            text = { Text("삭제", modifier = Modifier.fillMaxWidth(),textAlign = TextAlign.Center)},
+            onClick = { onClick(); isDropDownExpanded = false },
+            modifier = Modifier.height(32.dp).width(84.dp)
         )
     }
 
