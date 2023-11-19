@@ -234,6 +234,7 @@ class PostOrderingTestCase(TestCase):
         self.restaurant = Restaurant.objects.create(
             name='Test Restaurant')
         self.tag = Tag.objects.create(ko_label='한식', en_label='Korean', type='from_category')
+        self.tag_unrelated = Tag.objects.create(ko_label='중식', en_label='Chinese', type='from_category')
 
                 
         # add tag to user_viewer
@@ -265,10 +266,11 @@ class PostOrderingTestCase(TestCase):
             user=self.user_unfollowed,
             restaurant=self.restaurant,
             rating=4.5,
-            description=f'Test Description Unfollowed, but has tag and like from user_viewer',
+            description=f'Test Description Unfollowed, but has related tag and like from user_viewer',
             created_at=now - timedelta(days=2)
         )
         post_3.tags.add(self.tag)
+        post_3.tags.add(self.tag_unrelated) # This should not affect the ordering
         post_3.likes.add(self.user_viewer)
 
         # post 4
@@ -280,11 +282,23 @@ class PostOrderingTestCase(TestCase):
             created_at=now - timedelta(days=2)
         )
         post_4.likes.add(self.user_viewer)
+        post_3.tags.add(self.tag_unrelated) # This should not affect the ordering
+        
+        # post 5
+        post_5 = Post.objects.create(
+            user=self.user_unfollowed,
+            restaurant=self.restaurant,
+            rating=4.5,
+            description=f'Test Description Unfollowed, but has related tag and like from user_viewer and user_followed',
+            created_at=now - timedelta(days=2)
+        )
+        post_5.tags.add(self.tag)
+        post_5.likes.add(self.user_viewer)
+        post_5.likes.add(self.user_followed)
 
         '''
         posts/following: 1번만
-        post/recommend: 3, 2, 4번 (1번은 안 나옴)
-        
+        post/recommend: 5, 3, 2, 4번 (1번은 안 나옴: 태그도 겹치지 않고, 좋아요도 적기 때문에)
         '''
 
 
@@ -312,12 +326,24 @@ class PostOrderingTestCase(TestCase):
         response = self.client.get('/posts/recommend/')
         self.assertEqual(response.status_code, 200)
         results = response.json()
-        
-        # Check filtering
-        self.assertTrue(len(results['data']) == 3)
-        self.assertTrue(results['data'][0]['description'] == 'Test Description Unfollowed, but has tag and like from user_viewer')
-        self.assertTrue(results['data'][1]['description'] == 'Test Description Unfollowed, but has tag')
-        self.assertTrue(results['data'][2]['description'] == 'Test Description Unfollowed, but like from user_viewer')
+
+        # Each tuple contains the expected description and like_count for a post
+        expected_results = [
+            ('Test Description Unfollowed, but has related tag and like from user_viewer and user_followed', 2),
+            ('Test Description Unfollowed, but has related tag and like from user_viewer', 1),
+            ('Test Description Unfollowed, but has tag', 0),
+            ('Test Description Unfollowed, but like from user_viewer', 1),
+        ]
+
+        # Check the number of results
+        self.assertEqual(len(results['data']), len(expected_results))
+
+        # Loop through each result and check against expected values
+        for i, (expected_description, expected_like_count) in enumerate(expected_results):
+            with self.subTest(i=i):
+                self.assertEqual(results['data'][i]
+                                ['description'], expected_description)
+                self.assertEqual(results['data'][i]['like_count'], expected_like_count)
 
 class PostSearchTestCase(TestCase):
     def setUp(self):

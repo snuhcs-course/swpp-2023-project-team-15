@@ -115,6 +115,8 @@ def filter_users(request):
 def refresh_user_tags(request):
     user = request.user
     print(f'User {user} is trying to refresh their tags')
+    
+    original_tags_ko_labels = [tag.ko_label for tag in user.tags.all()]
 
     # Define the mapping of ratings to weights with a 0.5 interval (actually there is no 0.5 score coming. every weight is on my own..)
     rating_weights = {1: -3.0, 1.5: -2.2, 2: -1.5, 2.5: -0.5, 3: 0.0, 3.5: 0.5, 4: 1.5, 4.5: 2.2, 5: 3.0}
@@ -168,7 +170,10 @@ def refresh_user_tags(request):
     updated_tags = Tag.objects.filter(ko_label__in=tag_ko_label_candidates)
     
     user.tags.set(updated_tags)
-    return Response({"user_tags": [i.ko_label for i in updated_tags]})
+    
+    removed = [tag for tag in original_tags_ko_labels if tag not in tag_ko_label_candidates]
+    added = [tag for tag in tag_ko_label_candidates if tag not in original_tags_ko_labels]
+    return Response({"user_tags": [i.ko_label for i in updated_tags], "removed": removed, "added": added}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

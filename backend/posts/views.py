@@ -2,22 +2,20 @@ import threading
 
 import requests
 from decouple import config
-from django.db.models import Q, Count 
+from django.db.models import Count, Q
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from posts.utils import create_tags_on_thread
 from tags.models import Tag
 from tags.utils import (category_name_to_tags, google_translate_ko_to_en,
                         ml_sentiment_analysis, ml_tagging)
 
 from .models import Post
 from .serializers import PostSerializer, data_list
-
-from posts.utils import create_tags_on_thread
-
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -65,8 +63,8 @@ class PostViewSet(viewsets.ModelViewSet):
 
         # Counting intersecting tags and like_count annotating it
         queryset = queryset.annotate(
-            intersecting_tags_count=Count('tags', filter=Q(tags__in=user_tags)),
-            like_count=Count('likes')
+            intersecting_tags_count=Count('tags', filter=Q(tags__in=user_tags), distinct=True),
+            like_count=Count('likes', distinct=True)
         )
 
 
