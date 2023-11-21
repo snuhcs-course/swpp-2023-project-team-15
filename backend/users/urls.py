@@ -14,4 +14,6 @@ urlpatterns = [
     path('filter/', filter_users, name='filter_users'),
     path('refresh-tags/', refresh_user_tags, name='refresh_user_tags'),
     path('<int:pk>/follow/', follow, name='follow'),
+    path('<int:pk>/followers/', follower_list, name='follower_list'),
+    path('<int:pk>/followings/', following_list, name="following_list"),
 ]
