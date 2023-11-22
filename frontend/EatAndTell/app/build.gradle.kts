@@ -126,7 +126,8 @@ dependencies {
     implementation ("com.google.android.gms:play-services-maps:18.0.0")
     implementation ("com.google.android.gms:play-services-location:19.0.0")
 
-
+    // https://stackoverflow.com/a/51969705
+    androidTestImplementation("androidx.test:rules:1.5.0")
 
     runtimeOnly("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     runtimeOnly("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")

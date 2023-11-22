@@ -33,6 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.eatandtell.data.security.SharedPreferencesManager
 
 import com.example.eatandtell.ui.showToast
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,12 +42,16 @@ import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.start.StartViewModel
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 //import com.example.eatandtell.ui.AppNavigation
 @AndroidEntryPoint
 class AppMainActivity : ComponentActivity() {
     private val appMainViewModel: AppMainViewModel by viewModels()
+
+    @Inject
+    lateinit var sharedPreferencesManager: SharedPreferencesManager
 
     var positionX = ""
     var positionY = ""
@@ -78,7 +83,8 @@ class AppMainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val token = intent.getStringExtra("Token")
+        val token = sharedPreferencesManager.getToken(this)["Token"]
+        println("XXX token: $token")
         lifecycleScope.launch {
             appMainViewModel.initialize(token)
         }
@@ -102,8 +108,6 @@ class AppMainActivity : ComponentActivity() {
                     }
             }
             else -> {
-                // You can directly ask for the permission.
-                // The registered ActivityResultCallback gets the result of this request.
                 requestPermissionLauncher.launch(
                     Manifest.permission.ACCESS_FINE_LOCATION)
             }

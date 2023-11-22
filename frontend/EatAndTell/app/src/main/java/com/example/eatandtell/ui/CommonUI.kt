@@ -936,8 +936,7 @@ fun Home(onClick: () -> Unit) {
             .width(24.dp)
             .height(24.dp)
             .clickable(onClick = onClick)
-            .testTag("go_to_Home"),
-
+            .testTag("go_to_home"),
         contentDescription = "Home",
         tint = Black
     )
