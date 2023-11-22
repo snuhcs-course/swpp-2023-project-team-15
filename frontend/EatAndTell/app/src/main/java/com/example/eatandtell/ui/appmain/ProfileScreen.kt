@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Tab
@@ -309,7 +310,6 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                         itsMe = userId == viewModel.myProfile.id, // Example of determining if it's the current user's profile
                         context = context,
                         onClick = {
-                            /* TODO: toggle follow */
                             val followerCount =
                                 if (userInfo.is_followed) userInfo.follower_count - 1 else userInfo.follower_count + 1
                             userInfo = userInfo.copy(
@@ -444,7 +444,8 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                         viewModel = viewModel,
                         userInfo = myInfo,
                         onClick = {
-                            navigateToDestination(navController, "EditProfile")
+//                            navigateToDestination(navController, "EditProfile")
+                                  navController.navigate("EditProfile")
                         },
                         buttonText = "프로필 편집",
                         itsMe = true,
@@ -522,6 +523,13 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                             onDelete = { postToDelete ->
                                 feedPosts.remove(postToDelete)
                             })
+                        Divider(
+                            color = PaleGray,
+                            thickness = 1.dp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 10.dp)
+                        )
                     }
                     else items(
                         items = feedPosts,
@@ -547,6 +555,13 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                                 )
                             }
                         }
+                        Divider(
+                            color = PaleGray,
+                            thickness = 1.dp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 10.dp)
+                        )
                     }
                 }
 

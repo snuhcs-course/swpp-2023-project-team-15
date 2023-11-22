@@ -2,6 +2,8 @@
 package com.example.eatandtell.ui
 
 import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -259,21 +261,19 @@ fun BlackSmallText(text: String, modifier: Modifier?) {
 
 
 @Composable
-fun MainButton(onClick: () -> Unit, text: String, notLoading : Boolean = true, enabled : Boolean = true) {
+fun MainButton(onClick: () -> Unit, text: String, notLoading : Boolean = true, enabled : Boolean = true, containerColor: Color = MainColor, modifier: Modifier = Modifier ) {
     Button(
         onClick = {if (notLoading) onClick() else { /**/ }},
         colors = ButtonDefaults.buttonColors(
-            containerColor = MainColor,
+            containerColor = containerColor,
             contentColor = White
         ),
-        shape = RoundedCornerShape(size = 4.dp),
+        shape = RoundedCornerShape(size = 8.dp),
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp),
         enabled = enabled,
     ) {
-
-
         if (notLoading) Text(text, color = White, style = TextStyle(
             fontSize = 16.sp,
             lineHeight = 18.sp,
@@ -885,7 +885,7 @@ fun Post(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+//        Spacer(modifier = Modifier.height(24.dp))
     }
 
     //If Image Clicked, show Image Dialog

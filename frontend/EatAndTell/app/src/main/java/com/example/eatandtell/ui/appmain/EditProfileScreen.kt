@@ -140,16 +140,17 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                     , size = 100.dp)
                 Spacer(modifier = Modifier.height(25.dp))
 
-                NameText(text = "아이디")
-                CustomTextField( // username은 바꾸지 않고 보여주기만 한다.
-                    value = myProfile.username,
-                    onValueChange = { },
-                    placeholder = "아이디를 입력하세요 (4~20자)",
-                    enable = false,
-                )
+//                NameText(text = "아이디")
+//                CustomTextField( // username은 바꾸지 않고 보여주기만 한다.
+//                    value = myProfile.username,
+//                    onValueChange = { },
+//                    placeholder = "아이디를 입력하세요 (4~20자)",
+//                    enable = false,
+//                )
                 Spacer(modifier = Modifier.height(25.dp))
 
                 NameText(text = "자기소개")
+                Spacer(modifier = Modifier.height(25.dp))
                 CustomTextField(
                     value = description.text,
                     onValueChange = { description = TextFieldValue(it) },

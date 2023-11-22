@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -42,6 +44,7 @@ import com.example.eatandtell.ui.UpButton
 import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.theme.Gray
 import com.example.eatandtell.ui.theme.MainColor
+import com.example.eatandtell.ui.theme.PaleGray
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -177,7 +180,13 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
                         )
                     }
                 }
-            }
+                Divider(
+                    color = PaleGray,
+                    thickness = 1.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp)
+                )            }
         }
 
 

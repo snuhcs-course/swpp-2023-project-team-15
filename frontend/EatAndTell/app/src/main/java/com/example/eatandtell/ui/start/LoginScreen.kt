@@ -28,6 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -44,6 +45,7 @@ import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.appmain.AppMainActivity
 import com.example.eatandtell.ui.showToast
+import com.example.eatandtell.ui.theme.Black
 
 @Composable
 fun PasswordVisibilityToggle(passwordHidden: Boolean, onClick: () -> Unit) {
@@ -88,7 +90,8 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
             }
             is LoginState.Error -> {
                 val errorMessage = (loginState as LoginState.Error).message
-                showToast(context,"로그인에 실패하였습니다")
+//                showToast(context,"로그인에 실패하였습니다")
+                showToast(context,"아이디 또는 비밀번호가 일치하지 않습니다")
 
             }
             // Handle other states if necessary
@@ -150,41 +153,55 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
         )
 
         Spacer(modifier = Modifier.height(18.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            GraySmallText(
-                text = "계정 정보를 잊어버리셨나요?"
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            BlackSmallText(
-                text = "아이디/패스워드 찾기",
-                modifier = Modifier.clickable { /* 여기에 클릭 시 수행될 동작 추가 */ }
-            )
-        }
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth(),
+//            horizontalArrangement = Arrangement.Center
+//        ) {
+//            GraySmallText(
+//                text = "계정 정보를 잊어버리셨나요?"
+//            )
+//            Spacer(modifier = Modifier.width(4.dp))
+//            BlackSmallText(
+//                text = "아이디/패스워드 찾기",
+//                modifier = Modifier.clickable { /* 여기에 클릭 시 수행될 동작 추가 */ }
+//            )
+//        }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        GraySmallText(
+            text = "계정이 없으십니까?",
+        )
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            GraySmallText(
-                text = "계정이 없으십니까?",
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            BlackSmallText(
-                text = "회원가입",
-                modifier = Modifier.clickable {
+        Spacer(modifier = Modifier.height(18.dp))
+
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth(),
+//            horizontalArrangement = Arrangement.Center
+//        ) {
+//            GraySmallText(
+//                text = "계정이 없으십니까?",
+//            )
+//            Spacer(modifier = Modifier.width(4.dp))
+//            BlackSmallText(
+//                text = "회원가입",
+//                modifier = Modifier
+//                    .clickable {
+//                        navController.navigate("signup")
+//                        viewModel.resetStates()
+//                    }
+//                    .testTag("go_to_signup")
+//            )
+            MainButton(
+                onClick = {
                     navController.navigate("signup")
-                    viewModel.resetStates()
-                }.testTag("go_to_signup")
+                    viewModel.resetStates() },
+                text = "회원가입하기",
+                containerColor = Black,
+                modifier = Modifier.testTag("go_to_signup")
             )
 
-        }
+//        }
     }
 }
 
@@ -195,7 +212,15 @@ fun LoginButton(viewModel: StartViewModel, id: String, password: String, context
     MainButton(
         text = "로그인",
         onClick = {
-            onClick(null)
+//            onClick(null)
+            when {
+                id.isBlank() -> showToast(context, "아이디를 입력하세요")
+                password.isBlank() -> showToast(context, "비밀번호를 입력하세요")
+                password.length !in 4..20 -> showToast(context, "비밀번호가 4-20자여야 합니다")
+                else -> {
+                    onClick(null)
+                }
+            }
         }
     )
 }

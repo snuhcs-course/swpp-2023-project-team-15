@@ -39,6 +39,7 @@ import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.MainButton
 import com.example.eatandtell.ui.appmain.AppMainActivity
 import com.example.eatandtell.ui.showToast
+import com.example.eatandtell.ui.theme.Black
 
 @Composable
 fun SignupScreen(navController: NavController, context: ComponentActivity, viewModel: StartViewModel) {
@@ -163,23 +164,33 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth(),
+//            horizontalArrangement = Arrangement.Center
+//        ) {
             GraySmallText(
                 text = "이미 계정이 있으십니까?",
             )
-            Spacer(modifier = Modifier.width(4.dp))
-            BlackSmallText(
-                text = "로그인",
-                modifier = Modifier.clickable {
+//            Spacer(modifier = Modifier.width(18.dp))
+        Spacer(modifier = Modifier.height(18.dp))
+        MainButton(
+                onClick = {
                     navController.navigate("login")
                     viewModel.resetStates()
-                }.testTag("go_to_login")
+                          },
+                text = "로그인하기",
+                containerColor = Black,
+                modifier = Modifier.testTag("go_to_login")
             )
-        }
+//            BlackSmallText(
+//                text = "로그인",
+//                modifier = Modifier.clickable {
+//                    navController.navigate("login")
+//                    viewModel.resetStates()
+//                }.testTag("go_to_login")
+//            )
+//        }
     }
 }
 
@@ -217,11 +228,11 @@ fun SignupButton(
                 email.isBlank() -> showToast(context, "이메일을 입력하세요")
                 !isEmailValid(email) -> showToast(context, "이메일 주소가 올바르지 않습니다")
                 username.isBlank() -> showToast(context, "아이디를 입력하세요")
-                username.length !in 4..20 -> showToast(context, "아이디가 올바르지 않습니다")
+                username.length !in 4..20 -> showToast(context, "아이디가 4-20자여야 합니다")
                 password.isBlank() -> showToast(context, "비밀번호를 입력하세요")
-                password.length !in 4..20 -> showToast(context, "비밀번호가 올바르지 않습니다")
+                password.length !in 4..20 -> showToast(context, "비밀번호가 4-20자여야 합니다")
                 confirmPassword.isBlank() -> showToast(context, "비밀번호 확인을 입력하세요")
-                password != confirmPassword -> showToast(context, "비밀번호 확인이 틀립니다")
+                password != confirmPassword -> showToast(context, "비밀번호 확인이 일치하지 않습니다")
                 else -> {
                     onClick(null)
                 }
