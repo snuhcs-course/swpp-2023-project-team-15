@@ -16,7 +16,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.example.eatandtell.CustomTestRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -52,10 +52,12 @@ android {
         }
     }
 
+    // For mockk to run in instrumented tests. See https://github.com/mockk/mockk/issues/819#issuecomment-1731796944
+    testOptions {
+        packaging { jniLibs { useLegacyPackaging = true } }
+    }
+
 }
-
-
-
 
 
 dependencies {
@@ -85,6 +87,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
     androidTestImplementation ("androidx.navigation:navigation-testing:2.4.0-alpha10")
     androidTestImplementation("io.mockk:mockk:1.13.8")
+    androidTestImplementation("io.mockk:mockk-android:1.13.8") // for instrumentation tests. See https://mockk.io/ANDROID.html
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -103,6 +106,8 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.44")
     kapt("com.google.dagger:hilt-android-compiler:2.44")
     implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
+
+
     // For Robolectric tests.
     testImplementation("com.google.dagger:hilt-android-testing:2.44")
     // ...with Kotlin.
@@ -121,7 +126,8 @@ dependencies {
     implementation ("com.google.android.gms:play-services-maps:18.0.0")
     implementation ("com.google.android.gms:play-services-location:19.0.0")
 
-
+    // https://stackoverflow.com/a/51969705
+    androidTestImplementation("androidx.test:rules:1.5.0")
 
     runtimeOnly("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     runtimeOnly("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
