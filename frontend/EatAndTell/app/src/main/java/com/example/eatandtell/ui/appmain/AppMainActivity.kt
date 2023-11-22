@@ -84,7 +84,6 @@ class AppMainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val token = sharedPreferencesManager.getToken(this)["Token"]
-        println("XXX token: $token")
         lifecycleScope.launch {
             appMainViewModel.initialize(token)
         }
