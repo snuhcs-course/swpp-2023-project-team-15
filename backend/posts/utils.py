@@ -7,7 +7,7 @@ def get_top_tag_after_translation_only_label(possible_tags, translated_descripti
     label_score_dict = ml_tagging(translated_description, possible_tags)
     max_label = max(label_score_dict, key=label_score_dict.get)
     
-    if label_score_dict[max_label] > 0.3:
+    if label_score_dict[max_label] > 0.23:
         return max_label
     return None
 
