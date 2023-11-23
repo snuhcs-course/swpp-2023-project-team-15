@@ -34,9 +34,9 @@ fun FollowRow(
             user.description,
             onClick = {
                 if (user.id == viewModel.myProfile.id)
-                    navigateToDestination(navHostController, "Profile")
+                    navHostController.navigate( "Profile")
                 else
-                    navigateToDestination(navHostController, "Profile/${user.id}")
+                    navHostController.navigate( "Profile/${user.id}")
             },
         )
     }

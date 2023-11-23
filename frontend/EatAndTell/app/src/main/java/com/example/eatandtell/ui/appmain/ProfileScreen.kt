@@ -94,7 +94,6 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO,navController:
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 FollowText(count = userInfo.following_count, label = "팔로잉",
                     onClick={
-
                         navController.navigate("Following/${userInfo.id}")
                     })
             }
