@@ -2,8 +2,6 @@
 package com.example.eatandtell.ui
 
 import android.content.Context
-import android.view.LayoutInflater
-import android.view.View
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -663,8 +661,9 @@ fun Profile(
     }
 }
 @Composable
-fun FollowText(count: Int, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+fun FollowText(count: Int, label: String,onClick: (() -> Unit) = { },) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable(onClick = onClick)) {
         Text(text = "$count", style = TextStyle(
             fontSize = 16.sp,
             lineHeight = 18.sp,
