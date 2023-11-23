@@ -113,15 +113,18 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
             else if (buttonText == "팔로우하기") {
                 CustomButton(onClick = {
                     onClick()
-                }, text = buttonText, containerColor = PaleGray, borderColor = PaleGray)
+                }, text = buttonText, containerColor = PaleGray, borderColor = PaleGray, testTag = "follow_button")
 
             } else {
                 Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
                     CustomButton(
-                        onClick = { expanded = true },
+                        onClick = {
+                            expanded = true
+                        },
                         text = buttonText,
                         containerColor = White,
-                        borderColor = PaleGray
+                        borderColor = PaleGray,
+                        testTag = "unfollow_button"
                     )
 
                     DropdownMenu(

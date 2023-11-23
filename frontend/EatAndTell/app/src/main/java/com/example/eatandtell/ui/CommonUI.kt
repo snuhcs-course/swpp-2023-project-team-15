@@ -80,6 +80,7 @@ fun HeartFull(onClick: (Int) -> Unit, post_id: Int) {
             .width(24.dp)
             .height(24.dp)
             .clickable { onClick(post_id) }
+            .testTag("heart_full")
         ,
         contentDescription = "heart_full",
         tint = MainColor,
@@ -94,6 +95,7 @@ fun HeartEmpty(onClick: (Int) -> Unit, post_id: Int) {
             .width(24.dp)
             .height(24.dp)
             .clickable { onClick(post_id) }
+            .testTag("heart_empty")
         ,
         contentDescription = "heart_empty",
         tint = MainColor
@@ -343,7 +345,8 @@ fun CustomButton(
     cornerRadius: Dp = 40.dp, // You can specify the corner radius
     height: Dp = 36.dp, // You can specify the height
     widthFraction: Float = 0.9f, // Default to 1f which is full width
-    icon: ImageVector? = null // Icon is optional
+    icon: ImageVector? = null, // Icon is optional
+    testTag: String = "CustomButton",
 ) {
     Button(
         onClick = onClick,
@@ -354,7 +357,8 @@ fun CustomButton(
         enabled = true,
         modifier = Modifier
             .fillMaxWidth(widthFraction)
-            .height(height),
+            .height(height)
+            .testTag(testTag),
         border = BorderStroke(3.dp,borderColor),
         contentPadding = PaddingValues(0.dp)
     ) {
