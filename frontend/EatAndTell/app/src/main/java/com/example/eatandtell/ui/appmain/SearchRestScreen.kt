@@ -101,7 +101,8 @@ fun SearchRestScreen(navController: NavHostController, context: AppMainActivity,
                         contentDescription = "Search Icon"
                     )
                 }
-            }
+            },
+            testTag = "search_rest_screen_text_field",
         )
         Spacer(modifier = Modifier.height(20.dp))
 

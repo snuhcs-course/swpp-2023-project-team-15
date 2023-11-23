@@ -113,6 +113,7 @@ fun CustomTextField(
     onTrailingIconClick: (() -> Unit)? = null,
     maxLines : Int = 1,
     enable : Boolean = true,
+    testTag: String = "CustomTextField",
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -139,7 +140,8 @@ fun CustomTextField(
                 shape = RoundedCornerShape(size = 4.dp)
             )
             .fillMaxWidth()
-            .height(IntrinsicSize.Min),
+            .height(IntrinsicSize.Min)
+            .testTag(testTag),
         colors = TextFieldDefaults.textFieldColors(
             containerColor = White , //Color(0xFFEEEEEE),
             cursorColor = Color.Black,
@@ -657,6 +659,7 @@ fun Profile(
         modifier = Modifier
             .padding(4.dp)
             .clickable(onClick = onClick)
+            .testTag("profile_row")
     ) {
         ProfileImage(profileUrl = profileUrl)
         ProfileText(username = username, userDescription = userDescription)
