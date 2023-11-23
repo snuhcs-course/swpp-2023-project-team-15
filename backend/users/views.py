@@ -196,7 +196,19 @@ def follow(request, pk):
     # Serialize the user data and return it
     return Response({"following": following}, status=status.HTTP_200_OK)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def follower_list(self, pk):
+    followers = Follow.objects.filter(followee_id=pk).select_related('follower')
+    serializer = UserInfoSerializer([follow.follower for follow in followers], many=True)
+    return Response(serializer.data)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def following_list(self, pk):
+    following = Follow.objects.filter(follower_id=pk).select_related('followee')
+    serializer = UserInfoSerializer([follow.followee for follow in following], many=True)
+    return Response(serializer.data)
 
 
 
