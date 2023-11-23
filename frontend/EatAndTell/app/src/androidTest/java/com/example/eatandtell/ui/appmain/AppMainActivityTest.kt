@@ -142,6 +142,7 @@ class AppMainActivityTest {
         // todo: 3. test that the following user's post is displayed in the following tab
 
         // 4. click unfollow button (twice)
+        // Note: this part is flaky. sometimes the test fails even if the unfollow button is actually displayed.
         waitUntilNodeWith(tag = "unfollow_button")
         composeTestRule.onNodeWithTag("unfollow_button").performClick()
 
