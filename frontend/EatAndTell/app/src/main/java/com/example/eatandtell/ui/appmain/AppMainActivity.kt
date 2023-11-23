@@ -231,6 +231,30 @@ fun AppMainNavigate(navController: NavHostController, modifier: Modifier, contex
             val userId = backStackEntry.arguments?.getString("userId")
             ProfileScreen(context, viewModel, navController, userId?.toIntOrNull())
         }
+        composable(
+            route = "Follower/{userId}",
+            arguments = listOf(
+                navArgument("userId") {
+                    defaultValue = "self"  // set default value for self profile
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
+            FollowerScreen(context, viewModel, navController, userId?.toIntOrNull())
+        }
 
+        composable(
+            route = "Following/{userId}",
+            arguments = listOf(
+                navArgument("userId") {
+                    defaultValue = "self"  // set default value for self profile
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
+            FollowingScreen(context, viewModel, navController, userId?.toIntOrNull())
+        }
     }
 }

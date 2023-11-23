@@ -97,6 +97,8 @@ fun TopBar(currentScreenName: String, navigateToHome: () -> Unit) {
             "Upload" -> "리뷰 작성"
             "Profile" -> "프로필"
             "EditProfile" -> "프로필 편집"
+            "Follower" -> "팔로워"
+            "Following"-> "팔로잉"
             else -> "Eat & Tell"
         }
     )

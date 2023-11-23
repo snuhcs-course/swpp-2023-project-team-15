@@ -104,5 +104,13 @@ class ApiRepository@Inject constructor(private val apiService: ApiService) {
         apiService.getFollwingPosts(authorization)
     }
 
+    suspend fun getFollowers(authorization: String, userid: Int?):Result<List<UserDTO>> = runCatching{
+        apiService.getFollowers(authorization,userid)
+    }
+
+    suspend fun getFollowings(authorization: String, userid: Int?):Result<List<UserDTO>> = runCatching{
+        apiService.getFollowings(authorization,userid)
+    }
+
 
 }

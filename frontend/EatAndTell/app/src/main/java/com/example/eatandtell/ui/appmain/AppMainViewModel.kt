@@ -18,7 +18,6 @@ import com.example.eatandtell.dto.TopTag
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
-import com.example.eatandtell.ui.showToast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -483,6 +482,28 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             onError(errorMessage)
         }
 
+    }
+
+    suspend fun getFollowers(user_id:Int?=null, onSuccess: (List<UserDTO>) -> Unit){
+        val authorization = "Token $token"
+        val response = apiRepository.getFollowers(authorization,user_id)
+        response.onSuccess { response->
+            onSuccess(response)
+        }.onFailure { e->
+            Log.d("getFollowers error", e.message ?: "Network error")
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
+    suspend fun getFollowings(user_id:Int?=null, onSuccess: (List<UserDTO>) -> Unit){
+        val authorization = "Token $token"
+        val response = apiRepository.getFollowings(authorization,user_id)
+        response.onSuccess { response->
+            onSuccess(response)
+        }.onFailure { e->
+            Log.d("getFollowers error", e.message ?: "Network error")
+            throw e // rethrow the exception to be caught in the calling function
+        }
     }
     }
 

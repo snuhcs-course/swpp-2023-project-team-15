@@ -34,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.eatandtell.dto.PostDTO
@@ -231,7 +230,7 @@ fun HomePost(
                     else
                         navigateToDestination(navHostController, "Profile/${user.id}")
                 },
-            );
+            )
             Spacer(modifier = Modifier.height(11.dp))
             Post(
                 post = post,
