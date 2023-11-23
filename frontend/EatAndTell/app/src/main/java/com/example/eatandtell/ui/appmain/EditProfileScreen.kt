@@ -165,6 +165,13 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     MediumRedButton(onClick = {
+                        SharedPreferencesManager.clearPreferences(context)
+                        //go to StartActivity's Login Screen
+                        val intent = Intent(context, StartActivity::class.java)
+                        startActivity(context, intent, null)
+                    }, text = "로그아웃")
+
+                    MediumRedButton(onClick = {
                                 try {
                                     buttonEnable = false
                                     coroutineScope.launch {
@@ -181,14 +188,6 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                                     println("An error occurred: ${e.message}")
                                 }
                             }, text = "프로필 저장", enable = buttonEnable)
-
-                    MediumRedButton(onClick = {
-                        SharedPreferencesManager.clearPreferences(context)
-                        //go to StartActivity's Login Screen
-                        val intent = Intent(context, StartActivity::class.java)
-                        startActivity(context, intent, null)
-                    }, text = "로그아웃")
-
                 }
             }
         }

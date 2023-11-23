@@ -216,6 +216,7 @@ fun SignupButton(
 
     MainButton(text = "회원가입",
         onClick={
+            val trimmedEmail = email.trim()
             when {
                 /*email.isBlank() -> "이메일을 입력하세요"
                 !isEmailValid(email) -> "이메일 주소가 올바르지 않습니다"
@@ -225,8 +226,8 @@ fun SignupButton(
                 password.length !in 4..20 ->"비밀번호가 올바르지 않습니다"
                 confirmPassword.isBlank() -> "비밀번호 확인을 입력하세요"
                 password != confirmPassword ->  "비밀번호 확인이 틀립니다"*/
-                email.isBlank() -> showToast(context, "이메일을 입력하세요")
-                !isEmailValid(email) -> showToast(context, "이메일 주소가 올바르지 않습니다")
+                trimmedEmail.isBlank() -> showToast(context, "이메일을 입력하세요")
+                !isEmailValid(trimmedEmail) -> showToast(context, "이메일 주소가 올바르지 않습니다")
                 username.isBlank() -> showToast(context, "아이디를 입력하세요")
                 username.length !in 4..20 -> showToast(context, "아이디가 4-20자여야 합니다")
                 password.isBlank() -> showToast(context, "비밀번호를 입력하세요")

@@ -337,7 +337,7 @@ fun CustomButton(
     textColor: Color = Black,
     fontWeight: Int = 500,
     containerColor: Color = MainColor, // Pass the container color as a parameter
-    borderColor: Color = White,
+    borderColor: Color = Color.Transparent,
     cornerRadius: Dp = 40.dp, // You can specify the corner radius
     height: Dp = 36.dp, // You can specify the height
     widthFraction: Float = 0.9f, // Default to 1f which is full width
