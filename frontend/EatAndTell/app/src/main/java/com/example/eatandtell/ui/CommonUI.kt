@@ -80,6 +80,7 @@ fun HeartFull(onClick: (Int) -> Unit, post_id: Int) {
             .width(24.dp)
             .height(24.dp)
             .clickable { onClick(post_id) }
+            .testTag("heart_full")
         ,
         contentDescription = "heart_full",
         tint = MainColor,
@@ -94,6 +95,7 @@ fun HeartEmpty(onClick: (Int) -> Unit, post_id: Int) {
             .width(24.dp)
             .height(24.dp)
             .clickable { onClick(post_id) }
+            .testTag("heart_empty")
         ,
         contentDescription = "heart_empty",
         tint = MainColor
@@ -113,6 +115,7 @@ fun CustomTextField(
     onTrailingIconClick: (() -> Unit)? = null,
     maxLines : Int = 1,
     enable : Boolean = true,
+    testTag: String = "CustomTextField",
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -139,7 +142,8 @@ fun CustomTextField(
                 shape = RoundedCornerShape(size = 4.dp)
             )
             .fillMaxWidth()
-            .height(IntrinsicSize.Min),
+            .height(IntrinsicSize.Min)
+            .testTag(testTag),
         colors = TextFieldDefaults.textFieldColors(
             containerColor = White , //Color(0xFFEEEEEE),
             cursorColor = Color.Black,
@@ -341,7 +345,8 @@ fun CustomButton(
     cornerRadius: Dp = 40.dp, // You can specify the corner radius
     height: Dp = 36.dp, // You can specify the height
     widthFraction: Float = 0.9f, // Default to 1f which is full width
-    icon: ImageVector? = null // Icon is optional
+    icon: ImageVector? = null, // Icon is optional
+    testTag: String = "CustomButton",
 ) {
     Button(
         onClick = onClick,
@@ -352,7 +357,8 @@ fun CustomButton(
         enabled = true,
         modifier = Modifier
             .fillMaxWidth(widthFraction)
-            .height(height),
+            .height(height)
+            .testTag(testTag),
         border = BorderStroke(3.dp,borderColor),
         contentPadding = PaddingValues(0.dp)
     ) {
@@ -657,6 +663,7 @@ fun Profile(
         modifier = Modifier
             .padding(4.dp)
             .clickable(onClick = onClick)
+            .testTag("profile_row")
     ) {
         ProfileImage(profileUrl = profileUrl)
         ProfileText(username = username, userDescription = userDescription)

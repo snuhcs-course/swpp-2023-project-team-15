@@ -318,7 +318,8 @@ fun SearchBar(value: TextFieldValue, onValueChange: (TextFieldValue) -> Unit, on
                     contentDescription = "Search Icon"
                 )
             }
-        }
+        },
+        testTag = "search_bar_text_field",
     )
 }
 

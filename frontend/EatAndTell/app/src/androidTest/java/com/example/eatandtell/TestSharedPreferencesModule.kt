@@ -25,6 +25,7 @@ object TestSharedPreferencesModule {
     fun provideTestSharedPreferenceManager(): SharedPreferencesManager {
         return mockk {
             every { getToken(any()) } returns mapOf("Token" to "da8c255f281e2b7ba54600c0a41ff02892787b96")
+            every { setToken(any(), any()) } returns Unit
         }
     }
 }
