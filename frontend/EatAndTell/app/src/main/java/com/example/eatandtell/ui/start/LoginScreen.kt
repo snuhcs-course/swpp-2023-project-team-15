@@ -90,7 +90,6 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
             }
             is LoginState.Error -> {
                 val errorMessage = (loginState as LoginState.Error).message
-//                showToast(context,"로그인에 실패하였습니다")
                 showToast(context,"아이디 또는 비밀번호가 일치하지 않습니다")
 
             }
@@ -141,10 +140,7 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
                 Log.d("login screen", "ID: ${id.text}, Password: ${password.text}")
                 viewModel.loginUser(id.text, password.text,context)
                 viewModel.resetStates()
-                //val intent = Intent(context, AppMainActivity::class.java)
-                //intent.putExtra("Token", token) // 토큰 넘겨주기
-                //context.startActivity(intent)
-                //context.finish()
+
             },
             id = id.text,
             password = password.text,
@@ -153,20 +149,6 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
         )
 
         Spacer(modifier = Modifier.height(18.dp))
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth(),
-//            horizontalArrangement = Arrangement.Center
-//        ) {
-//            GraySmallText(
-//                text = "계정 정보를 잊어버리셨나요?"
-//            )
-//            Spacer(modifier = Modifier.width(4.dp))
-//            BlackSmallText(
-//                text = "아이디/패스워드 찾기",
-//                modifier = Modifier.clickable { /* 여기에 클릭 시 수행될 동작 추가 */ }
-//            )
-//        }
 
         GraySmallText(
             text = "계정이 없으십니까?",
@@ -174,24 +156,6 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
 
         Spacer(modifier = Modifier.height(18.dp))
 
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth(),
-//            horizontalArrangement = Arrangement.Center
-//        ) {
-//            GraySmallText(
-//                text = "계정이 없으십니까?",
-//            )
-//            Spacer(modifier = Modifier.width(4.dp))
-//            BlackSmallText(
-//                text = "회원가입",
-//                modifier = Modifier
-//                    .clickable {
-//                        navController.navigate("signup")
-//                        viewModel.resetStates()
-//                    }
-//                    .testTag("go_to_signup")
-//            )
             MainButton(
                 onClick = {
                     navController.navigate("signup")
@@ -201,18 +165,15 @@ fun LoginScreen(navController: NavController, context: ComponentActivity, viewMo
                 modifier = Modifier.testTag("go_to_signup")
             )
 
-//        }
     }
 }
 
 @Composable
 fun LoginButton(viewModel: StartViewModel, id: String, password: String, context: Context, onClick: (String?) -> Unit) {
-    val coroutineScope = rememberCoroutineScope()
 
     MainButton(
         text = "로그인",
         onClick = {
-//            onClick(null)
             when {
                 id.isBlank() -> showToast(context, "아이디를 입력하세요")
                 password.isBlank() -> showToast(context, "비밀번호를 입력하세요")

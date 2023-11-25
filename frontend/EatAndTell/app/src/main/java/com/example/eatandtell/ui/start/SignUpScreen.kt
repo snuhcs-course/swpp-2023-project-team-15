@@ -159,20 +159,14 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
             password = password.text,
             confirmPassword = confirmPassword.text,
             context = context,
-            viewModel = viewModel
         )
 
         Spacer(modifier = Modifier.height(18.dp))
 
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth(),
-//            horizontalArrangement = Arrangement.Center
-//        ) {
+
             GraySmallText(
                 text = "이미 계정이 있으십니까?",
             )
-//            Spacer(modifier = Modifier.width(18.dp))
         Spacer(modifier = Modifier.height(18.dp))
         MainButton(
                 onClick = {
@@ -183,14 +177,7 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
                 containerColor = Black,
                 modifier = Modifier.testTag("go_to_login")
             )
-//            BlackSmallText(
-//                text = "로그인",
-//                modifier = Modifier.clickable {
-//                    navController.navigate("login")
-//                    viewModel.resetStates()
-//                }.testTag("go_to_login")
-//            )
-//        }
+
     }
 }
 
@@ -198,7 +185,6 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
 
 @Composable
 fun SignupButton(
-    viewModel: StartViewModel,
     onClick: (String?) -> Unit,
     email: String,
     username: String,
@@ -206,7 +192,6 @@ fun SignupButton(
     confirmPassword: String,
     context: Context
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val emailRegex = Regex("^\\S+@\\S+\\.\\S+\$")
 
     fun isEmailValid(email: String): Boolean {
@@ -218,14 +203,6 @@ fun SignupButton(
         onClick={
             val trimmedEmail = email.trim()
             when {
-                /*email.isBlank() -> "이메일을 입력하세요"
-                !isEmailValid(email) -> "이메일 주소가 올바르지 않습니다"
-                username.isBlank() -> "아이디를 입력하세요"
-                username.length !in 4..20 -> "아이디가 올바르지 않습니다"
-                password.isBlank() ->  "비밀번호를 입력하세요"
-                password.length !in 4..20 ->"비밀번호가 올바르지 않습니다"
-                confirmPassword.isBlank() -> "비밀번호 확인을 입력하세요"
-                password != confirmPassword ->  "비밀번호 확인이 틀립니다"*/
                 trimmedEmail.isBlank() -> showToast(context, "이메일을 입력하세요")
                 !isEmailValid(trimmedEmail) -> showToast(context, "이메일 주소가 올바르지 않습니다")
                 username.isBlank() -> showToast(context, "아이디를 입력하세요")
@@ -238,10 +215,5 @@ fun SignupButton(
                     onClick(null)
                 }
             }
-
-
-
         })
-
-
 }

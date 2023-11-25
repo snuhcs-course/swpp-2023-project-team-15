@@ -49,49 +49,24 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
-    var feedPosts = remember { mutableStateListOf<PostDTO>() }
-    var loading by remember { mutableStateOf(true) }
+//    var feedPosts = remember { mutableStateListOf<PostDTO>() }
+    val feedPosts = viewModel.posts // Directly use the mutable state list
+    var loading by remember { viewModel.isLoading }
     var lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     var selectedTab by remember { mutableStateOf("추천") }
+    val loadError by remember { viewModel.loadError }
 
     Log.d("navigateToDestination", "lazylist in Home: ${lazyListState}")
 
 
-    LaunchedEffect(selectedTab,loading) {
-        try {
-            println("trying to load home feed")
-            if(selectedTab == "추천") {
-                viewModel.getPersonalizedPosts(
-                    onSuccess = { posts ->
-                        // Instead of reassigning, we clear and add all to mutate the list's contents
-                        feedPosts.clear()
-                        feedPosts.addAll(posts)
-                        println("feedPosts: ${feedPosts.size}")
-                    },
-                )
-                println("getting posts is fine")
-                loading = false
-            } else {
-                viewModel.getFollowingPosts(
-                    onSuccess = { posts ->
-                        // Instead of reassigning, we clear and add all to mutate the list's contents
-                        feedPosts.clear()
-                        feedPosts.addAll(posts)
-                        println("feedPosts: ${feedPosts.size}")
-                    },
-                )
-                println("getting posts is fine")
-                loading = false
-            }
-
-        }
-        catch (e: Exception) {
-            if (e !is CancellationException) { // 유저가 너무 빨리 화면을 옮겨다니는 경우에는 CancellationException이 발생할 수 있지만, 서버 에러가 아니라서 패스
-                loading = false
-                Log.d("home feed load error", e.toString())
-                showToast(context, "홈 피드 로딩에 실패하였습니다")
-            }
+    LaunchedEffect(selectedTab) {
+        viewModel.loadPosts(selectedTab)
+    }
+    LaunchedEffect(loadError) {
+        loadError?.let { error ->
+            showToast(context, error)
+            viewModel.loadError.value = null // Reset the error state after showing the toast
         }
     }
 

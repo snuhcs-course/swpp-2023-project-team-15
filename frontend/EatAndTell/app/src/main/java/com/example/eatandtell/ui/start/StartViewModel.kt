@@ -30,7 +30,7 @@ class StartViewModel @Inject constructor(private val mainRepository: ApiReposito
 
             response.onSuccess { response ->
                 val token = response.token
-                //Log.d("login", "success")
+                Log.d("login", "success")
                 tokenRepository.saveToken(context, token)
                 _loginState.value = LoginState.Success(response.token)
             }
@@ -62,21 +62,6 @@ class StartViewModel @Inject constructor(private val mainRepository: ApiReposito
                 Log.d("login", "error: $errorMessage")
                 _registerState.value = RegisterState.Error(exception.localizedMessage ?: "Unknown error")
             }
-            /*
-            response.onSuccess { it ->
-                val token = it.token
-
-                SharedPreferencesManager.setToken(context, token)
-
-            }
-            response.onFailure { exception ->
-
-
-                //showToast(context, "회원가입에 실패하였습니다")
-
-
-            }
-*/
 
         }
     }

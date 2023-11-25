@@ -36,7 +36,12 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
     private val _editStatus = MutableLiveData<String>()
     val editStatus: LiveData<String> = _editStatus
+    private val _tagUpdateStatus = MutableLiveData<String>()
+    val tagUpdateStatus: LiveData<String> = _tagUpdateStatus
 
+    val posts = mutableStateListOf<PostDTO>()
+    val isLoading = mutableStateOf(true)
+    val loadError = mutableStateOf<String?>(null)
 
 
     var myProfile = UserDTO(0, "", "", "", listOf())
@@ -50,9 +55,6 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             getMyProfile()
         }
     }
-    private val _tagUpdateStatus = MutableLiveData<String>()
-    val tagUpdateStatus: LiveData<String> = _tagUpdateStatus
-
 
     fun prepareFileData(photoPath: Uri, context: Context): ByteArray? {
         val contentResolver = context.contentResolver
@@ -65,7 +67,32 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             null
         }
     }
-        //private val apiService = RetrofitClient.retro.create(ApiService::class.java)
+
+    // Inside AppMainViewModel
+
+
+    fun loadPosts(selectedTab: String) {
+        viewModelScope.launch {
+            try {
+                isLoading.value = true
+                if (selectedTab == "추천") {
+                    getPersonalizedPosts { fetchedPosts ->
+                        posts.clear()
+                        posts.addAll(fetchedPosts)
+                    }
+                } else {
+                    getFollowingPosts { fetchedPosts ->
+                        posts.clear()
+                        posts.addAll(fetchedPosts)
+                    }
+                }
+            } catch (e: Exception) {
+                loadError.value = "홈 피드 로딩에 실패하였습니다"
+            } finally {
+                isLoading.value = false
+            }
+        }
+    }
 
 
     fun uploadPhotosAndPost(
@@ -505,7 +532,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             throw e // rethrow the exception to be caught in the calling function
         }
     }
-    }
+}
 
 // Event wrapper to handle one-time events
 
