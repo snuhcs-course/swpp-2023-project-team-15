@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Tab
@@ -72,7 +73,7 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -> Unit, buttonText: String, itsMe : Boolean = false, context : ComponentActivity? = null, // Added this parameter
+fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO,navController: NavHostController, onClick: () -> Unit, buttonText: String, itsMe : Boolean = false, context : ComponentActivity? = null, // Added this parameter
 ) {
     var tags by rememberSaveable { mutableStateOf(userInfo.tags) }
     val coroutinescope = rememberCoroutineScope()
@@ -91,11 +92,17 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
             ProfileImage(profileUrl = userInfo.avatar_url, size = 60.dp)
             Spacer(modifier = Modifier.width(95.dp))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                FollowText(count = userInfo.following_count, label = "팔로잉")
+                FollowText(count = userInfo.following_count, label = "팔로잉",
+                    onClick={
+                        navController.navigate("Following/${userInfo.id}")
+                    })
             }
             Spacer(modifier = Modifier.width(50.dp))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                FollowText(count = userInfo.follower_count, label = "팔로워")
+                FollowText(count = userInfo.follower_count, label = "팔로워",
+                    onClick={
+                        navController.navigate("Follower/${userInfo.id}" )
+                    })
             }
         }
 
@@ -311,8 +318,8 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                         buttonText = if (userInfo.is_followed) "팔로잉" else "팔로우하기",
                         itsMe = userId == viewModel.myProfile.id, // Example of determining if it's the current user's profile
                         context = context,
+                        navController = navController,
                         onClick = {
-                            /* TODO: toggle follow */
                             val followerCount =
                                 if (userInfo.is_followed) userInfo.follower_count - 1 else userInfo.follower_count + 1
                             userInfo = userInfo.copy(
@@ -446,8 +453,10 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                     ProfileRow(
                         viewModel = viewModel,
                         userInfo = myInfo,
+                        navController=navController,
                         onClick = {
-                            navigateToDestination(navController, "EditProfile")
+//                            navigateToDestination(navController, "EditProfile")
+                                  navController.navigate("EditProfile")
                         },
                         buttonText = "프로필 편집",
                         itsMe = true,
@@ -525,6 +534,13 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                             onDelete = { postToDelete ->
                                 feedPosts.remove(postToDelete)
                             })
+                        Divider(
+                            color = PaleGray,
+                            thickness = 1.dp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 10.dp)
+                        )
                     }
                     else items(
                         items = feedPosts,
@@ -550,6 +566,13 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO, onClick: () -
                                 )
                             }
                         }
+                        Divider(
+                            color = PaleGray,
+                            thickness = 1.dp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 10.dp)
+                        )
                     }
                 }
 

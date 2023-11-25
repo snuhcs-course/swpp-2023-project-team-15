@@ -263,21 +263,19 @@ fun BlackSmallText(text: String, modifier: Modifier?) {
 
 
 @Composable
-fun MainButton(onClick: () -> Unit, text: String, notLoading : Boolean = true, enabled : Boolean = true) {
+fun MainButton(onClick: () -> Unit, text: String, notLoading : Boolean = true, enabled : Boolean = true, containerColor: Color = MainColor, modifier: Modifier = Modifier ) {
     Button(
         onClick = {if (notLoading) onClick() else { /**/ }},
         colors = ButtonDefaults.buttonColors(
-            containerColor = MainColor,
+            containerColor = containerColor,
             contentColor = White
         ),
-        shape = RoundedCornerShape(size = 4.dp),
+        shape = RoundedCornerShape(size = 8.dp),
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp),
         enabled = enabled,
     ) {
-
-
         if (notLoading) Text(text, color = White, style = TextStyle(
             fontSize = 16.sp,
             lineHeight = 18.sp,
@@ -341,7 +339,7 @@ fun CustomButton(
     textColor: Color = Black,
     fontWeight: Int = 500,
     containerColor: Color = MainColor, // Pass the container color as a parameter
-    borderColor: Color = White,
+    borderColor: Color = Color.Transparent,
     cornerRadius: Dp = 40.dp, // You can specify the corner radius
     height: Dp = 36.dp, // You can specify the height
     widthFraction: Float = 0.9f, // Default to 1f which is full width
@@ -670,8 +668,9 @@ fun Profile(
     }
 }
 @Composable
-fun FollowText(count: Int, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+fun FollowText(count: Int, label: String,onClick: (() -> Unit) = { },) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable(onClick = onClick)) {
         Text(text = "$count", style = TextStyle(
             fontSize = 16.sp,
             lineHeight = 18.sp,
@@ -892,7 +891,7 @@ fun Post(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+//        Spacer(modifier = Modifier.height(24.dp))
     }
 
     //If Image Clicked, show Image Dialog

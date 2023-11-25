@@ -140,16 +140,17 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                     , size = 100.dp)
                 Spacer(modifier = Modifier.height(25.dp))
 
-                NameText(text = "아이디")
-                CustomTextField( // username은 바꾸지 않고 보여주기만 한다.
-                    value = myProfile.username,
-                    onValueChange = { },
-                    placeholder = "아이디를 입력하세요 (4~20자)",
-                    enable = false,
-                )
+//                NameText(text = "아이디")
+//                CustomTextField( // username은 바꾸지 않고 보여주기만 한다.
+//                    value = myProfile.username,
+//                    onValueChange = { },
+//                    placeholder = "아이디를 입력하세요 (4~20자)",
+//                    enable = false,
+//                )
                 Spacer(modifier = Modifier.height(25.dp))
 
                 NameText(text = "자기소개")
+                Spacer(modifier = Modifier.height(25.dp))
                 CustomTextField(
                     value = description.text,
                     onValueChange = { description = TextFieldValue(it) },
@@ -163,6 +164,13 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+                    MediumRedButton(onClick = {
+                        SharedPreferencesManager.clearPreferences(context)
+                        //go to StartActivity's Login Screen
+                        val intent = Intent(context, StartActivity::class.java)
+                        startActivity(context, intent, null)
+                    }, text = "로그아웃")
+
                     MediumRedButton(onClick = {
                                 try {
                                     buttonEnable = false
@@ -180,14 +188,6 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                                     println("An error occurred: ${e.message}")
                                 }
                             }, text = "프로필 저장", enable = buttonEnable)
-
-                    MediumRedButton(onClick = {
-                        SharedPreferencesManager.clearPreferences(context)
-                        //go to StartActivity's Login Screen
-                        val intent = Intent(context, StartActivity::class.java)
-                        startActivity(context, intent, null)
-                    }, text = "로그아웃")
-
                 }
             }
         }
