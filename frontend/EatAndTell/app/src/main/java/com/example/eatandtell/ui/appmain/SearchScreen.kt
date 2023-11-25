@@ -276,20 +276,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                             post = post,
                             viewModel = viewModel,
                             navHostController = navController,
-                            onDelete = { postToDelete ->
-                                postLists.remove(postToDelete)
-                            }
-                        ) { postToLike ->
-                            val index = postLists.indexOf(postToLike)
-                            if (index != -1) {
-                                val newLikeCount =
-                                    if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
-                                postLists[index] = postToLike.copy(
-                                    is_liked = !postToLike.is_liked,
-                                    like_count = newLikeCount
-                                )
-                            }
-                        }
+                        )
                     }
                 }
 

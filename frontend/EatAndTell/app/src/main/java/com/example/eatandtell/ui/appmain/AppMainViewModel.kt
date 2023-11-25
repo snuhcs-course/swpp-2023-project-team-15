@@ -348,12 +348,18 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         suspend fun toggleLike(post_id: Int) {
             val authorization = "Token $token"
             val response = apiRepository.toggleLike(authorization, post_id)
-            response.onSuccess { Log.d("toggle like", "success") }
+            response.onSuccess {
+                val index = posts.indexOfFirst { it.id == post_id }
+                if (index != -1) {
+                    val updatedPost = posts[index].let {
+                        it.copy(is_liked = !it.is_liked, like_count = it.like_count + if (it.is_liked) -1 else 1)
+                    }
+                    posts[index] = updatedPost
+                }
+                Log.d("toggle like", "success") }
             response.onFailure { e ->
                 Log.d("toggle like error", e.message ?: "Network error")
             }
-
-
         }
 
         suspend fun toggleFollow(user_id: Int):Boolean {
@@ -374,6 +380,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             val authorization = "Token $token"
             try {
                 val response = apiRepository.deletePost(authorization, post_id)
+                posts.removeAll { it.id == post_id }
                 Log.d("delete post", "success")
             } catch (e: Exception) {
                 Log.d("delete post error", e.message ?: "Network error")

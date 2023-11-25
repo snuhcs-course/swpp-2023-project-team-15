@@ -549,23 +549,7 @@ fun ProfileRow(viewModel: AppMainViewModel, userInfo: UserInfoDTO,navController:
                             post = post,
                             viewModel = viewModel,
                             navHostController = navController,
-                            onDelete = { postToDelete ->
-                                feedPosts.remove(postToDelete)
-                            }
-
-                        ) { postToLike ->
-                            val index = feedPosts.indexOf(postToLike)
-                            if (index != -1) {
-                                // Determine the new like count based on the current is_liked state
-                                val newLikeCount =
-                                    if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
-                                // Update the post with the new like state and count
-                                feedPosts[index] = postToLike.copy(
-                                    is_liked = !postToLike.is_liked,
-                                    like_count = newLikeCount
-                                )
-                            }
-                        }
+                        )
                         Divider(
                             color = PaleGray,
                             thickness = 1.dp,
