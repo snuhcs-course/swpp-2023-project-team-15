@@ -21,6 +21,7 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -65,29 +66,17 @@ class ProfileScreenFactory: IProfileScreenFactory {
         navController: NavHostController,
         userId: Int? = null
     ) {
-//        val feedPosts = remember { mutableStateListOf<PostDTO>() }
-//        var myInfo by remember { mutableStateOf(UserInfoDTO(0, "", "", "", listOf(), false, 0, 0)) }
-//        var selectedTab by remember { mutableStateOf("MY") }
-//        var loading by remember { mutableStateOf(1) }
-        // loading == 1: 전체 로딩
-        // loading == 2: 하위 피드만 재로딩
-        // loading == 0: 로딩 안함
-//        val uploadMessage by viewModel.uploadStatus.observeAsState()
-//        LaunchedEffect(key1 = uploadMessage){
-//            uploadMessage?.let{
-//                showToast(context,it)
-//            }
-//        }
 
         var lazyListState = rememberLazyListState()
         val coroutineScope = rememberCoroutineScope()
 
         Log.d("navigateToDestination", "lazylist in MyProfile: ${lazyListState}")
 
-        val feedPosts = viewModel.profilePosts
-        val myInfo = viewModel.myInfo.value
+        val feedPosts by viewModel.profilePosts.collectAsState()
+        val myInfo by viewModel.myInfo.collectAsState()
         var loading by remember { mutableStateOf(1) } // Consider making this state part of the ViewModel too
         var selectedTab by remember { mutableStateOf("MY") }
+        val loadError by viewModel.loadError.collectAsState() // Observing StateFlow for error
 
         LaunchedEffect(selectedTab, loading) {
             if (loading != 0) {
@@ -96,10 +85,10 @@ class ProfileScreenFactory: IProfileScreenFactory {
             }
         }
 
-        LaunchedEffect(viewModel.loadError) {
-            viewModel.loadError.value?.let { error ->
+        LaunchedEffect(loadError) {
+            loadError?.let { error ->
                 showToast(context, error)
-                viewModel.loadError.value = null // Reset the error state after showing the toast
+                viewModel.resetLoadError() // Reset error via ViewModel method
             }
         }
 
@@ -240,43 +229,38 @@ class ProfileScreenFactory: IProfileScreenFactory {
         navController: NavHostController,
         userId: Int? = null
     ) {
-        val userPosts = remember { mutableStateListOf<PostDTO>() }
-        var userInfo by remember {
-            mutableStateOf(
-                UserInfoDTO(
-                    0,
-                    "",
-                    "",
-                    "",
-                    listOf(),
-                    false,
-                    0,
-                    0
-                )
-            )
-        }
-        var loading by remember { mutableStateOf(true) } //이때는 유저 프로필까지 가져와야 한다.
+//        val userPosts = remember { mutableStateListOf<PostDTO>() }
+//        var userInfo by remember {
+//            mutableStateOf(
+//                UserInfoDTO(
+//                    0,
+//                    "",
+//                    "",
+//                    "",
+//                    listOf(),
+//                    false,
+//                    0,
+//                    0
+//                )
+//            )
+//        }
+        val userPosts by viewModel.userPosts.collectAsState()
+        val userInfo by viewModel.userInfo.collectAsState()
+        val loading by viewModel.loading.collectAsState()
+        val loadError by viewModel.loadError.collectAsState() // Observing StateFlow for error
         var lazyListState = rememberLazyListState()
         val coroutineScope = rememberCoroutineScope()
 
 
-        LaunchedEffect(loading) {
-            try {
-                viewModel.getUserFeed(
-                    userId = userId,
-                    onSuccess = { info, posts ->
-                        userInfo= info
-                        userPosts.clear()
-                        userPosts.addAll(posts)
-                    }
-                )
-                loading = false
-            } catch (e: Exception) {
-                if (e !is CancellationException) { // 유저가 너무 빨리 화면을 옮겨다니는 경우에는 CancellationException이 발생할 수 있지만, 서버 에러가 아니라서 패스
-                    loading = false
-                    println("feed load error $e")
-                    showToast(context, "유저 피드 로딩에 실패하였습니다 $e")
-                }
+        // Load user posts once when userId changes
+        LaunchedEffect(userId) {
+            viewModel.loadUserPosts(userId)
+        }
+
+        LaunchedEffect(loadError) {
+            loadError?.let { error ->
+                showToast(context, error)
+                viewModel.resetLoadError()
             }
         }
 
@@ -311,12 +295,6 @@ class ProfileScreenFactory: IProfileScreenFactory {
                         context = context,
                         navController = navController,
                         onClick = {
-                            val followerCount =
-                                if (userInfo.is_followed) userInfo.follower_count - 1 else userInfo.follower_count + 1
-                            userInfo = userInfo.copy(
-                                is_followed = !userInfo.is_followed,
-                                follower_count = followerCount
-                            )
                             coroutineScope.launch {
                                 viewModel.toggleFollow(userInfo.id)
                             }

@@ -25,6 +25,7 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,13 +48,12 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
-//    var feedPosts = remember { mutableStateListOf<PostDTO>() }
-    val feedPosts = viewModel.homePosts // Directly use the mutable state list
-    var loading by remember { viewModel.isLoading }
+    val feedPosts by viewModel.homePosts.collectAsState(initial = emptyList()) // Collect as state
+    val loading by viewModel.loading.collectAsState()
     var lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     var selectedTab by remember { mutableStateOf("추천") }
-    val loadError by remember { viewModel.loadError }
+    val loadError by viewModel.loadError.collectAsState() // Observing StateFlow for error
 
     Log.d("navigateToDestination", "lazylist in Home: ${lazyListState}")
 
@@ -64,7 +64,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
     LaunchedEffect(loadError) {
         loadError?.let { error ->
             showToast(context, error)
-            viewModel.loadError.value = null // Reset the error state after showing the toast
+            viewModel.resetLoadError() // Reset error via ViewModel method
         }
     }
 
@@ -94,14 +94,14 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
                 Tab(
                     text = { Text("추천") },
                     selected = selectedTab == "추천",
-                    onClick = { selectedTab = "추천"; loading = true },
+                    onClick = { selectedTab = "추천"},
                     selectedContentColor = MainColor,
                     unselectedContentColor = Gray,
                 )
                 Tab(
                     text = { Text("팔로잉") },
                     selected = selectedTab == "팔로잉",
-                    onClick = { selectedTab = "팔로잉"; loading = true },
+                    onClick = { selectedTab = "팔로잉"},
                     selectedContentColor = MainColor,
                     unselectedContentColor = Gray,
                 )

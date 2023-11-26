@@ -20,6 +20,8 @@ import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -39,14 +41,26 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     private val _tagUpdateStatus = MutableLiveData<String>()
     val tagUpdateStatus: LiveData<String> = _tagUpdateStatus
 
-    val homePosts = mutableStateListOf<PostDTO>()
-    val isLoading = mutableStateOf(true)
-    val loadError = mutableStateOf<String?>(null)
+    private val _homePosts = MutableStateFlow<List<PostDTO>>(listOf())
+    val homePosts = _homePosts.asStateFlow()
+    private val _loadError = MutableStateFlow<String?>(null)
+    val loadError = _loadError.asStateFlow()
 
-    // Define state holders
-    val profilePosts = mutableStateListOf<PostDTO>()
-    val myInfo = mutableStateOf(UserInfoDTO(0, "", "", "", listOf(), false, 0, 0))
-    val loading = mutableStateOf(false)
+    private val _profilePosts = MutableStateFlow<List<PostDTO>>(listOf())
+    val profilePosts = _profilePosts.asStateFlow()
+
+    private val _myInfo = MutableStateFlow(UserInfoDTO(0, "", "", "", listOf(), false, 0, 0))
+    val myInfo = _myInfo.asStateFlow()
+
+    private val _loading = MutableStateFlow(true)
+    val loading = _loading.asStateFlow()
+
+    private val _userInfo = MutableStateFlow(UserInfoDTO(0, "", "", "", listOf(), false, 0, 0))
+    val userInfo = _userInfo.asStateFlow()
+    private val _userPosts = MutableStateFlow<List<PostDTO>>(listOf())
+    val userPosts = _userPosts.asStateFlow()
+
+
 
     var myProfile = UserDTO(0, "", "", "", listOf())
 
@@ -77,38 +91,59 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
     suspend fun loadHomePosts(selectedTab: String) {
             try {
-                isLoading.value = true
+                _loading.value = true
                 if (selectedTab == "추천") {
                     getPersonalizedPosts { fetchedPosts ->
-                        homePosts.clear()
-                        homePosts.addAll(fetchedPosts)
+                        _homePosts.value = fetchedPosts
                     }
                 } else {
                     getFollowingPosts { fetchedPosts ->
-                        homePosts.clear()
-                        homePosts.addAll(fetchedPosts)
+                        _homePosts.value = fetchedPosts
                     }
                 }
             } catch (e: Exception) {
-                loadError.value = "홈 피드 로딩에 실패하였습니다"
+                _loadError.value = "홈 피드 로딩에 실패하였습니다"
             } finally {
-                isLoading.value = false
+                _loading.value = false
             }
     }
 
+    // Inside AppMainViewModel
+
+    suspend fun loadUserPosts(userId: Int?) {
+        try {
+            _loading.value = true // Start loading
+            getUserFeed(
+                userId = userId,
+                onSuccess = { userInfo, userPosts ->
+                    _userInfo.value = userInfo // Update user information
+                    _userPosts.value = userPosts // Update user posts
+                }
+            )
+        } catch (e: Exception) {
+            if (e !is CancellationException) {
+                _loadError.value = "유저 피드 로딩에 실패하였습니다"
+            }
+        } finally {
+            _loading.value = false // End loading
+        }
+    }
+
+
+
     suspend fun loadProfileData(userId: Int?, loadType: Int, selectedTab: String) {
         try {
-            isLoading.value = true
+            _loading.value = true // Update StateFlow
             when (loadType) {
                 1 -> loadUserFeed(userId)
                 2 -> if (selectedTab == "MY") loadUserFeed(userId) else loadLikedFeed()
             }
         } catch (e: Exception) {
             if (e !is CancellationException) {
-                loadError.value = "유저 피드 로딩에 실패하였습니다"
+                _loadError.value = "유저 피드 로딩에 실패하였습니다"
             }
         } finally {
-            isLoading.value = false
+            _loading.value = false
         }
     }
 
@@ -117,9 +152,8 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             getUserFeed(
                 userId = userId,
                 onSuccess = { info, posts ->
-                    myInfo.value = info
-                    profilePosts.clear()
-                    profilePosts.addAll(posts)
+                    _myInfo.value = info
+                    _profilePosts.value = posts
                 }
             )
     }
@@ -128,10 +162,13 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     suspend fun loadLikedFeed() {
             getLikedFeed (
                 onSuccess = { posts ->
-                    profilePosts.clear()
-                    profilePosts.addAll(posts)
+                    _profilePosts.value = posts
                 }
             )
+    }
+
+    fun resetLoadError() {
+        _loadError.value = null
     }
 
 
@@ -390,48 +427,51 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             val response = apiRepository.toggleLike(authorization, post_id)
             response.onSuccess {
                 // Update post in all relevant lists
-                updatePostInList(homePosts, post_id)
-                updatePostInList(profilePosts, post_id)
+                updatePostInList(_homePosts, post_id)
+                updatePostInList(_profilePosts, post_id)
                 Log.d("toggle like", "success") }
             response.onFailure { e ->
                 Log.d("toggle like error", e.message ?: "Network error")
             }
         }
-    private fun updatePostInList(postsList: MutableList<PostDTO>, postId: Int) {
-        val index = postsList.indexOfFirst { it.id == postId }
-        if (index != -1) {
-            val post = postsList[index]
-            val updatedPost = post.copy(is_liked = !post.is_liked, like_count = post.like_count + if (post.is_liked) -1 else 1)
-            postsList[index] = updatedPost
+    private fun updatePostInList(postsFlow: MutableStateFlow<List<PostDTO>>, postId: Int) {
+        val updatedPosts = postsFlow.value.map { post ->
+            if (post.id == postId) post.copy(is_liked = !post.is_liked, like_count = post.like_count + if (post.is_liked) -1 else 1) else post
         }
+        postsFlow.value = updatedPosts
     }
 
-        suspend fun toggleFollow(user_id: Int):Boolean {
+
+        suspend fun toggleFollow(userId: Int){
             val authorization = "Token $token"
-            return try {
-                val response = apiRepository.toggleFollow(authorization, user_id)
+            val response = apiRepository.toggleFollow(authorization, userId)
+            response.onSuccess {
+                val updatedUserInfo = userInfo.value.copy(
+                    is_followed = !userInfo.value.is_followed,
+                    follower_count = userInfo.value.follower_count + if (userInfo.value.is_followed) -1 else 1
+                )
+                _userInfo.value = updatedUserInfo // Assuming _userInfo is the MutableStateFlow backing userInfo StateFlow
                 Log.d("toggle follow", "success")
-                true
-            } catch (e: Exception) {
-                Log.d("toggle follow error", e.message ?: "Network error")
-                false
             }
-        }
+            response.onFailure { e ->
+                Log.d("toggle follow error", e.message ?: "Network error")
+            }
+    }
 
 
-
-        suspend fun deletePost(post_id: Int) {
+        suspend fun deletePost(postId: Int) {
             val authorization = "Token $token"
             try {
-                val response = apiRepository.deletePost(authorization, post_id)
-                homePosts.removeAll { it.id == post_id }
-                profilePosts.removeAll { it.id == post_id }
+                apiRepository.deletePost(authorization, postId)
+                val updatedHomePosts = homePosts.value.filter { it.id != postId }
+                _homePosts.value = updatedHomePosts
+                val updatedProfilePosts = profilePosts.value.filter { it.id != postId }
+                _profilePosts.value = updatedProfilePosts
                 Log.d("delete post", "success")
             } catch (e: Exception) {
                 Log.d("delete post error", e.message ?: "Network error")
             }
         }
-
         suspend fun getMyProfile() {
             val authorization = "Token $token"
 
