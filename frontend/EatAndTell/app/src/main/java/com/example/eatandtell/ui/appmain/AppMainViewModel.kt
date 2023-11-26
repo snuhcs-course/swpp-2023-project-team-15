@@ -39,10 +39,14 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     private val _tagUpdateStatus = MutableLiveData<String>()
     val tagUpdateStatus: LiveData<String> = _tagUpdateStatus
 
-    val posts = mutableStateListOf<PostDTO>()
+    val homePosts = mutableStateListOf<PostDTO>()
     val isLoading = mutableStateOf(true)
     val loadError = mutableStateOf<String?>(null)
 
+    // Define state holders
+    val profilePosts = mutableStateListOf<PostDTO>()
+    val myInfo = mutableStateOf(UserInfoDTO(0, "", "", "", listOf(), false, 0, 0))
+    val loading = mutableStateOf(false)
 
     var myProfile = UserDTO(0, "", "", "", listOf())
 
@@ -71,19 +75,18 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     // Inside AppMainViewModel
 
 
-    fun loadPosts(selectedTab: String) {
-        viewModelScope.launch {
+    suspend fun loadHomePosts(selectedTab: String) {
             try {
                 isLoading.value = true
                 if (selectedTab == "추천") {
                     getPersonalizedPosts { fetchedPosts ->
-                        posts.clear()
-                        posts.addAll(fetchedPosts)
+                        homePosts.clear()
+                        homePosts.addAll(fetchedPosts)
                     }
                 } else {
                     getFollowingPosts { fetchedPosts ->
-                        posts.clear()
-                        posts.addAll(fetchedPosts)
+                        homePosts.clear()
+                        homePosts.addAll(fetchedPosts)
                     }
                 }
             } catch (e: Exception) {
@@ -91,7 +94,44 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             } finally {
                 isLoading.value = false
             }
+    }
+
+    suspend fun loadProfileData(userId: Int?, loadType: Int, selectedTab: String) {
+        try {
+            isLoading.value = true
+            when (loadType) {
+                1 -> loadUserFeed(userId)
+                2 -> if (selectedTab == "MY") loadUserFeed(userId) else loadLikedFeed()
+            }
+        } catch (e: Exception) {
+            if (e !is CancellationException) {
+                loadError.value = "유저 피드 로딩에 실패하였습니다"
+            }
+        } finally {
+            isLoading.value = false
         }
+    }
+
+    // Load user feed
+    suspend fun loadUserFeed(userId: Int?) {
+            getUserFeed(
+                userId = userId,
+                onSuccess = { info, posts ->
+                    myInfo.value = info
+                    profilePosts.clear()
+                    profilePosts.addAll(posts)
+                }
+            )
+    }
+
+    // Load user feed
+    suspend fun loadLikedFeed() {
+            getLikedFeed (
+                onSuccess = { posts ->
+                    profilePosts.clear()
+                    profilePosts.addAll(posts)
+                }
+            )
     }
 
 
@@ -349,18 +389,22 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             val authorization = "Token $token"
             val response = apiRepository.toggleLike(authorization, post_id)
             response.onSuccess {
-                val index = posts.indexOfFirst { it.id == post_id }
-                if (index != -1) {
-                    val updatedPost = posts[index].let {
-                        it.copy(is_liked = !it.is_liked, like_count = it.like_count + if (it.is_liked) -1 else 1)
-                    }
-                    posts[index] = updatedPost
-                }
+                // Update post in all relevant lists
+                updatePostInList(homePosts, post_id)
+                updatePostInList(profilePosts, post_id)
                 Log.d("toggle like", "success") }
             response.onFailure { e ->
                 Log.d("toggle like error", e.message ?: "Network error")
             }
         }
+    private fun updatePostInList(postsList: MutableList<PostDTO>, postId: Int) {
+        val index = postsList.indexOfFirst { it.id == postId }
+        if (index != -1) {
+            val post = postsList[index]
+            val updatedPost = post.copy(is_liked = !post.is_liked, like_count = post.like_count + if (post.is_liked) -1 else 1)
+            postsList[index] = updatedPost
+        }
+    }
 
         suspend fun toggleFollow(user_id: Int):Boolean {
             val authorization = "Token $token"
@@ -380,7 +424,8 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             val authorization = "Token $token"
             try {
                 val response = apiRepository.deletePost(authorization, post_id)
-                posts.removeAll { it.id == post_id }
+                homePosts.removeAll { it.id == post_id }
+                profilePosts.removeAll { it.id == post_id }
                 Log.d("delete post", "success")
             } catch (e: Exception) {
                 Log.d("delete post error", e.message ?: "Network error")

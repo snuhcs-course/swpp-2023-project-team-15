@@ -26,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -44,13 +43,12 @@ import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.theme.Gray
 import com.example.eatandtell.ui.theme.MainColor
 import com.example.eatandtell.ui.theme.PaleGray
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
 //    var feedPosts = remember { mutableStateListOf<PostDTO>() }
-    val feedPosts = viewModel.posts // Directly use the mutable state list
+    val feedPosts = viewModel.homePosts // Directly use the mutable state list
     var loading by remember { viewModel.isLoading }
     var lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -61,7 +59,7 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
 
 
     LaunchedEffect(selectedTab) {
-        viewModel.loadPosts(selectedTab)
+        viewModel.loadHomePosts(selectedTab)
     }
     LaunchedEffect(loadError) {
         loadError?.let { error ->
@@ -78,9 +76,6 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
             .padding(horizontal = 20.dp),
     ) {
         item { Spacer(modifier = Modifier.height(8.dp)) }
-//            items(feedPosts) { post ->
-//                HomePost(post, viewModel = viewModel, navHostController = navHostController)
-//            }
 
         item {
             TabRow(
@@ -134,26 +129,6 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
         }
         else {
             items(items = feedPosts, key = { it.id }) { post ->
-//                HomePost(
-//                    post = post,
-//                    viewModel = viewModel,
-//                    navHostController = navHostController,
-//                    onDelete = { postToDelete ->
-//                        feedPosts.remove(postToDelete)
-//                    }
-//                ) { postToLike ->
-//                    val index = feedPosts.indexOf(postToLike)
-//                    if (index != -1) {
-//                        // Determine the new like count based on the current is_liked state
-//                        val newLikeCount =
-//                            if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
-//                        // Update the post with the new like state and count
-//                        feedPosts[index] = postToLike.copy(
-//                            is_liked = !postToLike.is_liked,
-//                            like_count = newLikeCount
-//                        )
-//                    }
-//                }
                 HomePost(
                     post = post,
                     viewModel = viewModel,
@@ -186,8 +161,6 @@ fun HomePost(
     post: PostDTO,
     viewModel: AppMainViewModel,
     navHostController: NavHostController,
-//    onDelete: (PostDTO) -> Unit,
-//    onLike: (PostDTO) -> Unit
 ) {
     val user = post.user
     val coroutinescope = rememberCoroutineScope()
@@ -215,7 +188,6 @@ fun HomePost(
             Post(
                 post = post,
                 onHeartClick = {
-//                    onLike(post)
                     coroutinescope.launch {
                         viewModel.toggleLike(post.id)
 
@@ -224,7 +196,6 @@ fun HomePost(
                 canDelete = (user.id == viewModel.myProfile.id),
                 onDelete = {
                     deleted = true
-//                    onDelete(post)
                     coroutinescope.launch {
                         viewModel.deletePost(post.id)
                     }
