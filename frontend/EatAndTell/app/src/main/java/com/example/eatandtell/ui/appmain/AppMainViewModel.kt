@@ -536,6 +536,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             // Update post in all relevant lists
             updatePostInList(_homePosts, post_id)
             updatePostInList(_profilePosts, post_id)
+            updatePostInList(_userPosts,post_id)
             Log.d("toggle like", "success") }
         response.onFailure { e ->
             Log.d("toggle like error", e.message ?: "Network error")
