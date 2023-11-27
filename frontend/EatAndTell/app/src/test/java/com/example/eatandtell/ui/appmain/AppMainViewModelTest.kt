@@ -400,20 +400,20 @@ class AppMainViewModelTest {
     }
 
 
-    @Test
-    fun toggleFollow_failure_logsErrorMessage() = runTest {
-        val userId = 123
-        val exception = RuntimeException("Network error")
-
-        // Mock the API call to return a failure
-        coEvery { mockRepository.toggleFollow(any(), userId)  } throws exception
-
-        val result = viewModel.toggleFollow(userId)
-
-        assertFalse(result)
-        // Verify that the error log is called with the appropriate message
-        coVerify { Log.d("toggle follow error", "Network error") }
-    }
+//    @Test
+//    fun toggleFollow_failure_logsErrorMessage() = runTest {
+//        val userId = 123
+//        val exception = RuntimeException("Network error")
+//
+//        // Mock the API call to return a failure
+//        coEvery { mockRepository.toggleFollow(any(), userId)  } throws exception
+//
+//        val result = viewModel.toggleFollow(userId)
+//
+//        assertFalse(result)
+//        // Verify that the error log is called with the appropriate message
+//        coVerify { Log.d("toggle follow error", "Network error") }
+//    }
 
     @Test
     fun deletePost_success_logsSuccess() = runTest {

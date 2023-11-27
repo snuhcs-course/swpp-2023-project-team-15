@@ -69,10 +69,23 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     val followings: StateFlow<List<UserDTO>> = _followings.asStateFlow()
 
 
+    // SearchScreen
+
+    private val _userLists = MutableStateFlow<List<UserDTO>>(emptyList())
+    val userLists = _userLists.asStateFlow()
+    private val _userListsByTags = MutableStateFlow<List<UserDTO>>(emptyList())
+    val userListsByTags = _userListsByTags.asStateFlow()
+    private val _postLists = MutableStateFlow<List<PostDTO>>(listOf())
+    val postLists = _postLists.asStateFlow()
+    private val _topTags = MutableStateFlow<List<TopTag>>(emptyList())
+    val topTags = _topTags.asStateFlow()
+    // Adding LiveData for error messages
+    private val _searchError = MutableLiveData<String?>()
+    val searchError: LiveData<String?> = _searchError
     var myProfile = UserDTO(0, "", "", "", listOf())
 
     var photoUris = mutableStateListOf<Uri>()// store image uri
-        private set
+    private set
     val reviewDescription = mutableStateOf("")
     fun initialize(token: String?) {
         this.token = token
@@ -97,22 +110,22 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
 
     suspend fun loadHomePosts(selectedTab: String) {
-            try {
-                _loading.value = true
-                if (selectedTab == "추천") {
-                    getPersonalizedPosts { fetchedPosts ->
-                        _homePosts.value = fetchedPosts
-                    }
-                } else {
-                    getFollowingPosts { fetchedPosts ->
-                        _homePosts.value = fetchedPosts
-                    }
+        try {
+            _loading.value = true
+            if (selectedTab == "추천") {
+                getPersonalizedPosts { fetchedPosts ->
+                    _homePosts.value = fetchedPosts
                 }
-            } catch (e: Exception) {
-                _loadError.value = "홈 피드 로딩에 실패하였습니다"
-            } finally {
-                _loading.value = false
+            } else {
+                getFollowingPosts { fetchedPosts ->
+                    _homePosts.value = fetchedPosts
+                }
             }
+        } catch (e: Exception) {
+            _loadError.value = "홈 피드 로딩에 실패하였습니다"
+        } finally {
+            _loading.value = false
+        }
     }
 
     // Inside AppMainViewModel
@@ -156,26 +169,101 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
     // Load user feed
     suspend fun loadUserFeed(userId: Int?) {
-            getUserFeed(
-                userId = userId,
-                onSuccess = { info, posts ->
-                    _myInfo.value = info
-                    _profilePosts.value = posts
-                }
-            )
+        getUserFeed(
+            userId = userId,
+            onSuccess = { info, posts ->
+                _myInfo.value = info
+                _profilePosts.value = posts
+            }
+        )
     }
 
     // Load user feed
     suspend fun loadLikedFeed() {
-            getLikedFeed (
-                onSuccess = { posts ->
-                    _profilePosts.value = posts
-                }
-            )
+        getLikedFeed (
+            onSuccess = { posts ->
+                _profilePosts.value = posts
+            }
+        )
     }
 
     fun resetLoadError() {
         _loadError.value = null
+    }
+
+
+    // Perform search based on selected type and search text
+    suspend fun performSearch(searchText: String, selectedButton: String) {
+        _loading.value = true
+        try {
+            if (searchText.isNotEmpty()){
+                _postLists.value = emptyList() // Clear post list
+                _userLists.value = emptyList() // Clear user list
+                _userListsByTags.value = emptyList() // Clear user list by tags
+                when (selectedButton) {
+                    "유저" -> handleUserSearch(searchText)
+                    "태그" -> handleTagSearch(searchText)
+                    "식당" -> handleRestaurantSearch(searchText)
+                }
+            }
+        } catch (e: CancellationException) {
+            // Handle CancellationException
+            Log.d("Search", "검색 작업이 취소되었습니다: ${e.message}")
+        } catch (e: Exception) {
+            // Handle general exceptions
+            Log.e("Search Error", "Failed to load search results: ${e.message}")
+            _searchError.postValue("search 로딩에 실패하였습니다")
+        } finally {
+            _loading.value = false
+        }
+    }
+    fun clearSearchError() {
+        _searchError.value = null
+    }
+    private suspend fun handleUserSearch(searchText: String) {
+        val response = apiRepository.getFilteredUsersByName("Token $token", searchText)
+        response.onSuccess { users ->
+            _userLists.value = users
+        }
+        response.onFailure { e ->
+            Log.e("Search Error", "User search failed: ${e.message}")
+        }
+        _loading.value = false
+    }
+
+
+    private suspend fun handleTagSearch(searchText: String) {
+        val response = apiRepository.getFilteredUsersByTag("Token $token", searchText)
+        response.onSuccess { users ->
+            _userListsByTags.value = users
+        }
+        response.onFailure { e ->
+            Log.e("Search Error", "Tag search failed: ${e.message}")
+        }
+        _loading.value = false
+    }
+
+    private suspend fun handleRestaurantSearch(searchText: String) {
+        val response = apiRepository.getFilteredByRestaurants("Token $token", searchText)
+        response.onSuccess { posts ->
+            _postLists.value = posts.data
+        }
+        response.onFailure { e ->
+            Log.e("Search Error", "Restaurant search failed: ${e.message}")
+        }
+        _loading.value = false
+    }
+
+    fun fetchTopTags() {
+        viewModelScope.launch {
+            val response = apiRepository.getTopTags("Token $token")
+            response.onSuccess { tags ->
+                _topTags.value = tags.take(5) // Update the MutableStateFlow
+            }
+            response.onFailure { e ->
+                Log.e("Search Error", "Failed to load top tags: ${e.message}")
+            }
+        }
     }
 
 
@@ -239,120 +327,120 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     }
 
 
-        suspend fun uploadPhotosAndEditProfile(
+    suspend fun uploadPhotosAndEditProfile(
 
-            photoPaths: List<Uri>, //실제로는 length 1짜리
-            description: String,
-            context: Context,
-            org_avatar_url: String,
-        ) {
+        photoPaths: List<Uri>, //실제로는 length 1짜리
+        description: String,
+        context: Context,
+        org_avatar_url: String,
+    ) {
 
 
-                Log.d("edit profile photoPaths: ", photoPaths.toString())
-                val photoUrls = mutableListOf<String>()
-                val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it, context) }
-                for (byteArray in photoByteArrays) {
-                    val requestBody: RequestBody =
-                        byteArray.toRequestBody("image/*".toMediaTypeOrNull())
-                    val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData(
-                        "image",
-                        "this_name_does_not_matter.jpg",
-                        requestBody
-                    )
-                    try {
-                        val imageUrl = getImageURL(fileToUpload)
-                        photoUrls.add(imageUrl)
-                    } catch (e: Exception) {
-                        Log.d("Image Upload Error", e.message ?: "Upload failed")
-                        _editStatus.postValue("프로필 편집에 실패했습니다")
-
-                    }
-                }
-
-                try {
-                    Log.d("edit profile", description)
-                    Log.d("edit profile", photoUrls.toString())
-                    Log.d("edit profile", org_avatar_url)
-                    val url = if (photoUrls.isEmpty()) org_avatar_url else photoUrls[0]
-                    val profileData =
-                        EditProfileRequest(description = description, avatar_url = url)
-                    Log.d("edit profile", profileData.toString())
-                    editProfile(profileData)
-                    _editStatus.postValue("프로필이 편집되었습니다")
-                    myProfile = UserDTO(myProfile.id, myProfile.username, description, url, myProfile.tags) //프로필 편집 후 myProfile 업데이트
-                } catch (e: Exception) {
-                    // Handle exceptions, e.g., from network calls, here
-                    if (e !is CancellationException) {
-                        Log.d("edit profile error", e.message ?: "Network error")
-
-                        _editStatus.postValue("프로필 편집에 실패했습니다")
-                    } else {
-                        Log.d("edit profile error", "cancellation exception")
-//                        _editStatus.postValue("프로필이 편집되었습니다")
-                        _editStatus.postValue("프로필 편집에 실패했습니다")
-
-                    }
-                }
-
-        }
-
-        private suspend fun uploadPost(postData: UploadPostRequest) {
-            val authorization = "Token $token"
-            val response= apiRepository.uploadPost(authorization, postData)
-            response.onSuccess {
-
-            }
-            response.onFailure{e->
-                val errorMessage = e.message ?: "Network error"
-                Log.d("upload post error", errorMessage)
-                throw e // rethrow the exception to be caught in the calling function
-
-            }
-
-        }
-
-        private suspend fun editProfile(profileData: EditProfileRequest) {
-            val authorization = "Token $token"
-
+        Log.d("edit profile photoPaths: ", photoPaths.toString())
+        val photoUrls = mutableListOf<String>()
+        val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it, context) }
+        for (byteArray in photoByteArrays) {
+            val requestBody: RequestBody =
+                byteArray.toRequestBody("image/*".toMediaTypeOrNull())
+            val fileToUpload: MultipartBody.Part = MultipartBody.Part.createFormData(
+                "image",
+                "this_name_does_not_matter.jpg",
+                requestBody
+            )
             try {
-                apiRepository.editProfile(authorization, profileData)
+                val imageUrl = getImageURL(fileToUpload)
+                photoUrls.add(imageUrl)
             } catch (e: Exception) {
-                val errorMessage = e.message ?: "Network error"
-                Log.d("edit profile error", errorMessage)
-                throw e // rethrow the exception to be caught in the calling function
+                Log.d("Image Upload Error", e.message ?: "Upload failed")
+                _editStatus.postValue("프로필 편집에 실패했습니다")
+
             }
         }
 
-        private suspend fun getImageURL(fileToUpload: MultipartBody.Part?): String {
-            val authorization = "Token $token"
-            val response = apiRepository.getImageURL(
-                authorization,
-                fileToUpload
-            ) // Assuming this is a suspend function call
-            var get_img_url: String = ""
-            response.onSuccess { response ->
-                get_img_url = response.image_url
+        try {
+            Log.d("edit profile", description)
+            Log.d("edit profile", photoUrls.toString())
+            Log.d("edit profile", org_avatar_url)
+            val url = if (photoUrls.isEmpty()) org_avatar_url else photoUrls[0]
+            val profileData =
+                EditProfileRequest(description = description, avatar_url = url)
+            Log.d("edit profile", profileData.toString())
+            editProfile(profileData)
+            _editStatus.postValue("프로필이 편집되었습니다")
+            myProfile = UserDTO(myProfile.id, myProfile.username, description, url, myProfile.tags) //프로필 편집 후 myProfile 업데이트
+        } catch (e: Exception) {
+            // Handle exceptions, e.g., from network calls, here
+            if (e !is CancellationException) {
+                Log.d("edit profile error", e.message ?: "Network error")
+
+                _editStatus.postValue("프로필 편집에 실패했습니다")
+            } else {
+                Log.d("edit profile error", "cancellation exception")
+//                        _editStatus.postValue("프로필이 편집되었습니다")
+                _editStatus.postValue("프로필 편집에 실패했습니다")
+
             }
-            response.onFailure { exception ->
-                val errorMessage = exception.message ?: "Network error"
-                Log.d("image_url_error", errorMessage)
-                get_img_url = errorMessage
-            }
-            return get_img_url
         }
 
-        suspend fun getAllPosts(onSuccess: (List<PostDTO>) -> Unit) {
-            val authorization = "Token $token"
-            val response = apiRepository.getAllPosts(authorization)
-            response.onSuccess { response ->
-                onSuccess(response.data)
+    }
 
-            }
-            response.onFailure { message ->
-                throw message
-            }
+    private suspend fun uploadPost(postData: UploadPostRequest) {
+        val authorization = "Token $token"
+        val response= apiRepository.uploadPost(authorization, postData)
+        response.onSuccess {
 
         }
+        response.onFailure{e->
+            val errorMessage = e.message ?: "Network error"
+            Log.d("upload post error", errorMessage)
+            throw e // rethrow the exception to be caught in the calling function
+
+        }
+
+    }
+
+    private suspend fun editProfile(profileData: EditProfileRequest) {
+        val authorization = "Token $token"
+
+        try {
+            apiRepository.editProfile(authorization, profileData)
+        } catch (e: Exception) {
+            val errorMessage = e.message ?: "Network error"
+            Log.d("edit profile error", errorMessage)
+            throw e // rethrow the exception to be caught in the calling function
+        }
+    }
+
+    private suspend fun getImageURL(fileToUpload: MultipartBody.Part?): String {
+        val authorization = "Token $token"
+        val response = apiRepository.getImageURL(
+            authorization,
+            fileToUpload
+        ) // Assuming this is a suspend function call
+        var get_img_url: String = ""
+        response.onSuccess { response ->
+            get_img_url = response.image_url
+        }
+        response.onFailure { exception ->
+            val errorMessage = exception.message ?: "Network error"
+            Log.d("image_url_error", errorMessage)
+            get_img_url = errorMessage
+        }
+        return get_img_url
+    }
+
+    suspend fun getAllPosts(onSuccess: (List<PostDTO>) -> Unit) {
+        val authorization = "Token $token"
+        val response = apiRepository.getAllPosts(authorization)
+        response.onSuccess { response ->
+            onSuccess(response.data)
+
+        }
+        response.onFailure { message ->
+            throw message
+        }
+
+    }
 
     suspend fun getPersonalizedPosts(onSuccess: (List<PostDTO>) -> Unit) {
         val authorization = "Token $token"
@@ -378,69 +466,69 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         }
     }
 
-        suspend fun getLikedFeed(onSuccess: (List<PostDTO>) -> Unit) {
-            val authorization = "Token $token"
-            val response = apiRepository.getLikedFeed(authorization)
-            response.onSuccess{response->
-                onSuccess(response)
-            }
-            response.onFailure {e->
-                throw e
-            }
-
+    suspend fun getLikedFeed(onSuccess: (List<PostDTO>) -> Unit) {
+        val authorization = "Token $token"
+        val response = apiRepository.getLikedFeed(authorization)
+        response.onSuccess{response->
+            onSuccess(response)
+        }
+        response.onFailure {e->
+            throw e
         }
 
+    }
 
-        suspend fun getUserFeed(
-            userId: Int? = null,
-            onSuccess: (UserInfoDTO, List<PostDTO>) -> Unit
-        ) {
-            val authorization = "Token $token"
 
-            val response = (
-                    if (userId != null) apiRepository.getUserFeed(authorization, userId)
-                    else apiRepository.getMyFeed(authorization)
-                    )
-            response.onSuccess { response ->
+    suspend fun getUserFeed(
+        userId: Int? = null,
+        onSuccess: (UserInfoDTO, List<PostDTO>) -> Unit
+    ) {
+        val authorization = "Token $token"
 
-                println("user feed response is")
-                println(response.tags)
-                val myInfo = UserInfoDTO(
-                    id = response.id,
-                    username = response.username,
-                    description = response.description,
-                    avatar_url = response.avatar_url,
-                    tags = response.tags,
-                    is_followed = response.is_followed,
-                    follower_count = response.follower_count,
-                    following_count = response.following_count,
+        val response = (
+                if (userId != null) apiRepository.getUserFeed(authorization, userId)
+                else apiRepository.getMyFeed(authorization)
                 )
-                val myPosts = response.posts ?: listOf() //posts가 null이라서 임시처리
-                println("get user feed success")
-                onSuccess(myInfo, myPosts)
+        response.onSuccess { response ->
 
-            }
-            response.onFailure { e ->
-                print("get user feed error")
-                println(e.message ?: "Network error")
-                throw e // rethrow the exception to be caught in the calling function
-            }
+            println("user feed response is")
+            println(response.tags)
+            val myInfo = UserInfoDTO(
+                id = response.id,
+                username = response.username,
+                description = response.description,
+                avatar_url = response.avatar_url,
+                tags = response.tags,
+                is_followed = response.is_followed,
+                follower_count = response.follower_count,
+                following_count = response.following_count,
+            )
+            val myPosts = response.posts ?: listOf() //posts가 null이라서 임시처리
+            println("get user feed success")
+            onSuccess(myInfo, myPosts)
 
         }
-
-
-        suspend fun toggleLike(post_id: Int) {
-            val authorization = "Token $token"
-            val response = apiRepository.toggleLike(authorization, post_id)
-            response.onSuccess {
-                // Update post in all relevant lists
-                updatePostInList(_homePosts, post_id)
-                updatePostInList(_profilePosts, post_id)
-                Log.d("toggle like", "success") }
-            response.onFailure { e ->
-                Log.d("toggle like error", e.message ?: "Network error")
-            }
+        response.onFailure { e ->
+            print("get user feed error")
+            println(e.message ?: "Network error")
+            throw e // rethrow the exception to be caught in the calling function
         }
+
+    }
+
+
+    suspend fun toggleLike(post_id: Int) {
+        val authorization = "Token $token"
+        val response = apiRepository.toggleLike(authorization, post_id)
+        response.onSuccess {
+            // Update post in all relevant lists
+            updatePostInList(_homePosts, post_id)
+            updatePostInList(_profilePosts, post_id)
+            Log.d("toggle like", "success") }
+        response.onFailure { e ->
+            Log.d("toggle like error", e.message ?: "Network error")
+        }
+    }
     private fun updatePostInList(postsFlow: MutableStateFlow<List<PostDTO>>, postId: Int) {
         val updatedPosts = postsFlow.value.map { post ->
             if (post.id == postId) post.copy(is_liked = !post.is_liked, like_count = post.like_count + if (post.is_liked) -1 else 1) else post
@@ -449,151 +537,153 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     }
 
 
-        suspend fun toggleFollow(userId: Int){
-            val authorization = "Token $token"
-            val response = apiRepository.toggleFollow(authorization, userId)
-            response.onSuccess {
-                val updatedUserInfo = userInfo.value.copy(
-                    is_followed = !userInfo.value.is_followed,
-                    follower_count = userInfo.value.follower_count + if (userInfo.value.is_followed) -1 else 1
-                )
-                _userInfo.value = updatedUserInfo // Assuming _userInfo is the MutableStateFlow backing userInfo StateFlow
-                Log.d("toggle follow", "success")
-            }
-            response.onFailure { e ->
-                Log.d("toggle follow error", e.message ?: "Network error")
-            }
+    suspend fun toggleFollow(userId: Int):Boolean{
+        val authorization = "Token $token"
+        val response = apiRepository.toggleFollow(authorization, userId)
+        response.onSuccess {
+            val updatedUserInfo = userInfo.value.copy(
+                is_followed = !userInfo.value.is_followed,
+                follower_count = userInfo.value.follower_count + if (userInfo.value.is_followed) -1 else 1
+            )
+            _userInfo.value = updatedUserInfo // Assuming _userInfo is the MutableStateFlow backing userInfo StateFlow
+            Log.d("toggle follow", "success")
+            return true
+        }
+        response.onFailure { e ->
+            Log.d("toggle follow error", e.message ?: "Network error")
+        }
+        return false
     }
 
 
-        suspend fun deletePost(postId: Int) {
-            val authorization = "Token $token"
-            try {
-                apiRepository.deletePost(authorization, postId)
-                val updatedHomePosts = homePosts.value.filter { it.id != postId }
-                _homePosts.value = updatedHomePosts
-                val updatedProfilePosts = profilePosts.value.filter { it.id != postId }
-                _profilePosts.value = updatedProfilePosts
-                Log.d("delete post", "success")
-            } catch (e: Exception) {
-                Log.d("delete post error", e.message ?: "Network error")
-            }
+    suspend fun deletePost(postId: Int) {
+        val authorization = "Token $token"
+        try {
+            apiRepository.deletePost(authorization, postId)
+            val updatedHomePosts = homePosts.value.filter { it.id != postId }
+            _homePosts.value = updatedHomePosts
+            val updatedProfilePosts = profilePosts.value.filter { it.id != postId }
+            _profilePosts.value = updatedProfilePosts
+            Log.d("delete post", "success")
+        } catch (e: Exception) {
+            Log.d("delete post error", e.message ?: "Network error")
         }
-        suspend fun getMyProfile() {
-            val authorization = "Token $token"
+    }
+    suspend fun getMyProfile() {
+        val authorization = "Token $token"
 
-            val response = apiRepository.getMyFeed(authorization)
+        val response = apiRepository.getMyFeed(authorization)
 
+        response.onSuccess { response ->
+
+            val myProf = UserDTO(
+                response.id,
+                response.username,
+                response.description,
+                response.avatar_url,
+                listOf()
+            )
+            val myFoll = listOf(
+                response.follower_count,
+                response.following_count,
+            )
+            Log.d("getMyProfile", "success")
+
+            myProfile = myProf
+        }
+        response.onFailure { e ->
+            Log.d("getMyProfile error", e.message ?: "Network error")
+            throw e
+        }
+
+    }
+
+
+    suspend fun getFilteredUsersByName(username: String, onSuccess: (List<UserDTO>) -> Unit) {
+        val authorization = "Token $token"
+        val response = apiRepository.getFilteredUsersByName(authorization, username)
+
+        response.onSuccess { response ->
+            //print response
+            println(response)
+            onSuccess(response)
+            Log.d("getFilteredUsersByName", "success")
+        }
+
+        response.onFailure { e ->
+            Log.d("getFilteredUsersByName error", e.message ?: "Network error")
+            throw e // rethrow the exception to be caught in the calling function
+        }
+
+    }
+
+    suspend fun getFilteredUsersByTag(tag: String, onSuccess: (List<UserDTO>) -> Unit) {
+        val authorization = "Token $token"
+        val response = apiRepository.getFilteredUsersByTag(authorization, tag)
+        response.onSuccess { response ->
+            onSuccess(response)
+            Log.d("getFilteredUsersByTag", "success")
+        }
+        response.onFailure { e ->
+            Log.d("getFilteredUsersByTag error", e.message ?: "Network error")
+            throw e // rethrow the exception to be caught in the calling function
+        }
+
+    }
+
+    suspend fun getFilteredByRestaurants(
+        restaurantName: String,
+        onSuccess: (List<PostDTO>) -> Unit
+    ) {
+        val authorization = "Token $token"
+        val response = apiRepository.getFilteredByRestaurants(authorization, restaurantName)
+
+        response.onSuccess { response ->
+            onSuccess(response.data)
+            Log.d("getFilteredByRestaurants", "success")
+        }
+        response.onFailure { e ->
+            Log.d("getFilteredByRestaurants error", e.message ?: "Network error")
+            throw e // rethrow the exception to be caught in the calling function
+        }
+
+    }
+
+    suspend fun getSearchedRest(
+        restaurantName: String,
+        x: String? = null,
+        y: String? = null
+    ): List<SearchedRestDTO> {
+        val authorization = "Token $token"
+        val response = apiRepository.getSearchedRest(authorization, restaurantName, x, y)
+        var result=listOf<SearchedRestDTO>()
+        response.onSuccess { response ->
+            Log.d("search rest", "success")
+            result= response.data
+        }
+        response.onFailure {e->
+            Log.d("search rest error", e.message ?: "Network error")
+            result= listOf()
+        }
+        return result
+
+    }
+
+    suspend fun refreshTags(onSuccess: (List<String>) -> Unit, context: Context) {
+        val authorization = "Token $token"
+        viewModelScope.launch {
+            val response = apiRepository.refreshTags(authorization)
             response.onSuccess { response ->
-
-                val myProf = UserDTO(
-                    response.id,
-                    response.username,
-                    response.description,
-                    response.avatar_url,
-                    listOf()
-                )
-                val myFoll = listOf(
-                    response.follower_count,
-                    response.following_count,
-                )
-                Log.d("getMyProfile", "success")
-
-                myProfile = myProf
+                onSuccess(response.user_tags)
+                Log.d("refresh tags", "success")
+                _tagUpdateStatus.postValue("태그가 업데이트되었습니다")
             }
             response.onFailure { e ->
-                Log.d("getMyProfile error", e.message ?: "Network error")
-                throw e
-            }
-
-        }
-
-
-        suspend fun getFilteredUsersByName(username: String, onSuccess: (List<UserDTO>) -> Unit) {
-            val authorization = "Token $token"
-            val response = apiRepository.getFilteredUsersByName(authorization, username)
-
-            response.onSuccess { response ->
-                //print response
-                println(response)
-                onSuccess(response)
-                Log.d("getFilteredUsersByName", "success")
-            }
-
-            response.onFailure { e ->
-                Log.d("getFilteredUsersByName error", e.message ?: "Network error")
-                throw e // rethrow the exception to be caught in the calling function
-            }
-
-        }
-
-        suspend fun getFilteredUsersByTag(tag: String, onSuccess: (List<UserDTO>) -> Unit) {
-            val authorization = "Token $token"
-            val response = apiRepository.getFilteredUsersByTag(authorization, tag)
-            response.onSuccess { response ->
-                onSuccess(response)
-                Log.d("getFilteredUsersByTag", "success")
-            }
-            response.onFailure { e ->
-                Log.d("getFilteredUsersByTag error", e.message ?: "Network error")
-                throw e // rethrow the exception to be caught in the calling function
-            }
-
-        }
-
-        suspend fun getFilteredByRestaurants(
-            restaurantName: String,
-            onSuccess: (List<PostDTO>) -> Unit
-        ) {
-            val authorization = "Token $token"
-            val response = apiRepository.getFilteredByRestaurants(authorization, restaurantName)
-
-            response.onSuccess { response ->
-                onSuccess(response.data)
-                Log.d("getFilteredByRestaurants", "success")
-            }
-            response.onFailure { e ->
-                Log.d("getFilteredByRestaurants error", e.message ?: "Network error")
-                throw e // rethrow the exception to be caught in the calling function
-            }
-
-        }
-
-        suspend fun getSearchedRest(
-            restaurantName: String,
-            x: String? = null,
-            y: String? = null
-        ): List<SearchedRestDTO> {
-            val authorization = "Token $token"
-            val response = apiRepository.getSearchedRest(authorization, restaurantName, x, y)
-            var result=listOf<SearchedRestDTO>()
-            response.onSuccess { response ->
-                Log.d("search rest", "success")
-                result= response.data
-            }
-            response.onFailure {e->
-                Log.d("search rest error", e.message ?: "Network error")
-                result= listOf()
-            }
-            return result
-
-        }
-
-        suspend fun refreshTags(onSuccess: (List<String>) -> Unit, context: Context) {
-            val authorization = "Token $token"
-            viewModelScope.launch {
-                val response = apiRepository.refreshTags(authorization)
-                response.onSuccess { response ->
-                    onSuccess(response.user_tags)
-                    Log.d("refresh tags", "success")
-                    _tagUpdateStatus.postValue("태그가 업데이트되었습니다")
-                }
-                response.onFailure { e ->
-                    Log.d("refresh tags error", e.message ?: "Network error")
-                    _tagUpdateStatus.postValue("태그 업데이트에 실패하였습니다")
-                }
+                Log.d("refresh tags error", e.message ?: "Network error")
+                _tagUpdateStatus.postValue("태그 업데이트에 실패하였습니다")
             }
         }
+    }
 
     suspend fun getTopTags(onSuccess: (List<TopTag>) -> Unit, onError: (String) -> Unit) {
         val authorization = "Token $token"
@@ -610,7 +700,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
     }
 
-//    suspend fun getFollowers(user_id:Int?=null, onSuccess: (List<UserDTO>) -> Unit){
+    //    suspend fun getFollowers(user_id:Int?=null, onSuccess: (List<UserDTO>) -> Unit){
 //        val authorization = "Token $token"
 //        val response = apiRepository.getFollowers(authorization,user_id)
 //        response.onSuccess { response->

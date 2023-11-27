@@ -24,10 +24,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -57,24 +60,26 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
     var searchText by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
     }
-    var userLists by remember { mutableStateOf(emptyList<UserDTO>()) }
 
-    var userListsByTags by remember { mutableStateOf(emptyList<UserDTO>()) }
+    val coroutineScope = rememberCoroutineScope()
 
-//    var postLists by remember { mutableStateOf(emptyList<PostDTO>()) }
-    val postLists = remember { mutableStateListOf<PostDTO>() }
-
-    var loading by remember { mutableStateOf(false) }
 
     var triggerSearch by remember { mutableStateOf(false) }
 
-    var topTags by remember { mutableStateOf<List<TopTag>>(emptyList()) }
 
     var selectedButton: String by remember { mutableStateOf("유저") }
 
     val debouncePeriod = 300L
 
     val searchJob = remember { mutableStateOf<Job?>(null) }
+
+    // Observing state changes
+
+    val userLists by viewModel.userLists.collectAsState()
+    val userListsByTags by viewModel.userListsByTags.collectAsState()
+    val postLists by viewModel.postLists.collectAsState()
+    val loading by viewModel.loading.collectAsState()
+    val topTags by viewModel.topTags.collectAsState()
 
     fun hideKeyboard() {
         val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -136,15 +141,8 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        LaunchedEffect(Unit) { // LaunchedEffect with Unit to run only once
-            viewModel.getTopTags(
-                onSuccess = { tags ->
-                    topTags = tags.take(5) // Take the first five tags
-                },
-                onError = { errorMessage ->
-                    showToast(context, "Failed to load top tags: $errorMessage")
-                }
-            )
+        LaunchedEffect(Unit) {
+            viewModel.fetchTopTags()
         }
 
         // show defaultTags when selectedbutton is "tag" and
@@ -159,64 +157,23 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
             }
         }
 
-        //search for userLists
-        LaunchedEffect(triggerSearch) {
-            println("search screen "+searchText.text + " " + triggerSearch)
-            searchJob.value?.cancel() // 이전 검색 작업이 있다면 취소
-            searchJob.value = launch {
-                delay(debouncePeriod)
-                if (searchText.text.isNotEmpty()) {
-                    postLists.clear() // This will clear the MutableStateList
-                    userLists = emptyList();
-                    userListsByTags = emptyList();
-                    loading = true
-                    try {
-                        if (selectedButton == "유저") { // If search by user@
-                            if (searchText.text.length >= 1) viewModel.getFilteredUsersByName( // 실질 searchtext가 존재하는 경우만 검색
-                                searchText.text, // Remove @ from the search string
-                                onSuccess = { users ->
-                                    userLists = users // resulted user Lists
-                                    loading = false
-                                }
-                            )
-                            postLists.clear() // This will clear the MutableStateList
-                        } else if (selectedButton == "태그") {
-                            //TODO: search by tags
-                            if (searchText.text.length >= 1) viewModel.getFilteredUsersByTag(
-                                searchText.text,
-                                onSuccess = { users ->
-                                    userListsByTags = users // resulted user Lists
-                                    loading = false
-                                }
-                            )
-                            postLists.clear() // This will clear the MutableStateList
-                        } else {
-                            if (searchText.text.length >= 1) viewModel.getFilteredByRestaurants(
-                                searchText.text,
-                                onSuccess = { posts ->
-                                    postLists.clear() // This will clear the MutableStateList
-                                    postLists.addAll(posts)
-                                    loading = false
-                                }
-                            )
-                            userLists = emptyList() // Reset user lists
-                            userListsByTags = emptyList()
-                        }
-                    } catch (e: CancellationException) {
-                        // 코루틴이 취소되었을 때의 예외 처리. (검색 text 빠르게 바꿔 이전 작업 취소는 경우)
-                        println("검색 작업이 취소되었습니다.")
-                    } catch (e: Exception) {
-                        println("searchload error")
-                        showToast(context, "search 로딩에 실패하였습니다")
-                        loading = false
-                    }
-                    triggerSearch = false // reset the trigger
+        // Trigger search logic
+        LaunchedEffect(searchText.text, selectedButton) {
+//            viewModel.performSearch(searchText.text, selectedButton)
+                searchJob.value?.cancel() // Cancel previous job
+                searchJob.value = coroutineScope.launch {
+                    delay(debouncePeriod)
+                    viewModel.performSearch(searchText.text, selectedButton)
+                    triggerSearch = false
                 }
-                }
-            triggerSearch = false
 
-            }
+        }
+        val searchError by viewModel.searchError.observeAsState()
 
+        searchError?.let {
+            showToast(context, it)
+            viewModel.clearSearchError() // Clear the error after showing toast
+        }
 
         if(loading) {
             Box(
@@ -310,6 +267,8 @@ fun SearchBar(value: TextFieldValue, onValueChange: (TextFieldValue) -> Unit, on
     )
 }
 
+
+
 @Composable
 fun DefaultTagView(tags: List<String>, onTagClick: (String) -> Unit = {}) {
         FlowRow(
@@ -326,12 +285,7 @@ fun DefaultTagView(tags: List<String>, onTagClick: (String) -> Unit = {}) {
         Spacer(modifier = Modifier.height(11.dp))
 
 }
-/*
-@Preview
-@Composable
-fun SearchScreenPreview() {
-    SearchScreen(navController = rememberNavController(), context = ComponentActivity(), viewModel = AppMainViewModel(null))
-}*/
+
 
 
 
