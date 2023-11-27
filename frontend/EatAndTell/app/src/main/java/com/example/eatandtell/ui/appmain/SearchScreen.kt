@@ -78,7 +78,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
     val userLists by viewModel.userLists.collectAsState()
     val userListsByTags by viewModel.userListsByTags.collectAsState()
     val postLists by viewModel.postLists.collectAsState()
-    val loading by viewModel.loading.collectAsState()
+    val loading by viewModel.searchLoading.collectAsState()
     val topTags by viewModel.topTags.collectAsState()
 
     fun hideKeyboard() {

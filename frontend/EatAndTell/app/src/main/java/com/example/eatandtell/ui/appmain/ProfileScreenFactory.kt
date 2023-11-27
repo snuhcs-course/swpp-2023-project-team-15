@@ -232,7 +232,7 @@ class ProfileScreenFactory: IProfileScreenFactory {
 
         val userPosts by viewModel.userPosts.collectAsState()
         val userInfo by viewModel.userInfo.collectAsState()
-        val loading by viewModel.loading.collectAsState()
+        val loading by viewModel.profileLoading.collectAsState()
         val loadError by viewModel.loadError.collectAsState() // Observing StateFlow for error
         var lazyListState = rememberLazyListState()
         val coroutineScope = rememberCoroutineScope()

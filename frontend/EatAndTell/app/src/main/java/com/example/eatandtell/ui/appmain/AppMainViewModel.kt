@@ -56,6 +56,18 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     private val _loading = MutableStateFlow(true)
     val loading = _loading.asStateFlow()
 
+    private val _editProfileLoading = MutableStateFlow(true)
+    val editProfileLoading = _editProfileLoading.asStateFlow()
+
+    private val _homeLoading = MutableStateFlow(true)
+    val homeLoading = _homeLoading.asStateFlow()
+
+    private val _profileLoading = MutableStateFlow(true)
+    val profileLoading = _profileLoading.asStateFlow()
+
+    private val _searchLoading = MutableStateFlow(true)
+    val searchLoading = _searchLoading.asStateFlow()
+
     private val _userInfo = MutableStateFlow(UserInfoDTO(0, "", "", "", listOf(), false, 0, 0))
     val userInfo = _userInfo.asStateFlow()
     private val _userPosts = MutableStateFlow<List<PostDTO>>(listOf())
@@ -111,7 +123,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
     suspend fun loadHomePosts(selectedTab: String) {
         try {
-            _loading.value = true
+            _homeLoading.value = true
             if (selectedTab == "추천") {
                 getPersonalizedPosts { fetchedPosts ->
                     _homePosts.value = fetchedPosts
@@ -124,7 +136,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         } catch (e: Exception) {
             _loadError.value = "홈 피드 로딩에 실패하였습니다"
         } finally {
-            _loading.value = false
+            _homeLoading.value = false
         }
     }
 
@@ -132,7 +144,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
     suspend fun loadUserPosts(userId: Int?) {
         try {
-            _loading.value = true // Start loading
+            _profileLoading.value = true // Start loading
             getUserFeed(
                 userId = userId,
                 onSuccess = { userInfo, userPosts ->
@@ -145,7 +157,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                 _loadError.value = "유저 피드 로딩에 실패하였습니다"
             }
         } finally {
-            _loading.value = false // End loading
+            _profileLoading.value = false // End loading
         }
     }
 
@@ -153,7 +165,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
     suspend fun loadProfileData(userId: Int?, loadType: Int, selectedTab: String) {
         try {
-            _loading.value = true // Update StateFlow
+            _profileLoading.value = true // Update StateFlow
             when (loadType) {
                 1 -> loadUserFeed(userId)
                 2 -> if (selectedTab == "MY") loadUserFeed(userId) else loadLikedFeed()
@@ -163,12 +175,12 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                 _loadError.value = "유저 피드 로딩에 실패하였습니다"
             }
         } finally {
-            _loading.value = false
+            _profileLoading.value = false
         }
     }
 
     // Load user feed
-    suspend fun loadUserFeed(userId: Int?) {
+    private suspend fun loadUserFeed(userId: Int?) {
         getUserFeed(
             userId = userId,
             onSuccess = { info, posts ->
@@ -179,7 +191,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     }
 
     // Load user feed
-    suspend fun loadLikedFeed() {
+    private suspend fun loadLikedFeed() {
         getLikedFeed (
             onSuccess = { posts ->
                 _profilePosts.value = posts
@@ -194,7 +206,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
     // Perform search based on selected type and search text
     suspend fun performSearch(searchText: String, selectedButton: String) {
-        _loading.value = true
+        _searchLoading.value = true
         try {
             if (searchText.isNotEmpty()){
                 _postLists.value = emptyList() // Clear post list
@@ -214,7 +226,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             Log.e("Search Error", "Failed to load search results: ${e.message}")
             _searchError.postValue("search 로딩에 실패하였습니다")
         } finally {
-            _loading.value = false
+            _searchLoading.value = false
         }
     }
     fun clearSearchError() {
@@ -228,7 +240,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         response.onFailure { e ->
             Log.e("Search Error", "User search failed: ${e.message}")
         }
-        _loading.value = false
+        _searchLoading.value = false
     }
 
 
@@ -240,7 +252,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         response.onFailure { e ->
             Log.e("Search Error", "Tag search failed: ${e.message}")
         }
-        _loading.value = false
+        _searchLoading.value = false
     }
 
     private suspend fun handleRestaurantSearch(searchText: String) {
@@ -251,7 +263,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         response.onFailure { e ->
             Log.e("Search Error", "Restaurant search failed: ${e.message}")
         }
-        _loading.value = false
+        _searchLoading.value = false
     }
 
     fun fetchTopTags() {
@@ -700,27 +712,6 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
     }
 
-    //    suspend fun getFollowers(user_id:Int?=null, onSuccess: (List<UserDTO>) -> Unit){
-//        val authorization = "Token $token"
-//        val response = apiRepository.getFollowers(authorization,user_id)
-//        response.onSuccess { response->
-//            onSuccess(response)
-//        }.onFailure { e->
-//            Log.d("getFollowers error", e.message ?: "Network error")
-//            throw e // rethrow the exception to be caught in the calling function
-//        }
-//    }
-//
-//    suspend fun getFollowings(user_id:Int?=null, onSuccess: (List<UserDTO>) -> Unit){
-//        val authorization = "Token $token"
-//        val response = apiRepository.getFollowings(authorization,user_id)
-//        response.onSuccess { response->
-//            onSuccess(response)
-//        }.onFailure { e->
-//            Log.d("getFollowers error", e.message ?: "Network error")
-//            throw e // rethrow the exception to be caught in the calling function
-//        }
-//    }
     suspend fun getFollowers(userId: Int? = null) {
         val authorization = "Token $token"
         val response = apiRepository.getFollowers(authorization, userId)

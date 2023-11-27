@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
     val feedPosts by viewModel.homePosts.collectAsState(initial = emptyList()) // Collect as state
-    val loading by viewModel.loading.collectAsState()
+    val loading by viewModel.homeLoading.collectAsState()
     var lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     var selectedTab by remember { mutableStateOf("추천") }

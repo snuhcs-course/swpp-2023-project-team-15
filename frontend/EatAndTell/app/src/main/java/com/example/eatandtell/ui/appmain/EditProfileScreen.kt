@@ -52,7 +52,7 @@ import kotlinx.coroutines.launch
 fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navController: NavHostController) {
 
     // Observe changes in ViewModel
-    val loading by viewModel.loading.collectAsState()
+    val loading by viewModel.editProfileLoading.collectAsState()
     fun hideKeyboard() {
         val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(context.currentFocus?.windowToken, 0)

@@ -73,7 +73,6 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
     var reviewDescription by viewModel.reviewDescription
     var myRating by rememberSaveable { mutableStateOf("0") }
 
-
 // Directly use the ViewModel's state
     val photoPaths = viewModel.photoUris
 
