@@ -244,7 +244,7 @@ fun AppMainNavigate(navController: NavHostController, modifier: Modifier, contex
             )
         ) { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId")
-            FollowerScreen(context, viewModel, navController, userId?.toIntOrNull())
+            FollowScreen(context, viewModel, navController,FollowScreenType.FOLLOWER, userId?.toIntOrNull())
         }
 
         composable(
@@ -257,7 +257,7 @@ fun AppMainNavigate(navController: NavHostController, modifier: Modifier, contex
             )
         ) { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId")
-            FollowingScreen(context, viewModel, navController, userId?.toIntOrNull())
+            FollowScreen(context, viewModel, navController, FollowScreenType.FOLLOWING,userId?.toIntOrNull())
         }
     }
 }

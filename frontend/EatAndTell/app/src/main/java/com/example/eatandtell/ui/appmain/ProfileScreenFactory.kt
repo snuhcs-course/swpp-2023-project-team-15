@@ -229,21 +229,7 @@ class ProfileScreenFactory: IProfileScreenFactory {
         navController: NavHostController,
         userId: Int? = null
     ) {
-//        val userPosts = remember { mutableStateListOf<PostDTO>() }
-//        var userInfo by remember {
-//            mutableStateOf(
-//                UserInfoDTO(
-//                    0,
-//                    "",
-//                    "",
-//                    "",
-//                    listOf(),
-//                    false,
-//                    0,
-//                    0
-//                )
-//            )
-//        }
+
         val userPosts by viewModel.userPosts.collectAsState()
         val userInfo by viewModel.userInfo.collectAsState()
         val loading by viewModel.loading.collectAsState()

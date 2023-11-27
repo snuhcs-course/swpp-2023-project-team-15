@@ -21,6 +21,7 @@ import com.example.eatandtell.dto.UserInfoDTO
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -60,6 +61,12 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     private val _userPosts = MutableStateFlow<List<PostDTO>>(listOf())
     val userPosts = _userPosts.asStateFlow()
 
+
+    private val _followers = MutableStateFlow<List<UserDTO>>(emptyList())
+    val followers: StateFlow<List<UserDTO>> = _followers.asStateFlow()
+
+    private val _followings = MutableStateFlow<List<UserDTO>>(emptyList())
+    val followings: StateFlow<List<UserDTO>> = _followings.asStateFlow()
 
 
     var myProfile = UserDTO(0, "", "", "", listOf())
@@ -603,27 +610,49 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
     }
 
-    suspend fun getFollowers(user_id:Int?=null, onSuccess: (List<UserDTO>) -> Unit){
+//    suspend fun getFollowers(user_id:Int?=null, onSuccess: (List<UserDTO>) -> Unit){
+//        val authorization = "Token $token"
+//        val response = apiRepository.getFollowers(authorization,user_id)
+//        response.onSuccess { response->
+//            onSuccess(response)
+//        }.onFailure { e->
+//            Log.d("getFollowers error", e.message ?: "Network error")
+//            throw e // rethrow the exception to be caught in the calling function
+//        }
+//    }
+//
+//    suspend fun getFollowings(user_id:Int?=null, onSuccess: (List<UserDTO>) -> Unit){
+//        val authorization = "Token $token"
+//        val response = apiRepository.getFollowings(authorization,user_id)
+//        response.onSuccess { response->
+//            onSuccess(response)
+//        }.onFailure { e->
+//            Log.d("getFollowers error", e.message ?: "Network error")
+//            throw e // rethrow the exception to be caught in the calling function
+//        }
+//    }
+    suspend fun getFollowers(userId: Int? = null) {
         val authorization = "Token $token"
-        val response = apiRepository.getFollowers(authorization,user_id)
-        response.onSuccess { response->
-            onSuccess(response)
-        }.onFailure { e->
-            Log.d("getFollowers error", e.message ?: "Network error")
-            throw e // rethrow the exception to be caught in the calling function
+        val response = apiRepository.getFollowers(authorization, userId)
+        response.onSuccess { users ->
+            _followers.value = users
+        }.onFailure { e ->
+            Log.e("getFollowers error", e.message ?: "Network error")
+            throw e// Handle error, maybe update _loadError
         }
     }
 
-    suspend fun getFollowings(user_id:Int?=null, onSuccess: (List<UserDTO>) -> Unit){
+    suspend fun getFollowings(userId: Int? = null) {
         val authorization = "Token $token"
-        val response = apiRepository.getFollowings(authorization,user_id)
-        response.onSuccess { response->
-            onSuccess(response)
-        }.onFailure { e->
-            Log.d("getFollowers error", e.message ?: "Network error")
-            throw e // rethrow the exception to be caught in the calling function
+        val response = apiRepository.getFollowings(authorization, userId)
+        response.onSuccess { users ->
+            _followings.value = users
+        }.onFailure { e ->
+            Log.e("getFollowings error", e.message ?: "Network error")
+            throw e// Handle error
         }
     }
+
 }
 
 // Event wrapper to handle one-time events
