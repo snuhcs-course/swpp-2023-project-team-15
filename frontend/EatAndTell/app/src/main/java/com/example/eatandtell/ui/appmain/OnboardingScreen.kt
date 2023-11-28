@@ -1,5 +1,6 @@
 package com.example.eatandtell.ui.appmain
 
+import android.widget.Button
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -32,11 +33,12 @@ class OnBoardingViewModel: ViewModel(){
 }
 
 val onboardingPages= listOf(
-    OnboardingPage("")
+    OnboardingPage()
+
 )
 
 @Composable
-fun OnboardingScreen(page: OnboardingPage){
+fun OnboardingScreen_typeA(page: OnboardingPage){
     Column(
         modifier=Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -44,11 +46,24 @@ fun OnboardingScreen(page: OnboardingPage){
     ) {
         Image(painter = painterResource(id = page.image), contentDescription = "image")
         Image(painter = painterResource(id = page.title), contentDescription = "Title")
-        Text(text = page.description, style = MaterialTheme.typography.subtitle1)
+
     }
-
-
 }
+
+@Composable
+fun OnboardingScreen_typeB(page: OnboardingPage){
+    Column(
+        modifier=Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(painter = painterResource(id = page.image), contentDescription = "image")
+        Image(painter = painterResource(id = page.title), contentDescription = "Title")
+        Button
+        //Text(text = page.description, style = MaterialTheme.typography.subtitle1)
+    }
+}
+
 
 
 @OptIn(ExperimentalFoundationApi::class)
