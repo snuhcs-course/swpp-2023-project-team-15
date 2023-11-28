@@ -1,4 +1,4 @@
-package com.example.eatandtell.ui.appmain
+package com.example.eatandtell.ui.start
 
 import android.widget.Button
 import androidx.compose.foundation.ExperimentalFoundationApi
