@@ -20,9 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -52,7 +50,8 @@ import kotlinx.coroutines.launch
 fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navController: NavHostController) {
 
     // Observe changes in ViewModel
-    val loading by viewModel.editProfileLoading.collectAsState()
+    val loading =false
+    //by viewModel.editProfileLoading.collectAsState()
     fun hideKeyboard() {
         val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(context.currentFocus?.windowToken, 0)

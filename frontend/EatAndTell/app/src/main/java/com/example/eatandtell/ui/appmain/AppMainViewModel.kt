@@ -289,6 +289,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
 
         viewModelScope.launch {
+
             val photoUrls = mutableListOf<String>()
             val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it, context) }
             for (byteArray in photoByteArrays) {
@@ -346,6 +347,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         context: Context,
         org_avatar_url: String,
     ) {
+
 
 
         Log.d("edit profile photoPaths: ", photoPaths.toString())

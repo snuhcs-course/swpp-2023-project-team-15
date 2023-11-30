@@ -1,26 +1,20 @@
 // SignUpScreen.kt
 package com.example.eatandtell.ui.start
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -32,12 +26,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.eatandtell.ui.BlackSmallText
 import com.example.eatandtell.ui.CustomTextField
 import com.example.eatandtell.ui.GraySmallText
 import com.example.eatandtell.ui.Logo
 import com.example.eatandtell.ui.MainButton
-import com.example.eatandtell.ui.appmain.AppMainActivity
 import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.theme.Black
 
@@ -72,11 +64,15 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
     LaunchedEffect(registerState) {
         when (registerState) {
             is RegisterState.Success -> {
-                val intent = Intent(context, AppMainActivity::class.java)
-                intent.putExtra("Token", (registerState as RegisterState.Success).token)
                 showToast(context,"Register Success")
-                context.startActivity(intent)
-                context.finish()
+                navController.navigate("onboarding") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+
+
             }
             is RegisterState.Error -> {
                 val errorMessage = (registerState as RegisterState.Error).message
@@ -97,7 +93,9 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
                 detectTapGestures(
                     onTap = { hideKeyboard() }
                 )
-            }.fillMaxSize().padding(horizontal = 20.dp)
+            }
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)
     ) {
         Logo()
         Spacer(modifier = Modifier.height(17.dp))
