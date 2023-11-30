@@ -53,10 +53,8 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     private val _myInfo = MutableStateFlow(UserInfoDTO(0, "", "", "", listOf(), false, 0, 0))
     val myInfo = _myInfo.asStateFlow()
 
-    private val _loading = MutableStateFlow(true)
-    val loading = _loading.asStateFlow()
 
-    private val _editProfileLoading = MutableStateFlow(true)
+    private val _editProfileLoading = MutableStateFlow(false)
     val editProfileLoading = _editProfileLoading.asStateFlow()
 
     private val _homeLoading = MutableStateFlow(true)
@@ -347,7 +345,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         context: Context,
         org_avatar_url: String,
     ) {
-
+        _editProfileLoading.value = true
 
 
         Log.d("edit profile photoPaths: ", photoPaths.toString())
@@ -367,7 +365,6 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             } catch (e: Exception) {
                 Log.d("Image Upload Error", e.message ?: "Upload failed")
                 _editStatus.postValue("프로필 편집에 실패했습니다")
-
             }
         }
 
@@ -392,8 +389,10 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                 Log.d("edit profile error", "cancellation exception")
 //                        _editStatus.postValue("프로필이 편집되었습니다")
                 _editStatus.postValue("프로필 편집에 실패했습니다")
-
             }
+        }
+        finally {
+            _editProfileLoading.value = false
         }
 
     }
