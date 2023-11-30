@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -65,6 +66,7 @@ fun OnboardingBackground() {
     Box(modifier = Modifier
         .fillMaxWidth()
         .fillMaxHeight(0.9f)
+        .clipToBounds()
     ) {
         Canvas(modifier = Modifier
             .fillMaxWidth()
@@ -73,7 +75,7 @@ fun OnboardingBackground() {
             drawCircle(
                 color = Color(0xFFFCD3B6),
                 radius = size.minDimension / 2 ,
-                center = Offset(x = size.width * 0.75f, y = size.height*0.3f)
+                center = Offset(x = size.width * 0.8f, y = size.height*0.25f)
             )
             drawCircle(
                 color = Color(0xFFF6B0A0), // Use the color code for the orange circle
@@ -83,7 +85,7 @@ fun OnboardingBackground() {
             drawCircle(
                 color = Color(0xFFF6B0A0), // Use the color code for the orange circle
                 radius = (size.minDimension / 2.6).toFloat(),
-                center = Offset(x = size.width * -0.05f, y = size.height * 0.95f)
+                center = Offset(x = size.width * -0.05f, y = size.height * 0.8f)
             )
 
         }
@@ -94,7 +96,10 @@ fun OnboardingBackground() {
 @Composable
 fun OnboardingScreen1( ){
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .fillMaxHeight(0.9f)
+    ) {
         OnboardingBackground()
         // Content layered on top of the background
         Column(
