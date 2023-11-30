@@ -70,18 +70,18 @@ fun navigateToDestination(navController: NavHostController, destination: String)
     }
 }
 
-@Preview
-@Composable
-fun PreviewNavigationBar() {
-    Surface {
-        BottomNavBar(
-            onHomeClick = { /*Home Clicked*/ },
-            onSearchClick = { /*Search Clicked*/ },
-            onPlusClick = { /*Plus Clicked*/ },
-            onProfileClick = { /*Profile Clicked*/ },
-        )
-    }
-}
+//@Preview
+//@Composable
+//fun PreviewNavigationBar() {
+//    Surface {
+//        BottomNavBar(
+//            onHomeClick = { /*Home Clicked*/ },
+//            onSearchClick = { /*Search Clicked*/ },
+//            onPlusClick = { /*Plus Clicked*/ },
+//            onProfileClick = { /*Profile Clicked*/ },
+//        )
+//    }
+//}
 
 
 // Top Bar

@@ -25,8 +25,8 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -44,54 +44,27 @@ import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.theme.Gray
 import com.example.eatandtell.ui.theme.MainColor
 import com.example.eatandtell.ui.theme.PaleGray
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostController: NavHostController) {
-    var feedPosts = remember { mutableStateListOf<PostDTO>() }
-    var loading by remember { mutableStateOf(true) }
+    val feedPosts by viewModel.homePosts.collectAsState(initial = emptyList()) // Collect as state
+    val loading by viewModel.homeLoading.collectAsState()
     var lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     var selectedTab by remember { mutableStateOf("추천") }
+    val loadError by viewModel.loadError.collectAsState() // Observing StateFlow for error
 
     Log.d("navigateToDestination", "lazylist in Home: ${lazyListState}")
 
 
-    LaunchedEffect(selectedTab,loading) {
-        try {
-            println("trying to load home feed")
-            if(selectedTab == "추천") {
-                viewModel.getPersonalizedPosts(
-                    onSuccess = { posts ->
-                        // Instead of reassigning, we clear and add all to mutate the list's contents
-                        feedPosts.clear()
-                        feedPosts.addAll(posts)
-                        println("feedPosts: ${feedPosts.size}")
-                    },
-                )
-                println("getting posts is fine")
-                loading = false
-            } else {
-                viewModel.getFollowingPosts(
-                    onSuccess = { posts ->
-                        // Instead of reassigning, we clear and add all to mutate the list's contents
-                        feedPosts.clear()
-                        feedPosts.addAll(posts)
-                        println("feedPosts: ${feedPosts.size}")
-                    },
-                )
-                println("getting posts is fine")
-                loading = false
-            }
-
-        }
-        catch (e: Exception) {
-            if (e !is CancellationException) { // 유저가 너무 빨리 화면을 옮겨다니는 경우에는 CancellationException이 발생할 수 있지만, 서버 에러가 아니라서 패스
-                loading = false
-                Log.d("home feed load error", e.toString())
-                showToast(context, "홈 피드 로딩에 실패하였습니다")
-            }
+    LaunchedEffect(selectedTab) {
+        viewModel.loadHomePosts(selectedTab)
+    }
+    LaunchedEffect(loadError) {
+        loadError?.let { error ->
+            showToast(context, error)
+            viewModel.resetLoadError() // Reset error via ViewModel method
         }
     }
 
@@ -103,9 +76,6 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
             .padding(horizontal = 20.dp),
     ) {
         item { Spacer(modifier = Modifier.height(8.dp)) }
-//            items(feedPosts) { post ->
-//                HomePost(post, viewModel = viewModel, navHostController = navHostController)
-//            }
 
         item {
             TabRow(
@@ -124,14 +94,14 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
                 Tab(
                     text = { Text("추천") },
                     selected = selectedTab == "추천",
-                    onClick = { selectedTab = "추천"; loading = true },
+                    onClick = { selectedTab = "추천"},
                     selectedContentColor = MainColor,
                     unselectedContentColor = Gray,
                 )
                 Tab(
                     text = { Text("팔로잉") },
                     selected = selectedTab == "팔로잉",
-                    onClick = { selectedTab = "팔로잉"; loading = true },
+                    onClick = { selectedTab = "팔로잉"},
                     selectedContentColor = MainColor,
                     unselectedContentColor = Gray,
                 )
@@ -162,23 +132,8 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
                 HomePost(
                     post = post,
                     viewModel = viewModel,
-                    navHostController = navHostController,
-                    onDelete = { postToDelete ->
-                        feedPosts.remove(postToDelete)
-                    }
-                ) { postToLike ->
-                    val index = feedPosts.indexOf(postToLike)
-                    if (index != -1) {
-                        // Determine the new like count based on the current is_liked state
-                        val newLikeCount =
-                            if (postToLike.is_liked) postToLike.like_count - 1 else postToLike.like_count + 1
-                        // Update the post with the new like state and count
-                        feedPosts[index] = postToLike.copy(
-                            is_liked = !postToLike.is_liked,
-                            like_count = newLikeCount
-                        )
-                    }
-                }
+                    navHostController = navHostController
+                )
                 Divider(
                     color = PaleGray,
                     thickness = 1.dp,
@@ -206,8 +161,6 @@ fun HomePost(
     post: PostDTO,
     viewModel: AppMainViewModel,
     navHostController: NavHostController,
-    onDelete: (PostDTO) -> Unit,
-    onLike: (PostDTO) -> Unit
 ) {
     val user = post.user
     val coroutinescope = rememberCoroutineScope()
@@ -235,7 +188,6 @@ fun HomePost(
             Post(
                 post = post,
                 onHeartClick = {
-                    onLike(post)
                     coroutinescope.launch {
                         viewModel.toggleLike(post.id)
 
@@ -244,10 +196,8 @@ fun HomePost(
                 canDelete = (user.id == viewModel.myProfile.id),
                 onDelete = {
                     deleted = true
-                    onDelete(post)
                     coroutinescope.launch {
                         viewModel.deletePost(post.id)
-
                     }
                 }
             )

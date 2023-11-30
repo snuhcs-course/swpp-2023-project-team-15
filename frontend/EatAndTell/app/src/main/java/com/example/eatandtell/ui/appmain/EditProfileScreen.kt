@@ -20,7 +20,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,6 +51,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, navController: NavHostController) {
 
+    // Observe changes in ViewModel
+    val loading by viewModel.editProfileLoading.collectAsState()
     fun hideKeyboard() {
         val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(context.currentFocus?.windowToken, 0)
@@ -68,30 +72,14 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
 
         val coroutineScope = rememberCoroutineScope()
 
-        var loading by remember { mutableStateOf(false) }
+
+//        var loading by remember { mutableStateOf(false) }
         var myProfile = viewModel.myProfile
 
         var buttonEnable by remember { mutableStateOf(true) }
 
-//        LaunchedEffect(loading) {
-//            try {
-//                viewModel.getMyProfile (
-//                    onSuccess = { it ->
-//                        myProfile = it
-//                        println("myProfile: ${myProfile.username}")
-//                    }
-//                )
-//                loading = false
-//            }
-//            catch (e: Exception) {
-//                if (e !is CancellationException) { // 유저가 너무 빨리 화면을 옮겨다니는 경우에는 CancellationException이 발생할 수 있지만, 서버 에러가 아니라서 패스
-//                    loading = false
-//                    println("get my profile load error")
-//                    showToast(context, "프로필 로딩에 실패하였습니다")
-//                }
-//            }
-//        }
 
+        // Observe loading state
         if (loading) {
             Box(
                 modifier = Modifier
@@ -115,10 +103,6 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                     photoPaths = it
                 }
 
-//            var username by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-//                mutableStateOf(TextFieldValue(myProfile.username))
-//            }
-//
 
             var description by rememberSaveable(stateSaver = TextFieldValue.Saver) {
                 mutableStateOf(TextFieldValue(myProfile.description))
@@ -188,6 +172,7 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                                     println("An error occurred: ${e.message}")
                                 }
                             }, text = "프로필 저장", enable = buttonEnable)
+
                 }
             }
         }

@@ -1,4 +1,3 @@
-// SignUpScreen.kt
 package com.example.eatandtell.ui.appmain
 
 import android.R.attr.path
@@ -69,14 +68,10 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
     var restaurantName by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(placeName ?: ""))
     }
-//
-//    var reviewDescription by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-//        mutableStateOf(TextFieldValue(""))
-//    }
+
 
     var reviewDescription by viewModel.reviewDescription
     var myRating by rememberSaveable { mutableStateOf("0") }
-
 
 // Directly use the ViewModel's state
     val photoPaths = viewModel.photoUris
@@ -100,24 +95,7 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
             restaurantName = TextFieldValue(it)
         }
     }
-//    LaunchedEffect(loading) {
-//        try {
-//            viewModel.getMyProfile (
-//                onSuccess = { it ->
-//                    myProfile = it
-//                    println("myProfile: ${myProfile.username}")
-//                }
-//            )
-//            loading = false
-//        }
-//        catch (e: Exception) {
-//            if (e !is CancellationException) { // 유저가 너무 빨리 화면을 옮겨다니는 경우에는 CancellationException이 발생할 수 있지만, 서버 에러가 아니라서 패스
-//                loading = false
-//                println("get my profile load error")
-//                showToast(context, "프로필 로딩에 실패하였습니다")
-//            }
-//        }
-//    }
+
 
     if(loading) {
         Box(

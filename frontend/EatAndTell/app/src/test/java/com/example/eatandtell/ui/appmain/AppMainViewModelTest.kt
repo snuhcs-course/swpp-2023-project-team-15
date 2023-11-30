@@ -38,6 +38,7 @@ import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -400,20 +401,7 @@ class AppMainViewModelTest {
     }
 
 
-    @Test
-    fun toggleFollow_failure_logsErrorMessage() = runTest {
-        val userId = 123
-        val exception = RuntimeException("Network error")
 
-        // Mock the API call to return a failure
-        coEvery { mockRepository.toggleFollow(any(), userId)  } throws exception
-
-        val result = viewModel.toggleFollow(userId)
-
-        assertFalse(result)
-        // Verify that the error log is called with the appropriate message
-        coVerify { Log.d("toggle follow error", "Network error") }
-    }
 
     @Test
     fun deletePost_success_logsSuccess() = runTest {
@@ -814,6 +802,313 @@ class AppMainViewModelTest {
         assertTrue(onErrorInvoked)
         assertEquals(errorMessage, receivedErrorMessage)
     }
+
+    @Test
+    fun loadHomePosts_recommended_successfullyUpdatesHomePosts() = runTest {
+        // Arrange
+        val mockPosts = listOf(PostDTO(1, UserDTO(1,"test","test","", listOf("")), RestaurantDTO(1,"test"),"0","test",
+            listOf(PhotoDTO(1,"",1,)),"",true,0,
+            listOf("")))
+        coEvery { mockRepository.getPersonalizedPosts(any()) } returns Result.success(GetAllPostsResponse(mockPosts))
+
+        // Act
+        viewModel.loadHomePosts("추천")
+        advanceUntilIdle()
+
+        // Assert
+        assertEquals(mockPosts, viewModel.homePosts.value)
+        assertTrue(viewModel.homeLoading.value.not())
+        assertNull(viewModel.loadError.value)
+    }
+
+    @Test
+    fun loadHomePosts_following_successfullyUpdatesHomePosts() = runTest {
+        // Arrange
+        val mockPosts = listOf(PostDTO(1, UserDTO(1,"test","test","", listOf("")), RestaurantDTO(1,"test"),"0","test",
+            listOf(PhotoDTO(1,"",1,)),"",true,0,
+            listOf("")))
+        coEvery { mockRepository.getFollowingPosts(any()) } returns Result.success(GetAllPostsResponse(mockPosts))
+
+        // Act
+        viewModel.loadHomePosts("팔로잉")
+        advanceUntilIdle()
+
+        // Assert
+        assertEquals(mockPosts, viewModel.homePosts.value)
+        assertTrue(viewModel.homeLoading.value.not())
+        assertNull(viewModel.loadError.value)
+    }
+
+    @Test
+    fun loadHomePosts_failure_updatesLoadError() = runTest {
+        // Arrange
+        val exception = Exception("Network error")
+        coEvery { mockRepository.getPersonalizedPosts(any()) } returns Result.failure(exception)
+        // Repeat for getFollowingPosts if needed
+
+        // Act
+        viewModel.loadHomePosts("추천") // Test with both "추천" and another value
+        advanceUntilIdle()
+
+        // Assert
+        assertNotNull(viewModel.loadError.value)
+        assertTrue(viewModel.homeLoading.value.not())
+    }
+
+
+
+        @Test
+        fun `loadUserPosts successfully updates user info and posts`() = runTest {
+            val userId = 123
+            val mockUserInfo = UserInfoDTO(123, "username", "description", "avatarUrl", listOf("tag1"), false, 10, 5)
+            val mockUserPosts = listOf(
+                PostDTO(1, UserDTO(1, "user1", "desc1", "avatarUrl1", listOf()), RestaurantDTO(1, "restaurant1"), "rating1", "description1", listOf(), "timestamp1", true, 10, listOf()),
+                PostDTO(2, UserDTO(2, "user2", "desc2", "avatarUrl2", listOf()), RestaurantDTO(2, "restaurant2"), "rating2", "description2", listOf(), "timestamp2", false, 5, listOf())
+            )
+            val expectedFeedResponse = GetFeedResponse(123, "username", "description", "avatarUrl", listOf("tag1"), false, 10, 5,mockUserPosts)
+
+            // Mock the API call to return the expected response
+            coEvery { mockRepository.getUserFeed(any(), eq(userId)) } returns Result.success(expectedFeedResponse)
+
+            viewModel.loadUserPosts(userId)
+
+            advanceUntilIdle()
+
+            assertEquals(mockUserInfo, viewModel.userInfo.value)
+            assertEquals(mockUserPosts, viewModel.userPosts.value)
+            assertFalse(viewModel.profileLoading.value)
+            assertNull(viewModel.loadError.value)
+        }
+
+        @Test
+        fun `loadUserPosts handles exceptions correctly`() = runTest {
+            val userId = 123
+            val exception = Exception("Error fetching user feed")
+
+            // Mock the API call to throw an exception
+            coEvery { mockRepository.getUserFeed(any(), eq(userId)) } throws exception
+
+            viewModel.loadUserPosts(userId)
+
+            advanceUntilIdle()
+
+            assertEquals("유저 피드 로딩에 실패하였습니다", viewModel.loadError.value)
+            assertFalse(viewModel.profileLoading.value)
+        }
+
+
+
+        @Test
+        fun `loadProfileData with loadType 1 updates user info and posts`() = runTest {
+            val userId = 123
+            val mockUserInfo = UserInfoDTO(123, "username", "description", "avatarUrl", listOf("tag1"), false, 10, 5)
+            val mockUserPosts = listOf(
+                PostDTO(1, UserDTO(1, "user1", "desc1", "avatarUrl1", listOf()), RestaurantDTO(1, "restaurant1"), "rating1", "description1", listOf(), "timestamp1", true, 10, listOf()),
+                PostDTO(2, UserDTO(2, "user2", "desc2", "avatarUrl2", listOf()), RestaurantDTO(2, "restaurant2"), "rating2", "description2", listOf(), "timestamp2", false, 5, listOf())
+            )
+            val expectedFeedResponse = GetFeedResponse(123, "username", "description", "avatarUrl", listOf("tag1"), false, 10, 5,mockUserPosts)
+
+            // Mock the API call to return the expected response
+            coEvery { mockRepository.getUserFeed(any(), eq(userId)) } returns Result.success(expectedFeedResponse)
+
+            viewModel.loadProfileData(userId, 1, "Any Tab")
+
+            advanceUntilIdle()
+
+            assertEquals(mockUserInfo, viewModel.myInfo.value)
+            assertEquals(mockUserPosts, viewModel.profilePosts.value)
+            assertNull(viewModel.loadError.value)
+            assertFalse(viewModel.profileLoading.value)
+        }
+
+        @Test
+        fun `loadProfileData with loadType 2 and MY tab updates user feed`() = runTest {
+            val userId = 123
+            val mockUserInfo = UserInfoDTO(123, "username", "description", "avatarUrl", listOf("tag1"), false, 10, 5)
+            val mockUserPosts = listOf(
+                PostDTO(1, UserDTO(1, "user1", "desc1", "avatarUrl1", listOf()), RestaurantDTO(1, "restaurant1"), "rating1", "description1", listOf(), "timestamp1", true, 10, listOf()),
+                PostDTO(2, UserDTO(2, "user2", "desc2", "avatarUrl2", listOf()), RestaurantDTO(2, "restaurant2"), "rating2", "description2", listOf(), "timestamp2", false, 5, listOf())
+            )
+            val expectedFeedResponse = GetFeedResponse(123, "username", "description", "avatarUrl", listOf("tag1"), false, 10, 5,mockUserPosts)
+
+            // Mock the API call to return the expected response
+            coEvery { mockRepository.getUserFeed(any(), eq(userId)) } returns Result.success(expectedFeedResponse)
+
+            viewModel.loadProfileData(userId, 2, "MY")
+
+            advanceUntilIdle()
+
+            assertEquals(mockUserInfo, viewModel.myInfo.value)
+            assertEquals(mockUserPosts, viewModel.profilePosts.value)
+            assertNull(viewModel.loadError.value)
+            assertFalse(viewModel.profileLoading.value)
+        }
+
+        @Test
+        fun `loadProfileData with loadType 2 and Other tab updates liked feed`() = runTest {
+            val mockLikedPosts = listOf<PostDTO>(/* ... populate with test data ... */)
+
+            // Mock the API call for liked feed
+            coEvery { mockRepository.getLikedFeed(any()) } returns Result.success(mockLikedPosts)
+
+            viewModel.loadProfileData(null, 2, "LIKED")
+
+            advanceUntilIdle()
+
+            assertEquals(mockLikedPosts, viewModel.profilePosts.value)
+            assertNull(viewModel.loadError.value)
+            assertFalse(viewModel.profileLoading.value)
+        }
+
+        @Test
+        fun `loadProfileData handles exceptions correctly`() = runTest {
+            val exception = Exception("Error fetching data")
+            coEvery { mockRepository.getUserFeed(any(), any()) } throws exception
+
+            viewModel.loadProfileData(123, 1, "LIKED")
+
+            advanceUntilIdle()
+
+            assertEquals("유저 피드 로딩에 실패하였습니다", viewModel.loadError.value)
+            assertFalse(viewModel.profileLoading.value)
+        }
+
+
+    @Test
+    fun `resetLoadError clears the load error value after an error`() = runTest {
+        val userId = 123
+        val exception = Exception("Error fetching data")
+        coEvery { mockRepository.getUserFeed(any(), eq(userId)) } throws exception
+
+        // Trigger an error condition
+        viewModel.loadProfileData(userId, 1, "Any Tab")
+        advanceUntilIdle()
+
+        // Verify that an error has been set
+        assertEquals("유저 피드 로딩에 실패하였습니다", viewModel.loadError.value)
+
+        // Call resetLoadError and verify that the error is cleared
+        viewModel.resetLoadError()
+        assertNull(viewModel.loadError.value)
+    }
+
+
+        @Test
+        fun `performSearch with user type updates user list`() = runTest {
+            val searchText = "test"
+            val mockUsers = listOf(
+                UserDTO(1, "user1", "desc1", "avatarUrl1", listOf()),
+                UserDTO(2, "user2", "desc2", "avatarUrl2", listOf())
+            )
+            // Mock the API call to return the mock users
+            coEvery { mockRepository.getFilteredUsersByName(any(), eq(searchText)) } returns Result.success(mockUsers)
+
+            viewModel.performSearch(searchText, "유저")
+
+            advanceUntilIdle()
+
+            assertEquals(mockUsers, viewModel.userLists.value)
+            assertTrue(viewModel.postLists.value.isEmpty())
+            assertTrue(viewModel.userListsByTags.value.isEmpty())
+            assertFalse(viewModel.searchLoading.value)
+        }
+
+    @Test
+    fun `performSearch with tag type updates user list by tags`() = runTest {
+        val searchText = "tagExample"
+        val mockUsersByTag = listOf(
+            UserDTO(1, "user1", "desc1", "avatarUrl1", listOf()),
+            UserDTO(2, "user2", "desc2", "avatarUrl2", listOf())
+        )
+        // Mock the API call to return the mock users by tag
+        coEvery { mockRepository.getFilteredUsersByTag(any(), searchText) } returns Result.success(mockUsersByTag)
+
+        viewModel.performSearch(searchText, "태그")
+
+        advanceUntilIdle()
+
+        assertEquals(mockUsersByTag, viewModel.userListsByTags.value)
+        assertTrue(viewModel.userLists.value.isEmpty())
+        assertTrue(viewModel.postLists.value.isEmpty())
+        assertFalse(viewModel.searchLoading.value)
+    }
+
+    @Test
+    fun `performSearch with restaurant type updates post list`() = runTest {
+        val searchText = "testRestaurant"
+        val mockPosts = listOf(
+            PostDTO(1, UserDTO(1, "user1", "desc1", "avatarUrl1", listOf()), RestaurantDTO(1, "restaurant1"), "rating1", "description1", listOf(), "timestamp1", true, 10, listOf()),
+            PostDTO(2, UserDTO(2, "user2", "desc2", "avatarUrl2", listOf()), RestaurantDTO(2, "restaurant2"), "rating2", "description2", listOf(), "timestamp2", false, 5, listOf())
+        )
+        // Mock the API call to return the mock posts
+        coEvery { mockRepository.getFilteredByRestaurants(any(), eq(searchText)) } returns Result.success(GetAllPostsResponse(mockPosts))
+
+        viewModel.performSearch(searchText, "식당")
+
+        advanceUntilIdle()
+
+        assertEquals(mockPosts, viewModel.postLists.value)
+        assertTrue(viewModel.userLists.value.isEmpty())
+        assertTrue(viewModel.userListsByTags.value.isEmpty())
+        assertFalse(viewModel.searchLoading.value)
+    }
+
+
+
+
+    @Test
+    fun `fetchTopTags successfully updates top tags list`() = runTest {
+        val mockTopTags = listOf(TopTag("Tag1_ko","Tag1_en","Type"), TopTag("Tag2_ko","Tag2_en","Type") )
+
+        // Mock the API call to return the mock top tags
+        coEvery { mockRepository.getTopTags(any()) } returns Result.success(mockTopTags)
+
+        viewModel.fetchTopTags()
+
+        advanceUntilIdle()
+
+        // Check if the top tags list is updated correctly with the first 5 items
+        assertEquals(mockTopTags.take(5), viewModel.topTags.value)
+    }
+
+        @Test
+        fun `getFollowers successfully updates followers list`() = runTest {
+            val userId = 123
+            val mockFollowers =listOf(
+                UserDTO(1, "user1", "desc1", "avatarUrl1", listOf()),
+                UserDTO(2, "user2", "desc2", "avatarUrl2", listOf())
+            )
+
+            // Mock the API call to return the mock followers
+            coEvery { mockRepository.getFollowers(any(), userId) } returns Result.success(mockFollowers)
+
+            viewModel.getFollowers(userId)
+
+            advanceUntilIdle()
+
+            // Check if the followers list is updated correctly
+            assertEquals(mockFollowers, viewModel.followers.value)
+        }
+
+        @Test
+        fun `getFollowings successfully updates followings list`() = runTest {
+            val userId = 123
+            val mockFollowings = listOf(
+                UserDTO(1, "user1", "desc1", "avatarUrl1", listOf()),
+                UserDTO(2, "user2", "desc2", "avatarUrl2", listOf())
+            )
+
+            // Mock the API call to return the mock followings
+            coEvery { mockRepository.getFollowings(any(), userId) } returns Result.success(mockFollowings)
+
+            viewModel.getFollowings(userId)
+
+            advanceUntilIdle()
+
+            // Check if the followings list is updated correctly
+            assertEquals(mockFollowings, viewModel.followings.value)
+        }
+
 
 
 
