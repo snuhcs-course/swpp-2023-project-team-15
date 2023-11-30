@@ -74,13 +74,13 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
             is RegisterState.Success -> {
                 val intent = Intent(context, AppMainActivity::class.java)
                 intent.putExtra("Token", (registerState as RegisterState.Success).token)
-                showToast(context,"Register Success")
+                showToast(context,"회원가입이 완료되었습니다")
                 context.startActivity(intent)
                 context.finish()
             }
             is RegisterState.Error -> {
                 val errorMessage = (registerState as RegisterState.Error).message
-                showToast(context,"Register Failed")
+                showToast(context,"아이디가 중복되었습니다.")
 
             }
             // Handle other states if necessary

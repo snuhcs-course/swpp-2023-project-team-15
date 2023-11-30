@@ -46,6 +46,7 @@ import com.example.eatandtell.ui.Post
 import com.example.eatandtell.ui.ProfileImage
 import com.example.eatandtell.ui.ProfileText
 import com.example.eatandtell.ui.Tag
+import com.example.eatandtell.ui.showToast
 import com.example.eatandtell.ui.theme.Gray
 import com.example.eatandtell.ui.theme.Inter
 import com.example.eatandtell.ui.theme.MainColor
@@ -170,6 +171,7 @@ fun ProfileRow(
                 }
             }
         }
+        val originalTags = userInfo.tags.toList()
         Spacer(modifier = Modifier.height(15.dp))
             //refresh button
             if (itsMe) {
@@ -180,20 +182,35 @@ fun ProfileRow(
                     CustomButton(
                         onClick = {
                             coroutinescope.launch {
+                                try{
                                 viewModel.refreshTags(
                                     onSuccess = { newTags ->
+
                                         // Check and cast newTags to List<String>
                                         if (newTags is List<*>) {
                                             @Suppress("UNCHECKED_CAST")
                                             tags = newTags as List<String>
                                             println("refreshed tags: $tags")
+                                            if (context != null) {
+                                                if (newTags.isEmpty() || newTags.sorted() == originalTags.sorted()) {
+                                                    showToast(context, "태그가 변경되지 않았습니다.")
+                                                }
+                                                else {
+                                                    showToast(context, "태그가 업데이트되었습니다")
+                                                }
+                                            }
+
                                         } else {
                                             println("Error: Expected a list of tags, but received something else.")
                                         }
                                     },
                                     context = context!!
                                 )
-
+                                } catch (e: Exception) {
+                                    if (context != null) {
+                                        showToast(context, "태그 업데이트에 실패하였습니다")
+                                    }
+                                }
                             }
 
                         },
