@@ -53,10 +53,8 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     private val _myInfo = MutableStateFlow(UserInfoDTO(0, "", "", "", listOf(), false, 0, 0))
     val myInfo = _myInfo.asStateFlow()
 
-    private val _loading = MutableStateFlow(true)
-    val loading = _loading.asStateFlow()
 
-    private val _editProfileLoading = MutableStateFlow(true)
+    private val _editProfileLoading = MutableStateFlow(false)
     val editProfileLoading = _editProfileLoading.asStateFlow()
 
     private val _homeLoading = MutableStateFlow(true)
@@ -113,7 +111,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                 inputStream.readBytes()
             }
         } catch (e: Exception) {
-            // Log the exception or handle it as needed
+            // Log the exception or handle it here
             null
         }
     }
@@ -219,12 +217,12 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                 }
             }
         } catch (e: CancellationException) {
-            // Handle CancellationException
             Log.d("Search", "검색 작업이 취소되었습니다: ${e.message}")
+            throw e
         } catch (e: Exception) {
-            // Handle general exceptions
             Log.e("Search Error", "Failed to load search results: ${e.message}")
-            _searchError.postValue("search 로딩에 실패하였습니다")
+            throw e
+//            _searchError.postValue("search 로딩에 실패하였습니다")
         } finally {
             _searchLoading.value = false
         }
@@ -239,6 +237,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         }
         response.onFailure { e ->
             Log.e("Search Error", "User search failed: ${e.message}")
+            throw e
         }
         _searchLoading.value = false
     }
@@ -250,6 +249,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             _userListsByTags.value = users
         }
         response.onFailure { e ->
+            throw e
             Log.e("Search Error", "Tag search failed: ${e.message}")
         }
         _searchLoading.value = false
@@ -262,6 +262,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         }
         response.onFailure { e ->
             Log.e("Search Error", "Restaurant search failed: ${e.message}")
+            throw e
         }
         _searchLoading.value = false
     }
@@ -273,7 +274,8 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                 _topTags.value = tags.take(5) // Update the MutableStateFlow
             }
             response.onFailure { e ->
-                Log.e("Search Error", "Failed to load top tags: ${e.message}")
+                Log.e("Tags fetching Error", "Failed to load top tags: ${e.message}")
+                throw e
             }
         }
     }
@@ -437,6 +439,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             val errorMessage = exception.message ?: "Network error"
             Log.d("image_url_error", errorMessage)
             get_img_url = errorMessage
+            throw exception // rethrow the exception to be caught in the calling function
         }
         return get_img_url
     }
@@ -737,6 +740,5 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
 }
 
-// Event wrapper to handle one-time events
 
 
