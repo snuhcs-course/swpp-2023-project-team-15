@@ -221,8 +221,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             throw e
         } catch (e: Exception) {
             Log.e("Search Error", "Failed to load search results: ${e.message}")
-            throw e
-//            _searchError.postValue("search 로딩에 실패하였습니다")
+            _loadError.value = "search 로딩에 실패하였습니다"
         } finally {
             _searchLoading.value = false
         }
@@ -250,7 +249,6 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         }
         response.onFailure { e ->
             throw e
-            Log.e("Search Error", "Tag search failed: ${e.message}")
         }
         _searchLoading.value = false
     }
@@ -275,7 +273,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             }
             response.onFailure { e ->
                 Log.e("Tags fetching Error", "Failed to load top tags: ${e.message}")
-                throw e
+                _tagUpdateStatus.postValue("태그 로딩에 실패하였습니다")
             }
         }
     }
@@ -452,7 +450,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
         }
         response.onFailure { message ->
-            throw message
+            _loadError.value = "전체 피드 로딩에 실패하였습니다"
         }
 
     }
@@ -465,7 +463,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
         }
         response.onFailure { message ->
-            throw message
+            _loadError.value = "추천 피드 로딩에 실패하였습니다"
         }
     }
 
@@ -476,8 +474,8 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             onSuccess(response.data)
 
         }
-        response.onFailure { message ->
-            throw message
+        response.onFailure {
+            _loadError.value = "팔로잉 피드 로딩에 실패하였습니다"
         }
     }
 
@@ -488,7 +486,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             onSuccess(response)
         }
         response.onFailure {e->
-            throw e
+            _loadError.value = "좋아요 피드 로딩에 실패하였습니다"
         }
 
     }
@@ -567,6 +565,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         }
         response.onFailure { e ->
             Log.d("toggle follow error", e.message ?: "Network error")
+            _loadError.value = "팔로우에 실패하였습니다. 잠시 후 다시 시도해주세요."
         }
         return false
     }
@@ -583,6 +582,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             Log.d("delete post", "success")
         } catch (e: Exception) {
             Log.d("delete post error", e.message ?: "Network error")
+            _loadError.value = "포스트 삭제에 실패하였습니다. 잠시 후 다시 시도해주세요."
         }
     }
     suspend fun getMyProfile() {
@@ -609,7 +609,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         }
         response.onFailure { e ->
             Log.d("getMyProfile error", e.message ?: "Network error")
-            throw e
+            _loadError.value = "프로필 로딩에 실패하였습니다. 잠시 후 다시 시도해주세요."
         }
 
     }
@@ -628,7 +628,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
         response.onFailure { e ->
             Log.d("getFilteredUsersByName error", e.message ?: "Network error")
-            throw e // rethrow the exception to be caught in the calling function
+            _loadError.value = "유저 검색에 실패하였습니다. 잠시 후 다시 시도해주세요."
         }
 
     }
@@ -642,7 +642,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         }
         response.onFailure { e ->
             Log.d("getFilteredUsersByTag error", e.message ?: "Network error")
-            throw e // rethrow the exception to be caught in the calling function
+            _loadError.value = "유저 검색에 실패하였습니다. 잠시 후 다시 시도해주세요."
         }
 
     }
@@ -660,7 +660,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         }
         response.onFailure { e ->
             Log.d("getFilteredByRestaurants error", e.message ?: "Network error")
-            throw e // rethrow the exception to be caught in the calling function
+            _loadError.value = "식당 검색에 실패하였습니다. 잠시 후 다시 시도해주세요."
         }
 
     }
@@ -723,7 +723,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             _followers.value = users
         }.onFailure { e ->
             Log.e("getFollowers error", e.message ?: "Network error")
-            throw e// Handle error, maybe update _loadError
+            _loadError.value = "팔로워 로딩에 실패하였습니다. 잠시 후 다시 시도해주세요."
         }
     }
 
@@ -734,7 +734,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             _followings.value = users
         }.onFailure { e ->
             Log.e("getFollowings error", e.message ?: "Network error")
-            throw e// Handle error
+            _loadError.value = "팔로잉 로딩에 실패하였습니다. 잠시 후 다시 시도해주세요."
         }
     }
 
