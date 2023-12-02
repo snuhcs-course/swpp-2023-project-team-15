@@ -153,43 +153,16 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
             viewModel.fetchTopTags()
         }
 
-        // show defaultTags when selectedbutton is "tag" and
-        if(selectedButton == "태그" && userListsByTags.isEmpty() && searchText.text == "") {
-            // Check if both lists are empty and triggerSearch is false
-            DefaultTagView(topTags.map { it.ko_label }) { tag ->
-                // Set the searchText to the tag that was clicked. set text cursor point to last
-                val newText = "$tag"
-                searchText = TextFieldValue(newText, TextRange(newText.length))
-                // Trigger the search
-                triggerSearch = true
-            }
-        }
-
         // Trigger search logic
         LaunchedEffect(searchText.text, selectedButton) {
-//            viewModel.performSearch(searchText.text, selectedButton)
                 searchJob.value?.cancel() // Cancel previous job
                 searchJob.value = coroutineScope.launch {
                         delay(debouncePeriod)
-//                    try {
                         viewModel.performSearch(searchText.text, selectedButton)
-//                    }
-//                    catch (e: CancellationException) {
-//                        showToast(context, "검색 작업이 취소되었습니다")
-//                    }
-//                    catch (e: Exception) {
-//                        showToast(context, "검색 작업이 실패하였습니다")
-//                    }
                         triggerSearch = false
                 }
 
         }
-//        val searchError by viewModel.searchError.observeAsState()
-//
-//        searchError?.let {
-//            showToast(context, it)
-//            viewModel.clearSearchError() // Clear the error after showing toast
-//        }
 
         if(loading) {
             Box(
@@ -207,6 +180,17 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
         }
         else {
             if (searchText.text == "") {
+                // show defaultTags when selectedbutton is "tag" and
+                if(selectedButton == "태그" && userListsByTags.isEmpty()) {
+                    // Check if both lists are empty and triggerSearch is false
+                    DefaultTagView(topTags.map { it.ko_label }) { tag ->
+                        // Set the searchText to the tag that was clicked. set text cursor point to last
+                        val newText = "$tag"
+                        searchText = TextFieldValue(newText, TextRange(newText.length))
+                        // Trigger the search
+                        triggerSearch = true
+                    }
+                }
                 Text(
                     text = "검색어가 없습니다.",
                     modifier = Modifier

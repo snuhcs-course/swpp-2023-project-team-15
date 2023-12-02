@@ -192,7 +192,10 @@ fun ProfileRow(
                                             tags = newTags as List<String>
                                             println("refreshed tags: $tags")
                                             if (context != null) {
-                                                if (newTags.isEmpty() || newTags.sorted() == originalTags.sorted()) {
+                                                if(tags.isEmpty()){
+                                                    showToast(context, "아직 태그가 없습니다")
+                                                }
+                                                else if (newTags.isEmpty() || newTags.sorted() == originalTags.sorted()) {
                                                     showToast(context, "태그가 변경되지 않았습니다.")
                                                 }
                                                 else {
