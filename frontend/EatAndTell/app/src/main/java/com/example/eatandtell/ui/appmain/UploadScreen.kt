@@ -70,6 +70,7 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
     var restaurantName by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(placeName ?: ""))
     }
+
     var reviewDescription by viewModel.reviewDescription
     var myRating by rememberSaveable { mutableStateOf("0") }
 
@@ -272,10 +273,8 @@ fun UploadButton(viewModel: AppMainViewModel,
                         )
                         onClickNav() //Navigation을 먼저 해버리니까
                     }
-                    showToast(context, "포스트가 업로드되었습니다")
                 } catch (e: Exception) {
                     // Handle exceptions, e.g., from network calls, here
-                    showToast(context, "포스트 업로드에 실패했습니다")
                 }
             }
 

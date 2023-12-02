@@ -202,6 +202,9 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
         _loadError.value = null
     }
 
+    fun resetUploadStatus() {
+        _uploadStatus.value = null
+    }
 
     // Perform search based on selected type and search text
     suspend fun performSearch(searchText: String, selectedButton: String) {
@@ -328,15 +331,12 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
             } catch (e: CancellationException) {
                 Log.d("upload photos and post error", "cancellation exception")
-                throw e
             } catch (e: Exception) {
                 Log.d("upload photos and post error", e.message ?: "Network error")
                 _uploadStatus.postValue("포스트 업로드에 실패했습니다.")
-                throw e
             }
             photoUris.clear()
             reviewDescription.value = ""
-
 
         }
     }
