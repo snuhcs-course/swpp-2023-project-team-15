@@ -18,6 +18,7 @@ import com.example.eatandtell.dto.TopTag
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
+import com.example.eatandtell.ui.showToast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -306,6 +307,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
                 } catch (e: Exception) {
                     Log.d("Image Upload Error", e.message ?: "Upload failed")
+                    showToast(context, "이미지 업로드에 실패했습니다.")
                     _uploadStatus.postValue("이미지 업로드에 실패했습니다.")
                     return@launch
                 }
@@ -326,10 +328,11 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
             } catch (e: CancellationException) {
                 Log.d("upload photos and post error", "cancellation exception")
-
+                throw e
             } catch (e: Exception) {
                 Log.d("upload photos and post error", e.message ?: "Network error")
                 _uploadStatus.postValue("포스트 업로드에 실패했습니다.")
+                throw e
             }
             photoUris.clear()
             reviewDescription.value = ""
@@ -388,7 +391,6 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                 _editStatus.postValue("프로필 편집에 실패했습니다")
             } else {
                 Log.d("edit profile error", "cancellation exception")
-//                        _editStatus.postValue("프로필이 편집되었습니다")
                 _editStatus.postValue("프로필 편집에 실패했습니다")
 
             }

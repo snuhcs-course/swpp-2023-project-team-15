@@ -113,9 +113,9 @@ class AppMainActivity : ComponentActivity() {
         }
 
 
-        appMainViewModel.uploadStatus.observe(this){message->
-            showToast(this,message)
-        }
+//        appMainViewModel.uploadStatus.observe(this){message->
+//            showToast(this,message)
+//        }
         appMainViewModel.editStatus.observe(this){message->
             showToast(this,message)
         }
