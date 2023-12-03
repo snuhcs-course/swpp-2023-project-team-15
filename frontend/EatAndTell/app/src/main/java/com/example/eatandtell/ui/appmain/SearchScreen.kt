@@ -121,6 +121,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                 onClick = {
                     selectedButton = "유저"
                     triggerSearch = true
+                    searchText = TextFieldValue("")
                 },
                 text = "유저",
                 selected = selectedButton != "유저"
@@ -131,6 +132,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                 onClick = {
                     selectedButton = "태그"
                     triggerSearch = true
+                    searchText = TextFieldValue("")
                 },
                 text = "태그",
                 selected = selectedButton != "태그"
@@ -141,6 +143,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                 onClick = {
                     selectedButton = "식당"
                     triggerSearch = true
+                    searchText = TextFieldValue("")
                 },
                 text = "식당",
                 selected = selectedButton != "식당"
