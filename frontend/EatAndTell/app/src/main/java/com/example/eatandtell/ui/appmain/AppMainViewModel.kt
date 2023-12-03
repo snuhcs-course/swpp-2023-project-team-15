@@ -40,8 +40,8 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
     private val _editStatus = MutableLiveData<String>()
     val editStatus: LiveData<String> = _editStatus
-    private val _tagUpdateStatus = MutableLiveData<String>()
-    val tagUpdateStatus: LiveData<String> = _tagUpdateStatus
+    private val _tagUpdateStatus = MutableStateFlow<String?>(null)
+    val tagUpdateStatus = _tagUpdateStatus.asStateFlow()
 
     private val _homePosts = MutableStateFlow<List<PostDTO>>(listOf())
     val homePosts = _homePosts.asStateFlow()
@@ -277,7 +277,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             }
             response.onFailure { e ->
                 Log.e("Tags fetching Error", "Failed to load top tags: ${e.message}")
-                _tagUpdateStatus.postValue("태그 로딩에 실패하였습니다")
+                _tagUpdateStatus.value = "태그 로딩에 실패하였습니다"
             }
         }
     }
@@ -694,11 +694,11 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             response.onSuccess { response ->
                 onSuccess(response.user_tags)
                 Log.d("refresh tags", "success")
-                _tagUpdateStatus.postValue("태그가 업데이트되었습니다")
+                _tagUpdateStatus.value = "태그가 업데이트되었습니다"
             }
             response.onFailure { e ->
                 Log.d("refresh tags error", e.message ?: "Network error")
-                _tagUpdateStatus.postValue("태그 업데이트에 실패하였습니다")
+                _loadError.value = "태그갱신에 실패하였습니다. 잠시 후 다시 시도해주세요"
             }
         }
     }

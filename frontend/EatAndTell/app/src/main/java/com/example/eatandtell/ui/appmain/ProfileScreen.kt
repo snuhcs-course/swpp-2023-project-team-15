@@ -20,7 +20,9 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,7 +68,16 @@ fun ProfileRow(
     val coroutinescope = rememberCoroutineScope()
 //    var isFollowing by remember { mutableStateOf(userInfo.is_followed) }
     var expanded by remember { mutableStateOf(false) }
+    val loadError by viewModel.loadError.collectAsState() // Observing StateFlow for error
 
+    LaunchedEffect(loadError) {
+        loadError?.let { error ->
+            if (context != null) {
+                showToast(context, error)
+            }
+            viewModel.resetLoadError() // Reset error via ViewModel method
+        }
+    }
     Column {
         Spacer(modifier = Modifier.height(10.dp))
         // First row with profile image, follower, and following
@@ -171,7 +182,6 @@ fun ProfileRow(
                 }
             }
         }
-        val originalTags = userInfo.tags.toList()
         Spacer(modifier = Modifier.height(15.dp))
             //refresh button
             if (itsMe) {
@@ -189,19 +199,19 @@ fun ProfileRow(
                                         // Check and cast newTags to List<String>
                                         if (newTags is List<*>) {
                                             @Suppress("UNCHECKED_CAST")
-                                            tags = newTags as List<String>
                                             println("refreshed tags: $tags")
                                             if (context != null) {
-                                                if(tags.isEmpty()){
+                                                if(newTags.isEmpty()){
                                                     showToast(context, "아직 태그가 없습니다")
                                                 }
-                                                else if (newTags.isEmpty() || newTags.sorted() == originalTags.sorted()) {
+                                                else if (newTags.sorted() == tags.sorted()) {
                                                     showToast(context, "태그가 변경되지 않았습니다.")
                                                 }
                                                 else {
                                                     showToast(context, "태그가 업데이트되었습니다")
                                                 }
                                             }
+                                            tags = newTags as List<String>
 
                                         } else {
                                             println("Error: Expected a list of tags, but received something else.")
@@ -210,9 +220,6 @@ fun ProfileRow(
                                     context = context!!
                                 )
                                 } catch (e: Exception) {
-                                    if (context != null) {
-                                        showToast(context, "태그 업데이트에 실패하였습니다")
-                                    }
                                 }
                             }
 
