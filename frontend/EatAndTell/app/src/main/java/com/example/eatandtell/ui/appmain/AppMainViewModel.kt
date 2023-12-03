@@ -1,4 +1,5 @@
 package com.example.eatandtell.ui.appmain
+
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -32,7 +33,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 
 @HiltViewModel
-class AppMainViewModel@Inject constructor(private val apiRepository: ApiRepository) : ViewModel() {
+class AppMainViewModel @Inject constructor(private val apiRepository: ApiRepository) : ViewModel() {
 
     private var token: String? = null
     private val _uploadStatus = MutableLiveData<String>()
@@ -90,13 +91,15 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     val postLists = _postLists.asStateFlow()
     private val _topTags = MutableStateFlow<List<TopTag>>(emptyList())
     val topTags = _topTags.asStateFlow()
+
     // Adding LiveData for error messages
     private val _searchError = MutableLiveData<String?>()
     val searchError: LiveData<String?> = _searchError
     var myProfile = UserDTO(0, "", "", "", listOf())
 
-    var photoUris = mutableStateListOf<Uri>()// store image uri
-    private set
+    var photoUris = mutableStateListOf<Uri>()
+        // store image uri
+        private set
     val reviewDescription = mutableStateOf("")
     fun initialize(token: String?) {
         this.token = token
@@ -161,7 +164,6 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     }
 
 
-
     suspend fun loadProfileData(userId: Int?, loadType: Int, selectedTab: String) {
         try {
             _profileLoading.value = true // Update StateFlow
@@ -191,7 +193,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
     // Load user feed
     private suspend fun loadLikedFeed() {
-        getLikedFeed (
+        getLikedFeed(
             onSuccess = { posts ->
                 _profilePosts.value = posts
             }
@@ -210,7 +212,7 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     suspend fun performSearch(searchText: String, selectedButton: String) {
         _searchLoading.value = true
         try {
-            if (searchText.isNotEmpty()){
+            if (searchText.isNotEmpty()) {
                 _postLists.value = emptyList() // Clear post list
                 _userLists.value = emptyList() // Clear user list
                 _userListsByTags.value = emptyList() // Clear user list by tags
@@ -230,9 +232,11 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             _searchLoading.value = false
         }
     }
+
     fun clearSearchError() {
         _searchError.value = null
     }
+
     private suspend fun handleUserSearch(searchText: String) {
         val response = apiRepository.getFilteredUsersByName("Token $token", searchText)
         response.onSuccess { users ->
@@ -382,7 +386,13 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             Log.d("edit profile", profileData.toString())
             editProfile(profileData)
             _editStatus.postValue("프로필이 편집되었습니다")
-            myProfile = UserDTO(myProfile.id, myProfile.username, description, url, myProfile.tags) //프로필 편집 후 myProfile 업데이트
+            myProfile = UserDTO(
+                myProfile.id,
+                myProfile.username,
+                description,
+                url,
+                myProfile.tags
+            ) //프로필 편집 후 myProfile 업데이트
         } catch (e: Exception) {
             // Handle exceptions, e.g., from network calls, here
             if (e !is CancellationException) {
@@ -400,11 +410,11 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
 
     private suspend fun uploadPost(postData: UploadPostRequest) {
         val authorization = "Token $token"
-        val response= apiRepository.uploadPost(authorization, postData)
+        val response = apiRepository.uploadPost(authorization, postData)
         response.onSuccess {
 
         }
-        response.onFailure{e->
+        response.onFailure { e ->
             val errorMessage = e.message ?: "Network error"
             Log.d("upload post error", errorMessage)
             throw e // rethrow the exception to be caught in the calling function
@@ -484,10 +494,10 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     suspend fun getLikedFeed(onSuccess: (List<PostDTO>) -> Unit) {
         val authorization = "Token $token"
         val response = apiRepository.getLikedFeed(authorization)
-        response.onSuccess{response->
+        response.onSuccess { response ->
             onSuccess(response)
         }
-        response.onFailure {e->
+        response.onFailure { e ->
             _loadError.value = "좋아요 피드 로딩에 실패하였습니다"
         }
 
@@ -539,21 +549,26 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
             // Update post in all relevant lists
             updatePostInList(_homePosts, post_id)
             updatePostInList(_profilePosts, post_id)
-            updatePostInList(_userPosts,post_id)
-            Log.d("toggle like", "success") }
+            updatePostInList(_userPosts, post_id)
+            Log.d("toggle like", "success")
+        }
         response.onFailure { e ->
             Log.d("toggle like error", e.message ?: "Network error")
         }
     }
+
     private fun updatePostInList(postsFlow: MutableStateFlow<List<PostDTO>>, postId: Int) {
         val updatedPosts = postsFlow.value.map { post ->
-            if (post.id == postId) post.copy(is_liked = !post.is_liked, like_count = post.like_count + if (post.is_liked) -1 else 1) else post
+            if (post.id == postId) post.copy(
+                is_liked = !post.is_liked,
+                like_count = post.like_count + if (post.is_liked) -1 else 1
+            ) else post
         }
         postsFlow.value = updatedPosts
     }
 
 
-    suspend fun toggleFollow(userId: Int):Boolean{
+    suspend fun toggleFollow(userId: Int): Boolean {
         val authorization = "Token $token"
         val response = apiRepository.toggleFollow(authorization, userId)
         response.onSuccess {
@@ -561,7 +576,8 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
                 is_followed = !userInfo.value.is_followed,
                 follower_count = userInfo.value.follower_count + if (userInfo.value.is_followed) -1 else 1
             )
-            _userInfo.value = updatedUserInfo // Assuming _userInfo is the MutableStateFlow backing userInfo StateFlow
+            _userInfo.value =
+                updatedUserInfo // Assuming _userInfo is the MutableStateFlow backing userInfo StateFlow
             Log.d("toggle follow", "success")
             return true
         }
@@ -573,20 +589,22 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     }
 
 
-    suspend fun deletePost(postId: Int) {
+    suspend fun deletePost(postId: Int): Boolean {
         val authorization = "Token $token"
-        try {
-            apiRepository.deletePost(authorization, postId)
-            val updatedHomePosts = homePosts.value.filter { it.id != postId }
-            _homePosts.value = updatedHomePosts
-            val updatedProfilePosts = profilePosts.value.filter { it.id != postId }
-            _profilePosts.value = updatedProfilePosts
-            Log.d("delete post", "success")
-        } catch (e: Exception) {
-            Log.d("delete post error", e.message ?: "Network error")
+        val result = apiRepository.deletePost(authorization, postId)
+        if(result.isFailure) {
+            Log.d("delete post error", result.exceptionOrNull()?.message ?: "Network error")
             _loadError.value = "포스트 삭제에 실패하였습니다. 잠시 후 다시 시도해주세요."
+            return false
         }
+        val updatedHomePosts = homePosts.value.filter { it.id != postId }
+        _homePosts.value = updatedHomePosts
+        val updatedProfilePosts = profilePosts.value.filter { it.id != postId }
+        _profilePosts.value = updatedProfilePosts
+        Log.d("delete post", "success")
+        return true
     }
+
     suspend fun getMyProfile() {
         val authorization = "Token $token"
 
@@ -674,14 +692,14 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     ): List<SearchedRestDTO> {
         val authorization = "Token $token"
         val response = apiRepository.getSearchedRest(authorization, restaurantName, x, y)
-        var result=listOf<SearchedRestDTO>()
+        var result = listOf<SearchedRestDTO>()
         response.onSuccess { response ->
             Log.d("search rest", "success")
-            result= response.data
+            result = response.data
         }
-        response.onFailure {e->
+        response.onFailure { e ->
             Log.d("search rest error", e.message ?: "Network error")
-            result= listOf()
+            result = listOf()
         }
         return result
 
@@ -706,11 +724,11 @@ class AppMainViewModel@Inject constructor(private val apiRepository: ApiReposito
     suspend fun getTopTags(onSuccess: (List<TopTag>) -> Unit, onError: (String) -> Unit) {
         val authorization = "Token $token"
         val response = apiRepository.getTopTags(authorization)
-        response.onSuccess{response->
+        response.onSuccess { response ->
             onSuccess(response)
             Log.d("getTopTags", "success")
         }
-        response.onFailure { e->
+        response.onFailure { e ->
             val errorMessage = e.message ?: "Network error"
             Log.d("getTopTags error", errorMessage)
             onError(errorMessage)
