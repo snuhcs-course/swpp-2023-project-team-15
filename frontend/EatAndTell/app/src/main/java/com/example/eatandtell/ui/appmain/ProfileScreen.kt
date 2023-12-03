@@ -260,6 +260,7 @@ fun ProfileRow(
         post: PostDTO,
         viewModel: AppMainViewModel,
         isCurrentUser: Boolean,
+        context: ComponentActivity,
     ) {
         val coroutinescope = rememberCoroutineScope()
         var deleted by remember { mutableStateOf(false) }
@@ -280,9 +281,11 @@ fun ProfileRow(
                     },
                     canDelete = isCurrentUser,
                     onDelete = {
-                        deleted = true
                         coroutinescope.launch {
-                            viewModel.deletePost(post.id)
+                            val res = viewModel.deletePost(post.id)
+                            if(res) {
+                                deleted = true
+                            }
                         }
                     }
                 )
