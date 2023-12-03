@@ -87,10 +87,23 @@ class RefreshUserTagsTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         # Check the response data
-        expected_tags = ['한식', '리뷰왕', '인플루언서', '리뷰천사', '고든램지']
+        expected_tags = ['한식']
         self.assertListEqual(sorted(response.data['user_tags']), sorted(expected_tags))
         self.assertListEqual(sorted(response.data['added']), sorted(expected_tags))
         self.assertListEqual(response.data['removed'], [])
+        
+        # create 3rd post: now there should be non-ml related tags
+        restaurant3 = Restaurant.objects.create(name='Test Restaurant 3', search_id='003', category_name='Korean')
+        post3 = Post.objects.create(
+            user=self.user, restaurant=restaurant3, rating=4.5, description='Great food!', sentiment=0.8)
+        
+        # Make the POST request to refresh user tags
+        response = self.client.post(reverse('refresh_user_tags'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Check the response data
+        expected_tags = ['한식', '리뷰왕', '인플루언서', '리뷰천사', '고든램지']
+        self.assertListEqual(sorted(response.data['user_tags']), sorted(expected_tags))
 
     def tearDown(self):
         pass

@@ -161,10 +161,13 @@ def refresh_user_tags(request):
         (get_review_angel, '리뷰천사'),
         (get_review_gourmet, '고든램지'),
     ]
-    for candidate_function, tag_ko_label in non_ml_related_tags:
-        print(f'tag_ko_label: {tag_ko_label}, candidate_function result: {candidate_function()}')
-        if user.id in candidate_function():
-            tag_ko_label_candidates.append(tag_ko_label)
+    user_post_count = user.posts.count()
+    
+    if user_post_count >= 3:
+        for candidate_function, tag_ko_label in non_ml_related_tags:
+            print(f'tag_ko_label: {tag_ko_label}, candidate_function result: {candidate_function()}')
+            if user.id in candidate_function():
+                tag_ko_label_candidates.append(tag_ko_label)
     
     # Update user's tags with candidates
     updated_tags = Tag.objects.filter(ko_label__in=tag_ko_label_candidates)
