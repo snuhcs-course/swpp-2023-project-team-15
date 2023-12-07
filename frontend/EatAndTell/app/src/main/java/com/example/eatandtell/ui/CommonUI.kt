@@ -435,8 +435,47 @@ fun PreviewMediumRedButton() {
         MediumRedButton(onClick = { /**/ }, text = "팔로우하기")
     }
 }
+@Composable
+fun LargeRedButton(onClick: () -> Unit, text: String, enable: Boolean = true) {
+    Button(
+        onClick = {if (enable) onClick() else { /**/ }},
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MainColor,
+            contentColor = White
+        ),
+        shape = RoundedCornerShape(size = 10.dp),
+        modifier = Modifier
+            .width(300.dp)
+            .height(50.dp),
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        if (enable) Text(text, color = White,
+            style = TextStyle(
+                fontFamily = Inter,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Black,
+                textAlign = TextAlign.Center,
+            ), modifier = Modifier
+                .padding(0.dp)
+                .align(Alignment.CenterVertically) // Center the text vertically
+        )
+        else //show loading
+            CircularProgressIndicator(
+                color = White,
+                modifier = Modifier
+                    .width(24.dp)
+                    .height(24.dp)
+            )
+    }
+}
 
-
+@Preview
+@Composable
+fun LargeRedButton() {
+    EatAndTellTheme {
+        LargeRedButton(onClick = { /**/ }, text = "팔로우하기")
+    }
+}
 @Composable
 fun Tag(text: String, onClick: () -> Unit) {
     Box(

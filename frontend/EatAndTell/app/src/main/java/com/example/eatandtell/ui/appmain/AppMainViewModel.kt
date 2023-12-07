@@ -297,6 +297,7 @@ class AppMainViewModel @Inject constructor(private val apiRepository: ApiReposit
 
 
         viewModelScope.launch {
+
             val photoUrls = mutableListOf<String>()
             val photoByteArrays = photoPaths.mapNotNull { prepareFileData(it, context) }
             for (byteArray in photoByteArrays) {
@@ -353,6 +354,7 @@ class AppMainViewModel @Inject constructor(private val apiRepository: ApiReposit
         context: Context,
         org_avatar_url: String,
     ) {
+        _editProfileLoading.value = true
 
 
         Log.d("edit profile photoPaths: ", photoPaths.toString())
@@ -372,7 +374,6 @@ class AppMainViewModel @Inject constructor(private val apiRepository: ApiReposit
             } catch (e: Exception) {
                 Log.d("Image Upload Error", e.message ?: "Upload failed")
                 _editStatus.postValue("프로필 편집에 실패했습니다")
-
             }
         }
 
@@ -402,8 +403,10 @@ class AppMainViewModel @Inject constructor(private val apiRepository: ApiReposit
             } else {
                 Log.d("edit profile error", "cancellation exception")
                 _editStatus.postValue("프로필 편집에 실패했습니다")
-
             }
+        }
+        finally {
+            _editProfileLoading.value = false
         }
 
     }

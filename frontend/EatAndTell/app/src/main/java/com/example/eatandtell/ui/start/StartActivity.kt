@@ -30,6 +30,7 @@ class StartActivity : ComponentActivity() {
                     NavHost(navController = navController, startDestination = "login") {
                         composable("login") { LoginScreen(navController, this@StartActivity, startViewModel) }
                         composable("signup") { SignupScreen(navController, this@StartActivity, startViewModel) }
+                        composable("onboarding"){ OnboardingScreen(this@StartActivity)}
                         // Add other composables/screens here
                     }
                 }
