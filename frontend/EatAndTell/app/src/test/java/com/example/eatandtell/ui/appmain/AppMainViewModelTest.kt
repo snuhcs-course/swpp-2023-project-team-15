@@ -9,7 +9,6 @@ import com.example.eatandtell.dto.GetFeedResponse
 import com.example.eatandtell.dto.GetSearchedRestResponse
 import com.example.eatandtell.dto.ImageURLResponse
 import com.example.eatandtell.dto.PhotoDTO
-import com.example.eatandtell.dto.PhotoReqDTO
 import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.RestReqDTO
 import com.example.eatandtell.dto.RestaurantDTO
@@ -23,25 +22,15 @@ import com.example.eatandtell.dto.toggleFollowResponse
 import com.example.eatandtell.dto.toggleLikeResponse
 import com.example.eatandtell.ui.start.MainCoroutineRule
 import io.mockk.MockKAnnotations
-import io.mockk.Runs
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mockk.slot
-import io.mockk.spyk
 import io.mockk.unmockkStatic
 import io.mockk.verify
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -50,8 +39,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayInputStream
 import java.io.FileNotFoundException
 
@@ -77,8 +64,6 @@ class AppMainViewModelTest {
         mockkStatic(Log::class)
         every { Log.d(any(), any()) } returns 0
 
-        //mockkStatic(::showToast)
-        //every {showToast(context,any())} returns
     }
 
     @Test
@@ -189,10 +174,11 @@ class AppMainViewModelTest {
 
         every { context.contentResolver.openInputStream(mockUri) } returns mockInputStream
         coEvery { mockRepository.getImageURL(any(), any()) } throws fakeException
+       // every { Toast.makeText(any<Context>(), any<String>(), any()) } returns mockk()
 
         viewModel.uploadPhotosAndPost(photoPaths, RestReqDTO("test", 1, ""), "3.0", "test description", context)
         advanceUntilIdle()
-
+        verify{Log.d("Image Upload Error", "Upload failed")}
         assertEquals("이미지 업로드에 실패했습니다.", viewModel.uploadStatus.value)
     }
 
@@ -339,17 +325,10 @@ class AppMainViewModelTest {
         coEvery { mockRepository.getMyFeed(any()) } returns Result.failure(exception)
 
         // Act & Assert
-        try {
-            viewModel.getMyProfile()
-            advanceUntilIdle()
-            fail("Exception should have been thrown")
-        } catch (e: Exception) {
-            // Verify that the caught exception is the same as what was thrown
-            assertEquals(errorMessage, e.message)
+        viewModel.getMyProfile()
+        advanceUntilIdle()
+        verify { Log.d("getMyProfile error", errorMessage)}
 
-            // Verify that the error log is called
-            verify { Log.d("getMyProfile error", errorMessage) }
-        }
     }
 
 
@@ -419,7 +398,7 @@ class AppMainViewModelTest {
             tags = listOf("tag1", "tag2")
         )
 
-        coEvery { mockRepository.deletePost(any(), postId) } returns Result.success(deletedPost)
+        coEvery { mockRepository.deletePost(any(), postId) } returns Result.success(Unit)
 
         viewModel.deletePost(postId)
         advanceUntilIdle()
@@ -434,7 +413,7 @@ class AppMainViewModelTest {
         val exception = Exception(exceptionMessage)
 
         // Mock the API call to simulate a failure and throw an exception
-        coEvery { mockRepository.deletePost(any(), postId) }throws exception
+        coEvery { mockRepository.deletePost(any(), postId) }returns Result.failure(exception)
 
         viewModel.deletePost(postId)
         advanceUntilIdle()
@@ -473,12 +452,18 @@ class AppMainViewModelTest {
         assertEquals(mockPosts, onSuccessResult)
     }
 
-    @Test(expected = Exception::class)
+    @Test
     fun getAllPosts_failure_throwsException() = runTest {
         val exception = Exception("Network error")
+        var onFailureResult: List<PostDTO>? = null
         coEvery { mockRepository.getAllPosts(any()) } returns Result.failure(exception)
 
-        viewModel.getAllPosts { }
+        viewModel.getAllPosts{posts->
+            onFailureResult = posts
+        }
+        advanceUntilIdle()
+
+        verify{Log.d("getAllPosts Error", "Network error")}
 
         // The test will fail if the exception is not thrown
     }
@@ -501,12 +486,19 @@ class AppMainViewModelTest {
         assertEquals(mockPosts, result)
     }
 
-    @Test(expected = Exception::class)
+    @Test
     fun getLikedFeed_failure_throwsException() = runTest {
         val exception = Exception("Network error")
         coEvery { mockRepository.getLikedFeed(any()) } returns Result.failure(exception)
 
-        viewModel.getLikedFeed { }
+        var result: List<PostDTO>? = null
+        viewModel.getLikedFeed { posts ->
+            result = posts
+        }
+        advanceUntilIdle()
+
+        verify{Log.d("getLiked feed error", "Network error")}
+
 
         // The test will fail if the exception is not thrown
     }
@@ -572,14 +564,8 @@ class AppMainViewModelTest {
         var exceptionThrown: Exception? = null
         val onSuccess: (List<UserDTO>) -> Unit = {}
 
-        try {
-            viewModel.getFilteredUsersByName(mockUsername, onSuccess)
-        } catch (e: Exception) {
-            exceptionThrown = e
-        }
-
-        assertNotNull(exceptionThrown)
-        assertEquals("Network error", exceptionThrown?.message)
+        viewModel.getFilteredUsersByName(mockUsername, onSuccess)
+        verify { Log.d("getFilteredUsersByName error", "Network error") }
     }
 
     @Test
@@ -629,14 +615,11 @@ class AppMainViewModelTest {
         var exceptionThrown: Exception? = null
         val onSuccess: (List<UserDTO>) -> Unit = {}
 
-        try {
-            viewModel.getFilteredUsersByTag(mockTag, onSuccess)
-        } catch (e: Exception) {
-            exceptionThrown = e
-        }
 
-        assertNotNull(exceptionThrown)
-        assertEquals("Network error", exceptionThrown?.message)
+        viewModel.getFilteredUsersByTag(mockTag, onSuccess)
+
+        verify { Log.d("getFilteredUsersByTag error", "Network error") }
+
     }
 
 
@@ -677,14 +660,14 @@ class AppMainViewModelTest {
         var exceptionThrown: Exception? = null
         val onSuccess: (List<PostDTO>) -> Unit = {}
 
-        try {
-            viewModel.getFilteredByRestaurants(restaurantName, onSuccess)
+        /*try {
+
         } catch (e: Exception) {
             exceptionThrown = e
-        }
+        }*/
+        viewModel.getFilteredByRestaurants(restaurantName, onSuccess)
 
-        assertNotNull(exceptionThrown)
-        assertEquals("Network error", exceptionThrown?.message)
+        verify { Log.d("getFilteredByRestaurants error", "Network error") }
     }
 
     @Test
@@ -753,7 +736,7 @@ class AppMainViewModelTest {
         verify(exactly = 0) { onSuccessMock(any()) }
 
         // Verify that the live data is updated with the error message
-        assertEquals("태그 업데이트에 실패하였습니다", viewModel.tagUpdateStatus.value)
+        assertEquals("태그갱신에 실패하였습니다. 잠시 후 다시 시도해주세요", viewModel.loadError.value)
     }
 
 
@@ -1115,6 +1098,7 @@ class AppMainViewModelTest {
     @After
     fun tearDown() {
         unmockkStatic(Log::class)
+        //unmockkStatic(Toast::class)
     }
 
 
