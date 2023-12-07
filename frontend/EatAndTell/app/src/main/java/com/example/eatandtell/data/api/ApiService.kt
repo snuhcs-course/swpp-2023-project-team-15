@@ -2,6 +2,7 @@ package com.example.eatandtell.data.api
 
 import com.example.eatandtell.dto.*
 import okhttp3.MultipartBody
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -65,7 +66,7 @@ interface ApiService {
 
     @DELETE("posts/{post_id}/") // The posts endpoint
     suspend fun deletePost(@Header("Authorization") authorization: String,
-                           @Path("post_id") post_id: Int): PostDTO
+                           @Path("post_id") post_id: Int): Response<Unit> // https://github.com/square/retrofit/issues/3075#issuecomment-564556949
 
     @POST("posts/") // The posts endpoint
     suspend fun uploadPost(@Header("Authorization") authorization: String,

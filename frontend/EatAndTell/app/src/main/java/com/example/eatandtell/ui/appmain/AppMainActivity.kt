@@ -113,8 +113,12 @@ class AppMainActivity : ComponentActivity() {
         }
 
 
-        appMainViewModel.uploadStatus.observe(this){message->
-            showToast(this,message)
+        // Observe the uploadStatus LiveData
+        appMainViewModel.uploadStatus.observe(this) { message ->
+            if (!message.isNullOrEmpty()) {
+                showToast(this, message)
+                appMainViewModel.resetUploadStatus()
+            }
         }
         appMainViewModel.editStatus.observe(this){message->
             showToast(this,message)

@@ -20,11 +20,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -68,7 +70,6 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
     var restaurantName by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(placeName ?: ""))
     }
-
 
     var reviewDescription by viewModel.reviewDescription
     var myRating by rememberSaveable { mutableStateOf("0") }
@@ -174,7 +175,8 @@ fun UploadScreen(navController: NavHostController, context: ComponentActivity, v
                             color = Black
                         ),
                         modifier = Modifier
-                            .weight(1f) .height(22.dp),
+                            .weight(1f)
+                            .height(22.dp),
                         maxLines = 1, overflow = TextOverflow.Ellipsis)
 
                     IconButton(
@@ -273,7 +275,6 @@ fun UploadButton(viewModel: AppMainViewModel,
                     }
                 } catch (e: Exception) {
                     // Handle exceptions, e.g., from network calls, here
-                    showToast(context, "An error occurred: ${e.message}")
                 }
             }
 

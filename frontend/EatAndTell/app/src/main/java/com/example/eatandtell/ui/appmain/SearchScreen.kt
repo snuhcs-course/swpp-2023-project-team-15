@@ -1,6 +1,7 @@
 package com.example.eatandtell.ui.appmain
 
 import android.content.Context
+import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,10 +37,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.dto.TopTag
@@ -48,6 +54,7 @@ import com.example.eatandtell.ui.Profile
 import com.example.eatandtell.ui.SearchSelectButton
 import com.example.eatandtell.ui.Tag
 import com.example.eatandtell.ui.showToast
+import com.example.eatandtell.ui.theme.Inter
 import com.example.eatandtell.ui.theme.MainColor
 import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.CancellationException
@@ -60,6 +67,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
     var searchText by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
     }
+
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -113,6 +121,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                 onClick = {
                     selectedButton = "유저"
                     triggerSearch = true
+                    searchText = TextFieldValue("")
                 },
                 text = "유저",
                 selected = selectedButton != "유저"
@@ -123,6 +132,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                 onClick = {
                     selectedButton = "태그"
                     triggerSearch = true
+                    searchText = TextFieldValue("")
                 },
                 text = "태그",
                 selected = selectedButton != "태그"
@@ -133,6 +143,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
                 onClick = {
                     selectedButton = "식당"
                     triggerSearch = true
+                    searchText = TextFieldValue("")
                 },
                 text = "식당",
                 selected = selectedButton != "식당"
@@ -145,34 +156,15 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
             viewModel.fetchTopTags()
         }
 
-        // show defaultTags when selectedbutton is "tag" and
-        if(selectedButton == "태그" && userListsByTags.isEmpty()) {
-            // Check if both lists are empty and triggerSearch is false
-            DefaultTagView(topTags.map { it.ko_label }) { tag ->
-                // Set the searchText to the tag that was clicked. set text cursor point to last
-                val newText = "$tag"
-                searchText = TextFieldValue(newText, TextRange(newText.length))
-                // Trigger the search
-                triggerSearch = true
-            }
-        }
-
         // Trigger search logic
         LaunchedEffect(searchText.text, selectedButton) {
-//            viewModel.performSearch(searchText.text, selectedButton)
                 searchJob.value?.cancel() // Cancel previous job
                 searchJob.value = coroutineScope.launch {
-                    delay(debouncePeriod)
-                    viewModel.performSearch(searchText.text, selectedButton)
-                    triggerSearch = false
+                        delay(debouncePeriod)
+                        viewModel.performSearch(searchText.text, selectedButton)
+                        triggerSearch = false
                 }
 
-        }
-        val searchError by viewModel.searchError.observeAsState()
-
-        searchError?.let {
-            showToast(context, it)
-            viewModel.clearSearchError() // Clear the error after showing toast
         }
 
         if(loading) {
@@ -190,55 +182,99 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
             }
         }
         else {
-            LazyColumn(
-                state = rememberLazyListState(),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                if (selectedButton == "유저") {
-                    items(userLists.size) { index ->
-                        val user = userLists[index]
-                        Profile(
-                            profileUrl = user.avatar_url,
-                            username = user.username,
-                            userDescription = user.description,
-                            onClick = {
-                                if (user.id == viewModel.myProfile?.id) {
-                                    navController.navigate("Profile")
-                                } else {
-                                    navController.navigate("Profile/${user.id}")
-                                }
-                            },
-                        )
+            if (searchText.text == "") {
+                // show defaultTags when selectedbutton is "tag" and
+                if(selectedButton == "태그" && userListsByTags.isEmpty()) {
+                    // Check if both lists are empty and triggerSearch is false
+                    DefaultTagView(topTags.map { it.ko_label }) { tag ->
+                        // Set the searchText to the tag that was clicked. set text cursor point to last
+                        val newText = "$tag"
+                        searchText = TextFieldValue(newText, TextRange(newText.length))
+                        // Trigger the search
+                        triggerSearch = true
                     }
                 }
-                else if (selectedButton == "태그"){
-                    items(userListsByTags.size) { index ->
-                        val user = userListsByTags[index]
-                        Profile(
-                            profileUrl = user.avatar_url,
-                            username = user.username,
-                            userDescription = user.description,
-                            onClick = {
-                                if (user.id == viewModel.myProfile?.id) {
-                                    navController.navigate("Profile")
-                                } else {
-                                    navController.navigate("Profile/${user.id}")
-                                }
-                            },
-                        )
+                Text(
+                    text = "검색어가 없습니다.",
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .align(Alignment.CenterHorizontally)
+                        .weight(1f)
+                    ,
+                    style = TextStyle(
+                        fontFamily = Inter,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight(500),
+                        color = Color.Gray,
+                    ),
+                )
+            }
+            else if(userLists.isNotEmpty() || userListsByTags.isNotEmpty() || postLists.isNotEmpty()){
+                LazyColumn(
+                    state = rememberLazyListState(),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    if (selectedButton == "유저") {
+                        items(userLists.size) { index ->
+                            val user = userLists[index]
+                            Profile(
+                                profileUrl = user.avatar_url,
+                                username = user.username,
+                                userDescription = user.description,
+                                onClick = {
+                                    if (user.id == viewModel.myProfile?.id) {
+                                        navController.navigate("Profile")
+                                    } else {
+                                        navController.navigate("Profile/${user.id}")
+                                    }
+                                },
+                            )
+                        }
                     }
-                } else {
-                    items(items = postLists, key = { it.id }) { post ->
-                        HomePost(
-                            post = post,
-                            viewModel = viewModel,
-                            navHostController = navController,
-                        )
+                    else if (selectedButton == "태그"){
+                        items(userListsByTags.size) { index ->
+                            val user = userListsByTags[index]
+                            Profile(
+                                profileUrl = user.avatar_url,
+                                username = user.username,
+                                userDescription = user.description,
+                                onClick = {
+                                    if (user.id == viewModel.myProfile?.id) {
+                                        navController.navigate("Profile")
+                                    } else {
+                                        navController.navigate("Profile/${user.id}")
+                                    }
+                                },
+                            )
+                        }
+                    } else {
+                        items(items = postLists, key = { it.id }) { post ->
+                            HomePost(
+                                post = post,
+                                viewModel = viewModel,
+                                navHostController = navController,
+                            )
+                        }
                     }
+                    // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
+                    item { Spacer(modifier = Modifier.height(70.dp)) }
                 }
 
-                // navigation bottom app bar 때문에 스크롤이 가려지는 것 방지 + 20.dp padding
-                item { Spacer(modifier = Modifier.height(70.dp)) }
+            }
+            else {
+                Text(
+                    text = "검색 결과가 없습니다",
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .align(Alignment.CenterHorizontally)
+                        .weight(1f),
+                    style = TextStyle(
+                        fontFamily = Inter,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight(500),
+                        color = Color.Gray,
+                    ),
+                )
             }
 
         }
