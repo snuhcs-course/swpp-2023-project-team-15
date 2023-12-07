@@ -118,7 +118,7 @@ fun OnboardingScreen1( ){
                     .height(30.dp)
             )
             Spacer(modifier = Modifier.height(32.dp))
-            val text = "오직 맛집 리뷰만, 당신이 기다려 온 SNS"
+            val text = "오직 맛집 리뷰만,\n 당신이 기다려 온 SNS"
 
             val boldText = "맛집"
             val boldText2 = "SNS"
@@ -139,7 +139,7 @@ fun OnboardingScreen1( ){
                 },
                 style = TextStyle(
                     fontFamily = Inter,
-                    fontSize = 36.sp,
+                    fontSize = 32.sp,
                     textAlign = TextAlign.Center,
                 )
             )
@@ -175,7 +175,7 @@ fun OnboardingScreen2() {
 
             Text("태그,\nAI가 찾아주는 나만의 취향",style = TextStyle(
                 fontFamily = Inter,
-                fontSize = 26.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Black,
                 textAlign = TextAlign.Center,
             )
@@ -224,7 +224,7 @@ fun OnboardingScreen3(){
 
             Text("태그,\nAI가 찾아주는 나만의 취향",style = TextStyle(
                 fontFamily = Inter,
-                fontSize = 26.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Black,
                 textAlign = TextAlign.Center,
             ))

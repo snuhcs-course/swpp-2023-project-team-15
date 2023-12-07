@@ -151,6 +151,7 @@ fun EditProfileScreen(context: ComponentActivity, viewModel: AppMainViewModel, n
                         SharedPreferencesManager.clearPreferences(context)
                         //go to StartActivity's Login Screen
                         val intent = Intent(context, StartActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(context, intent, null)
                     }, text = "로그아웃")
 
