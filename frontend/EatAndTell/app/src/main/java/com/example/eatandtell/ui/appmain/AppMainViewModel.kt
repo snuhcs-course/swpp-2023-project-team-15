@@ -19,7 +19,6 @@ import com.example.eatandtell.dto.TopTag
 import com.example.eatandtell.dto.UploadPostRequest
 import com.example.eatandtell.dto.UserDTO
 import com.example.eatandtell.dto.UserInfoDTO
-import com.example.eatandtell.ui.showToast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -315,7 +314,6 @@ class AppMainViewModel @Inject constructor(private val apiRepository: ApiReposit
 
                 } catch (e: Exception) {
                     Log.d("Image Upload Error", e.message ?: "Upload failed")
-                    showToast(context, "이미지 업로드에 실패했습니다.")
                     _uploadStatus.postValue("이미지 업로드에 실패했습니다.")
                     return@launch
                 }
@@ -466,6 +464,7 @@ class AppMainViewModel @Inject constructor(private val apiRepository: ApiReposit
         }
         response.onFailure { message ->
             _loadError.value = "전체 피드 로딩에 실패하였습니다"
+            Log.d("getAllPosts Error", "Network error")
         }
 
     }
@@ -502,6 +501,7 @@ class AppMainViewModel @Inject constructor(private val apiRepository: ApiReposit
         }
         response.onFailure { e ->
             _loadError.value = "좋아요 피드 로딩에 실패하였습니다"
+            Log.d("getLiked feed error", "Network error")
         }
 
     }
