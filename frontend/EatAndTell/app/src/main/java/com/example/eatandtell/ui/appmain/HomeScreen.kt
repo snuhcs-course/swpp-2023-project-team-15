@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.eatandtell.dto.PostDTO
 import com.example.eatandtell.ui.Post
@@ -127,7 +128,18 @@ fun HomeScreen(context: ComponentActivity, viewModel: AppMainViewModel,navHostCo
                 }
             }
         }
-        else {
+        else if (feedPosts.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 50.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("포스트가 없습니다.", color = Gray, fontSize = 16.sp)
+                }
+            }
+        } else {
             items(items = feedPosts, key = { it.id }) { post ->
                 HomePost(
                     post = post,

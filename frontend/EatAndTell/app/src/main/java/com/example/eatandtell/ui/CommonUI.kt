@@ -55,7 +55,7 @@ import com.example.eatandtell.ui.theme.MainColor
 import com.example.eatandtell.ui.theme.PaleOrange
 import com.example.eatandtell.ui.theme.White
 
-public fun showToast(context: Context, message: String) {
+public fun showToast(context: Context, message: String?) {
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
 

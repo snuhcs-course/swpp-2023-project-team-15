@@ -183,7 +183,9 @@ class ProfileScreenFactory: IProfileScreenFactory {
                         key = { it.id }) { post -> //내가 쓴 리뷰들
                         ProfilePost(post = post,
                             viewModel = viewModel,
-                            isCurrentUser = true)
+                            isCurrentUser = true,
+                            context = context,
+                        )
                         Divider(
                             color = PaleGray,
                             thickness = 1.dp,
@@ -295,6 +297,7 @@ class ProfileScreenFactory: IProfileScreenFactory {
                         post = post,
                         viewModel = viewModel,
                         isCurrentUser = userId == null, // Or any other logic you have for determining if the user is the current user
+                        context = context,
                     )
                 }
 

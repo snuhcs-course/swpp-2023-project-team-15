@@ -37,7 +37,7 @@ class ApiRepository@Inject constructor(private val apiService: ApiService) {
     suspend fun uploadPost(authorization: String, postData: UploadPostRequest): Result<PostDTO> = runCatching {
         apiService.uploadPost(authorization, postData)
     }
-    suspend fun deletePost( authorization: String, post_id: Int): Result<PostDTO> = runCatching{
+    suspend fun deletePost( authorization: String, post_id: Int): Result<Unit> = runCatching{
         apiService.deletePost(authorization,post_id)
     }
 

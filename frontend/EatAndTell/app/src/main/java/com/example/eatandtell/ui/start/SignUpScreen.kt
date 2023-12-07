@@ -64,7 +64,7 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
     LaunchedEffect(registerState) {
         when (registerState) {
             is RegisterState.Success -> {
-                showToast(context,"Register Success")
+                showToast(context, "회원가입이 완료되었습니다.")
                 navController.navigate("onboarding") {
                     popUpTo(navController.graph.startDestinationId) {
                         inclusive = true
@@ -76,7 +76,7 @@ fun SignupScreen(navController: NavController, context: ComponentActivity, viewM
             }
             is RegisterState.Error -> {
                 val errorMessage = (registerState as RegisterState.Error).message
-                showToast(context,"Register Failed")
+                showToast(context,"아이디가 중복되었습니다.")
 
             }
             // Handle other states if necessary
