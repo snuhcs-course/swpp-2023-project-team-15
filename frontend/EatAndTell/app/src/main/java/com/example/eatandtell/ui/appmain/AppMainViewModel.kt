@@ -204,7 +204,7 @@ class AppMainViewModel @Inject constructor(private val apiRepository: ApiReposit
     }
 
     fun resetUploadStatus() {
-        _uploadStatus.value = null
+        _uploadStatus.value = ""
     }
 
     // Perform search based on selected type and search text
