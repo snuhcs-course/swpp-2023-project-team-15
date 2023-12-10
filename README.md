@@ -17,10 +17,11 @@ Merge: pair끼리 1차 검증 후 PR 보내면 각 iteration의 PM이 리뷰 후
 
 # Our app : Eat and Tell (EaT)
 
+<img src="https://github.com/snuhcs-course/swpp-2023-project-team-15/assets/106653382/d84fddd3-65a6-4ddb-99ab-f0d6f9452691" width="150" height="150"/>
+
+
 EatAndTell is a restaurant review-dedicated SNS, motivated by the lack of personalization in existing restaurant review services. Just simply write restaurant reviews! Based on your reviews, our app creates tags for you to capture your taste. 
 With EatAndTell, enjoy a best-fit SNS tailored to your personal tastes and enhance your dining quality!
-
-![Logo](https://github.com/snuhcs-course/swpp-2023-project-team-15/assets/106653382/d84fddd3-65a6-4ddb-99ab-f0d6f9452691)
 
 
 
