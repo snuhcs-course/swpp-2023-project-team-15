@@ -6,17 +6,17 @@ plugins {
 }
 
 android {
-    namespace = "com.example.eatandtell"
+    namespace = "com.swpp2023.eatandtell"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.example.eatandtell"
+        applicationId = "com.swpp2023.eatandtell"
         minSdk = 24
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "com.example.eatandtell.CustomTestRunner"
+        testInstrumentationRunner = "com.swpp2023.eatandtell.CustomTestRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -29,6 +29,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
