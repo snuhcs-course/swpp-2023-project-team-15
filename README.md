@@ -1,6 +1,6 @@
 # Branch conventions
 
-## NEVER push directly to `main`!
+## NEVER push directly to `main`! (except for README changes)
 
 `default branch`: main
 
@@ -15,28 +15,23 @@ Merge: pair끼리 1차 검증 후 PR 보내면 각 iteration의 PM이 리뷰 후
 - 반드시 integration test 후 merge
 
 
-~~You can use the README file to showcase and promote your mobile app. The template provided below is just a starting point. Feel free to craft your README as you see fit.~~
-~~Please note that the README doesn't affect your grade and is not included in documentation(Wiki).~~
-
 # Our app : Eat and Tell (EaT)
 
-Our app is a social network dedicated to food reviews, designed to enrich users' dining experiences by enabling them to share their reviews, connect with like-minded friends, and receive personalized user tags derived from review analysis.
+EatAndTell is a restaurant review-dedicated SNS, motivated by the lack of personalization in existing restaurant review services. Just simply write restaurant reviews! Based on your reviews, our app creates tags for you to capture your taste. 
+With EatAndTell, enjoy a best-fit SNS tailored to your personal tastes and enhance your dining quality!
+![Logo](https://github.com/snuhcs-course/swpp-2023-project-team-15/assets/106653382/cceaf721-4f91-47d3-a6a6-388c39bea780)
 
-![Application Screenshot](path_to_screenshot.png)
+
 
 ## Features
 
-- Feature 1: Brief description
-- Feature 2: Brief description
-- ...
+Refer to Wiki Documents
+
 
 ## Getting Started
 
 ### Prerequisites
 
-- Android Studio [version, e.g., 4.2.1]
-- Minimum Android SDK Version [e.g., 21]
+- Android Studio Giraffe | 2022.3.1 Patch 1
+- Minimum Android SDK Version 24
 
-### Installation
-
-[Installation link here]
