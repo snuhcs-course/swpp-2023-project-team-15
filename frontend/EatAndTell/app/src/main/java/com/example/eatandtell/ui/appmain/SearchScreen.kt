@@ -184,7 +184,7 @@ fun SearchScreen(navController: NavHostController, context: ComponentActivity, v
         else {
             if (searchText.text == "") {
                 // show defaultTags when selectedbutton is "tag" and
-                if(selectedButton == "태그" && userListsByTags.isEmpty()) {
+                if(selectedButton == "태그" ) {
                     // Check if both lists are empty and triggerSearch is false
                     DefaultTagView(topTags.map { it.ko_label }) { tag ->
                         // Set the searchText to the tag that was clicked. set text cursor point to last
